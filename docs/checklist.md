@@ -23,7 +23,7 @@ Description: Dependency Management with Poetry: Configure pyproject.toml for pro
 Dependencies: AIM2-ODIE-001  
 Independent: No
 
-- [ ] **AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \-c "import owlready2").  
+- [x] **AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \-c "import owlready2").  
 - [ ] **AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.  
 - [ ] **AIM2-ODIE-002-T3:** Initialize Poetry project in the root directory (poetry init).  
 - [ ] **AIM2-ODIE-002-T4:** Add core runtime dependencies to pyproject.toml (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist).  
