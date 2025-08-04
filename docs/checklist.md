@@ -12,8 +12,8 @@ Dependencies: None
 Independent: Yes
 
 - [x] **AIM2-ODIE-001-T1:** Initialize Git repository in the project root.  
-- [ ] **AIM2-ODIE-001-T2:** Create src/ directory for source code.  
-- [ ] **AIM2-ODIE-001-T3:** Create data/ directory for input/output data.  
+- [x] **AIM2-ODIE-001-T2:** Create src/ directory for source code.  
+- [x] **AIM2-ODIE-001-T3:** Create data/ directory for input/output data.  
 - [ ] **AIM2-ODIE-001-T4:** Create tests/ directory for unit and integration tests.  
 - [ ] **AIM2-ODIE-001-T5:** Create docs/ directory for documentation.  
 - [ ] **AIM2-ODIE-001-T6:** Create initial README.md file with a brief project overview.
