@@ -11,6 +11,7 @@ This guide provides comprehensive installation instructions for the C-Spirit pro
 - [Verification](#verification)
 - [Troubleshooting](#troubleshooting)
 - [Optional Dependencies](#optional-dependencies)
+- [Additional Non-Python Dependencies](#additional-non-python-dependencies)
 - [Environment Configuration](#environment-configuration)
 
 ## System Requirements
@@ -1398,6 +1399,358 @@ brew install graphviz
 # Ubuntu/Debian
 sudo apt install graphviz
 ```
+
+## Additional Non-Python Dependencies
+
+While the core C-Spirit functionality relies primarily on Python libraries, several non-Python dependencies may be required for advanced features, performance optimization, or specific use cases. This section outlines potential additional dependencies that might arise during development or deployment.
+
+### 1. Graph Visualization and Analysis
+
+#### Graphviz (For Ontology and Network Visualization)
+**Purpose**: Rendering complex ontology structures, metabolic networks, and relationship graphs
+**When needed**: When generating publication-quality diagrams, debugging ontology structures, or creating visual reports
+
+##### Installation:
+
+**macOS:**
+```bash
+# Using Homebrew (recommended)
+brew install graphviz
+
+# Using MacPorts
+sudo port install graphviz
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install graphviz graphviz-dev
+
+# Additional fonts for better diagram rendering
+sudo apt install fonts-liberation fonts-dejavu
+```
+
+**RHEL/CentOS/Fedora:**
+```bash
+# RHEL/CentOS
+sudo yum install graphviz graphviz-devel
+
+# Fedora
+sudo dnf install graphviz graphviz-devel
+```
+
+**Windows:**
+```powershell
+# Using Chocolatey
+choco install graphviz
+
+# Using Scoop
+scoop install graphviz
+
+# Manual installation: Download from https://graphviz.org/download/
+```
+
+##### Verification:
+```bash
+# Test Graphviz installation
+dot -V
+neato -V
+fdp -V
+
+# Test with simple graph
+echo 'digraph G { A -> B -> C }' | dot -Tpng -o test.png
+```
+
+#### Neo4j (Optional - For Large-Scale Graph Databases)
+**Purpose**: Storing and querying large metabolic networks and complex ontology relationships
+**When needed**: For projects with >100k entities or complex graph traversals
+
+```bash
+# Installation varies by system - see Neo4j documentation
+# Typically requires Java 11+ (already covered in Java section)
+
+# Community Edition (free)
+# Download from: https://neo4j.com/download-center/
+```
+
+### 2. Document Processing and OCR
+
+#### Tesseract OCR (For Scanned Document Processing)
+**Purpose**: Extracting text from scanned PDFs and images in scientific literature
+**When needed**: Processing older papers or image-based chemical structure diagrams
+
+**macOS:**
+```bash
+brew install tesseract
+brew install tesseract-lang  # For additional languages
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install tesseract-ocr tesseract-ocr-eng
+# Additional language packs if needed
+sudo apt install tesseract-ocr-deu tesseract-ocr-fra
+```
+
+**Windows:**
+```powershell
+choco install tesseract
+# Or download from: https://github.com/UB-Mannheim/tesseract/wiki
+```
+
+#### Poppler Utils (For Advanced PDF Processing)
+**Purpose**: Enhanced PDF text extraction and manipulation
+**When needed**: Processing complex PDFs with embedded fonts or unusual layouts
+
+**macOS:**
+```bash
+brew install poppler
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install poppler-utils
+```
+
+### 3. Database Systems
+
+#### PostgreSQL (Optional - For Large-Scale Data Storage)
+**Purpose**: Storing extracted entities, relationships, and intermediate processing results
+**When needed**: Large-scale deployments or when SQLite performance becomes insufficient
+
+**macOS:**
+```bash
+brew install postgresql
+brew services start postgresql
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+```
+
+#### Redis (Optional - For Caching and Job Queues)
+**Purpose**: Caching LLM responses, intermediate results, and managing background tasks
+**When needed**: Multi-user deployments or batch processing workflows
+
+**macOS:**
+```bash
+brew install redis
+brew services start redis
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install redis-server
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
+```
+
+### 4. Scientific Computing Libraries
+
+#### BLAST+ (For Sequence Analysis)
+**Purpose**: Protein and nucleotide sequence similarity searches
+**When needed**: If extending C-Spirit to include genomic or proteomic data
+
+**macOS:**
+```bash
+brew install blast
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install ncbi-blast+
+```
+
+#### RDKit Dependencies (For Chemical Structure Analysis)
+**Purpose**: Chemical structure manipulation, similarity calculations, and molecular property prediction
+**When needed**: Advanced chemical structure analysis beyond basic Python libraries
+
+**System Libraries:**
+```bash
+# macOS
+brew install boost cmake eigen
+
+# Ubuntu/Debian
+sudo apt install libboost-all-dev cmake libeigen3-dev
+
+# Note: RDKit itself is available as a Python package,
+# but system libraries may improve performance
+```
+
+### 5. Machine Learning and AI Infrastructure
+
+#### CUDA Toolkit (For GPU-Accelerated Computing)
+**Purpose**: Accelerating large language model inference and machine learning computations
+**When needed**: Using local GPU resources for LLM processing or large-scale entity extraction
+
+**Requirements**: NVIDIA GPU with compute capability 3.5 or higher
+
+**Installation**: 
+- Download from NVIDIA Developer website
+- Follow platform-specific installation guides
+- Verify with `nvidia-smi` and `nvcc --version`
+
+#### Docker (For Containerized Deployments)
+**Purpose**: Consistent deployment environments and service orchestration
+**When needed**: Production deployments or complex multi-service architectures
+
+**macOS:**
+```bash
+brew install --cask docker
+# Or download Docker Desktop from docker.com
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install docker.io docker-compose
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER  # Add current user to docker group
+```
+
+### 6. Version Control and Large File Storage
+
+#### Git LFS (Large File Storage)
+**Purpose**: Managing large ontology files, model weights, and dataset files in version control
+**When needed**: Storing files >100MB in Git repositories
+
+**Installation:**
+```bash
+# macOS
+brew install git-lfs
+
+# Ubuntu/Debian
+sudo apt install git-lfs
+
+# Windows
+choco install git-lfs
+
+# Initialize in repository
+git lfs install
+git lfs track "*.owl"
+git lfs track "*.rdf"
+git lfs track "*.model"
+```
+
+### 7. Web Services and APIs
+
+#### Apache HTTP Server or Nginx (Optional)
+**Purpose**: Serving API endpoints or web interfaces for ontology browsing
+**When needed**: Deploying C-Spirit as a web service or creating public APIs
+
+**macOS:**
+```bash
+brew install nginx
+brew services start nginx
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+```
+
+### 8. System Monitoring and Debugging
+
+#### htop/btop (Enhanced System Monitoring)
+**Purpose**: Monitoring resource usage during intensive processing tasks
+**When needed**: Performance optimization and debugging
+
+**macOS:**
+```bash
+brew install htop btop
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install htop
+# btop installation varies - check GitHub releases
+```
+
+#### valgrind (Memory Debugging - Linux only)
+**Purpose**: Debugging memory issues in compiled extensions
+**When needed**: Troubleshooting memory leaks in native Python extensions
+
+```bash
+# Ubuntu/Debian
+sudo apt install valgrind
+```
+
+### 9. Internationalization and Text Processing
+
+#### ICU (International Components for Unicode)
+**Purpose**: Advanced text processing, normalization, and internationalization
+**When needed**: Processing non-English scientific literature or special characters
+
+**macOS:**
+```bash
+brew install icu4c
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install libicu-dev
+```
+
+### 10. Verification and Testing
+
+To verify optional dependencies, use these test commands:
+
+```bash
+# Graph visualization
+dot -V && echo "✅ Graphviz available" || echo "❌ Graphviz not installed"
+
+# OCR capabilities
+tesseract --version && echo "✅ Tesseract available" || echo "❌ Tesseract not installed"
+
+# PDF processing
+pdfinfo -v && echo "✅ Poppler available" || echo "❌ Poppler not installed"
+
+# Database systems
+psql --version && echo "✅ PostgreSQL available" || echo "❌ PostgreSQL not installed"
+redis-cli --version && echo "✅ Redis available" || echo "❌ Redis not installed"
+
+# BLAST tools
+blastn -version && echo "✅ BLAST+ available" || echo "❌ BLAST+ not installed"
+
+# Docker
+docker --version && echo "✅ Docker available" || echo "❌ Docker not installed"
+
+# Git LFS
+git lfs version && echo "✅ Git LFS available" || echo "❌ Git LFS not installed"
+```
+
+### Installation Priority
+
+Dependencies are categorized by priority:
+
+1. **High Priority** (likely needed for most deployments):
+   - Graphviz (for visualization)
+   - Git LFS (for large file management)
+   - Enhanced monitoring tools (htop/btop)
+
+2. **Medium Priority** (needed for specific features):
+   - Tesseract OCR (for scanned documents)
+   - PostgreSQL (for large-scale storage)
+   - Docker (for containerized deployment)
+
+3. **Low Priority** (specialized use cases):
+   - CUDA Toolkit (GPU acceleration)
+   - Neo4j (complex graph queries)
+   - BLAST+ (sequence analysis)
+   - Redis (caching and queues)
+
+### Performance Considerations
+
+- **Graphviz**: Large ontologies may require increased memory allocation
+- **Database Systems**: Configure appropriate connection pools and memory settings
+- **CUDA**: Ensure sufficient GPU memory for chosen LLM models
+- **Docker**: Monitor container resource usage in production environments
 
 ## Environment Configuration
 
