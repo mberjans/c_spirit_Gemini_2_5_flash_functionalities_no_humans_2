@@ -71,7 +71,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-005-T2:** Create src/ontology/loader.py.  
 - [x] **AIM2-ODIE-005-T3:** Implement load\_ontology\_from\_file(file\_path: str) function using Owlready2.get\_ontology(f"file://{file\_path}").load().  
 - [x] **AIM2-ODIE-005-T4:** Implement load\_ontology\_from\_url(url: str) function using Owlready2.get\_ontology(url).load().  
-- [ ] **AIM2-ODIE-005-T5:** Add try-except blocks to catch relevant exceptions during ontology loading and re-raise custom, more informative exceptions.  
+- [x] **AIM2-ODIE-005-T5:** Add try-except blocks to catch relevant exceptions during ontology loading and re-raise custom, more informative exceptions.  
 - [ ] **AIM2-ODIE-005-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-006  
