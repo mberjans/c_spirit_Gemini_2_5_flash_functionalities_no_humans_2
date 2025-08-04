@@ -61,10 +61,10 @@
   },
   "line_26": {
     "line_number": 26,
-    "original_line": "- [ ] **AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \\-c \"import owlready2\").",
+    "original_line": "- [x] **AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \\-c \"import owlready2\").",
     "task_id": "line_26",
     "task_description": "**AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \\-c \"import owlready2\").",
-    "is_checked": false,
+    "is_checked": true,
     "retry_count": 0,
     "last_attempt": "2025-08-04T15:53:03.652526",
     "is_failed": false
@@ -76,7 +76,7 @@
     "task_description": "**AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.",
     "is_checked": false,
     "retry_count": 0,
-    "last_attempt": null,
+    "last_attempt": "2025-08-04T15:56:29.375184",
     "is_failed": false
   },
   "line_28": {
