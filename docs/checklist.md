@@ -72,7 +72,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-005-T3:** Implement load\_ontology\_from\_file(file\_path: str) function using Owlready2.get\_ontology(f"file://{file\_path}").load().  
 - [x] **AIM2-ODIE-005-T4:** Implement load\_ontology\_from\_url(url: str) function using Owlready2.get\_ontology(url).load().  
 - [x] **AIM2-ODIE-005-T5:** Add try-except blocks to catch relevant exceptions during ontology loading and re-raise custom, more informative exceptions.  
-- [ ] **AIM2-ODIE-005-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-005-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-006  
 Description: Ontology Trimming & Filtering Core Logic: Implement core logic (src/ontology/trimmer.py) for programmatic trimming and filtering of ontology terms based on criteria (e.g., keyword matching, hierarchical relationships, specific properties) using Owlready2's search() and iteration methods.  
