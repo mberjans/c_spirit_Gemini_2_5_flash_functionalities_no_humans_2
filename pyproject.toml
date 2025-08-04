@@ -28,6 +28,7 @@ dev = [
     "pytest>=8.0.0,<9.0",
     "pytest-cov>=4.0.0,<7.0",  # Test coverage reporting
     "pytest-mock>=3.12.0,<4.0",  # Mock objects for testing
+    "faker>=32.0.0,<33.0",  # Fake data generation for testing
     
     # Code quality and linting
     "ruff>=0.6.0,<1.0",  # Fast Python linter and formatter
@@ -221,6 +222,9 @@ check-typed-exception = true
     "S101",   # Allow assert in tests
     "PT011",  # Allow broad exception catching in tests
     "PLR2004", # Allow magic values in tests
+]
+"src/utils/testing_framework.py" = [
+    "S311",   # Allow standard pseudo-random generators in testing utilities
 ]
 "__init__.py" = [
     "D104",   # Missing docstring in public package
