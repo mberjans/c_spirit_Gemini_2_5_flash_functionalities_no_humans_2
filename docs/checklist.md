@@ -16,7 +16,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-001-T3:** Create data/ directory for input/output data.  
 - [x] **AIM2-ODIE-001-T4:** Create tests/ directory for unit and integration tests.  
 - [x] **AIM2-ODIE-001-T5:** Create docs/ directory for documentation.  
-- [ ] **AIM2-ODIE-001-T6:** Create initial README.md file with a brief project overview.
+- [x] **AIM2-ODIE-001-T6:** Create initial README.md file with a brief project overview.
 
 Ticket ID: AIM2-ODIE-002  
 Description: Dependency Management with Poetry: Configure pyproject.toml for project metadata and initial dependencies (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist, pytest, ruff, black). Set up poetry.lock.  
