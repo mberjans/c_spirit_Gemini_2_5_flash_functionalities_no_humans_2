@@ -1797,6 +1797,172 @@ After successful installation:
 4. **Configure Environment**: Set up any required API keys and configuration
 5. **Start Development**: Begin with the basic ontology development examples
 
+## System-Specific Variations and Important Disclaimers
+
+### Platform Compatibility Notice
+
+**⚠️ IMPORTANT DISCLAIMER**: The installation instructions provided in this guide are comprehensive and tested on common configurations, but system-specific variations are inevitable due to the diversity of hardware, operating systems, and existing software configurations. Users should be prepared to adapt these instructions to their specific environment.
+
+### Common System-Specific Variations
+
+#### 1. Operating System Differences
+- **Package Manager Variations**: Different Linux distributions may use different package managers (apt, yum, dnf, pacman, zypper) with varying package names
+- **Library Paths**: System library locations may differ between distributions and versions
+- **Permission Models**: Some systems may require different user permissions or group memberships
+- **Service Management**: Service startup commands vary between systemd, init.d, and other init systems
+
+#### 2. Hardware Architecture Considerations
+- **ARM vs x86_64**: Apple Silicon (M1/M2/M3/M4) and ARM-based systems may require different binaries
+- **GPU Compatibility**: NVIDIA, AMD, and Intel GPUs have different driver requirements and acceleration capabilities
+- **Memory Constraints**: Available RAM affects which LLM models and reasoning operations are feasible
+
+#### 3. Existing Software Conflicts
+- **Python Version Conflicts**: Multiple Python installations may interfere with package management
+- **Java Version Issues**: Different JDK versions may affect Owlready2 reasoner compatibility
+- **Library Version Mismatches**: System-wide vs virtual environment library versions may conflict
+
+### General Troubleshooting Guidelines
+
+#### Before Seeking Help
+1. **Document Your Environment**:
+   ```bash
+   # Collect system information
+   uname -a                    # System architecture and kernel
+   python3 --version          # Python version
+   java -version              # Java version (if applicable)
+   cat /etc/os-release        # Linux distribution info
+   echo $PATH                 # Current PATH variable
+   ```
+
+2. **Check Resource Availability**:
+   ```bash
+   # System resources
+   free -h                    # Memory usage
+   df -h                      # Disk space
+   nproc                      # Number of CPU cores
+   ```
+
+3. **Verify Network Connectivity**:
+   ```bash
+   # Test connectivity for downloads
+   curl -Is https://pypi.org/ | head -1
+   curl -Is https://github.com/ | head -1
+   ```
+
+#### Common Resolution Strategies
+
+**Strategy 1: Clean Environment Approach**
+- Create fresh virtual environments rather than modifying system-wide installations
+- Use containerization (Docker) to isolate dependencies if persistent conflicts occur
+- Consider using conda/mamba environments for complex scientific package combinations
+
+**Strategy 2: Version Pinning**
+- Pin specific versions of problematic packages in requirements
+- Use lock files (poetry.lock, requirements.txt with exact versions) for reproducible builds
+- Test with multiple Python versions if compatibility issues arise
+
+**Strategy 3: Alternative Installation Methods**
+- Try different package managers (pip, conda, system package manager) if one fails
+- Use pre-compiled binaries instead of building from source when available
+- Consider using system packages instead of Python packages for core libraries
+
+#### When Instructions Don't Work
+
+1. **Adaptation Guidelines**:
+   - Substitute equivalent packages for your distribution
+   - Adjust file paths to match your system layout
+   - Modify user/group permissions as required by your security policies
+   - Use appropriate service management commands for your init system
+
+2. **Documentation Resources**:
+   - Consult your operating system's official documentation
+   - Check package manager documentation for your distribution
+   - Review upstream project documentation for specific dependency issues
+
+3. **Testing and Validation**:
+   - Test each dependency independently before proceeding
+   - Use the provided verification scripts to isolate problem areas
+   - Create minimal test cases to reproduce issues
+
+### Platform-Specific Considerations
+
+#### macOS
+- **Homebrew vs MacPorts**: Choose one package manager and stick with it to avoid conflicts
+- **Xcode Command Line Tools**: Required for compiling native extensions
+- **SIP (System Integrity Protection)**: May prevent modification of system directories
+- **Apple Silicon**: Some packages may need Rosetta translation or native ARM builds
+
+#### Linux
+- **Distribution Differences**: Ubuntu/Debian use apt, RHEL/CentOS use yum/dnf, Arch uses pacman
+- **SELinux/AppArmor**: Security frameworks may block certain operations
+- **Kernel Versions**: Older kernels may lack support for newer hardware features
+- **Container Environments**: Docker/Podman installations may have different requirements
+
+#### Windows
+- **WSL vs Native**: Linux subsystem vs native Windows installations have different characteristics
+- **Path Separators**: Backslash vs forward slash in file paths
+- **Permission Models**: Different from Unix-style permissions
+- **Antivirus Interference**: Security software may block Python package installations
+
+### Performance Expectations
+
+#### Hardware Requirements Reality Check
+- **Minimum vs Recommended**: Minimum requirements may result in poor performance
+- **Memory Usage**: LLM models can consume significantly more RAM than listed specifications
+- **Processing Time**: Complex ontology operations may take hours on slower hardware
+- **Storage Growth**: Intermediate files and model caches can consume significant disk space
+
+#### Optimization Opportunities
+- **Parallel Processing**: Utilize multiple CPU cores when available
+- **GPU Acceleration**: Leverage appropriate hardware acceleration when supported
+- **Storage Optimization**: Use SSDs for model storage and temporary files
+- **Memory Management**: Monitor and optimize memory usage for large datasets
+
+### Security and Network Considerations
+
+#### Firewall and Network
+- **Corporate Networks**: Proxy settings may affect package downloads
+- **Port Blocking**: Some services may require specific ports to be open
+- **Certificate Issues**: Corporate firewalls may interfere with SSL/TLS connections
+- **Bandwidth Limitations**: Large model downloads may be restricted
+
+#### Security Software
+- **Antivirus Scanning**: May slow down or block package installations
+- **Application Whitelisting**: May prevent execution of downloaded binaries
+- **Network Monitoring**: May flag unusual download patterns
+
+### Getting Environment-Specific Help
+
+When encountering system-specific issues:
+
+1. **Gather Comprehensive Information**:
+   - Exact error messages with full stack traces
+   - System configuration details (OS, architecture, versions)
+   - Steps taken and results observed
+   - Any modifications made to standard instructions
+
+2. **Search Strategy**:
+   - Include your specific OS and version in searches
+   - Look for issues in upstream project repositories
+   - Check distribution-specific forums and wikis
+   - Search for similar hardware/software combinations
+
+3. **Community Resources**:
+   - Operating system-specific forums and communities
+   - Package maintainer documentation and bug trackers
+   - Scientific computing communities (conda-forge, scientific Python)
+   - Academic computing support resources
+
+### Final Recommendations
+
+1. **Start Simple**: Begin with the most straightforward installation method for your platform
+2. **Test Incrementally**: Verify each component works before proceeding to the next
+3. **Document Changes**: Keep notes about any modifications needed for your environment
+4. **Plan for Updates**: Consider how future updates might affect your custom configuration
+5. **Backup Working Environments**: Once successful, backup your environment configuration
+
+**Remember**: These installation instructions provide a solid foundation, but successful deployment may require system-specific adaptations. The complexity of scientific computing environments means that some troubleshooting and customization is normal and expected.
+
 ## Getting Help
 
 If you encounter issues not covered in this guide:
