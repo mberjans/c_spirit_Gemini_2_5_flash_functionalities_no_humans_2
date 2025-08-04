@@ -29,7 +29,7 @@ Independent: No
 - [x] **AIM2-ODIE-002-T4:** Add core runtime dependencies to pyproject.toml (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist).  
 - [x] **AIM2-ODIE-002-T5:** Add development dependencies to pyproject.toml (e.g., pytest, ruff, black).  
 - [x] **AIM2-ODIE-002-T6:** Run poetry install to generate poetry.lock and install all specified dependencies.  
-- [ ] **AIM2-ODIE-002-T7:** **Conduct Unit Tests:** Run unit tests developed in T1 to confirm successful dependency setup.
+- [x] **AIM2-ODIE-002-T7:** **Conduct Unit Tests:** Run unit tests developed in T1 to confirm successful dependency setup.
 
 Ticket ID: AIM2-ODIE-003  
 Description: Establish Code Quality & Testing Standards: Integrate ruff (or flake8) and black for linting and formatting. Set up pytest for unit/integration testing. Define initial testing framework module for wrapped utilities and fakers.  
