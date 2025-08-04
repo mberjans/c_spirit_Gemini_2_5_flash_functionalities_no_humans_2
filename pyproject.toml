@@ -8,6 +8,36 @@ authors = [
 readme = "README.md"
 requires-python = "^3.8"
 dependencies = [
+    # Ontology manipulation and knowledge representation
+    "Owlready2>=0.48,<1.0",
+    
+    # Biological data processing
+    "biopython>=1.84,<2.0",
+    
+    # PDF text extraction
+    "PyMuPDF>=1.26.0,<2.0",
+    
+    # Text-to-ontology mapping
+    "text2term>=1.3.0,<2.0",
+    
+    # LLM-based information extraction
+    "llm-ie>=0.1.0,<1.0",
+    
+    # Ontology-guided generation with LLMs
+    "ontogpt>=0.2.6,<1.0",
+    
+    # Fuzzy string matching
+    "fuzzywuzzy>=0.18.0,<1.0",
+    "python-Levenshtein>=0.12.0,<1.0",  # Performance optimization for fuzzywuzzy
+    
+    # Data deduplication
+    "dedupe>=3.0.0,<4.0",
+    
+    # Taxonomic data management
+    "multitax>=1.2.0,<2.0",
+    
+    # NCBI taxonomy access
+    "ncbi-taxonomist>=1.2.0,<2.0"
 ]
 
 
