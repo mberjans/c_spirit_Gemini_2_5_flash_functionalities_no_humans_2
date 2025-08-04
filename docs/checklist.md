@@ -37,7 +37,7 @@ Dependencies: AIM2-ODIE-002
 Independent: No
 
 - [x] **AIM2-ODIE-003-T1:** **Develop Unit Tests:** Write a dummy Python file (src/temp\_test\_file.py) with intentional linting/formatting errors and a simple pytest test case. Write a test (tests/test\_code\_quality.py) to run ruff/black checks and pytest on this dummy file.  
-- [ ] **AIM2-ODIE-003-T2:** Configure ruff (or flake8) in pyproject.toml or a dedicated config file (e.g., .ruff.toml).  
+- [x] **AIM2-ODIE-003-T2:** Configure ruff (or flake8) in pyproject.toml or a dedicated config file (e.g., .ruff.toml).  
 - [ ] **AIM2-ODIE-003-T3:** Configure black in pyproject.toml or a dedicated config file (e.g., pyproject.toml).  
 - [ ] **AIM2-ODIE-003-T4:** Create tests/conftest.py for pytest configuration (if needed for shared fixtures).  
 - [ ] **AIM2-ODIE-003-T5:** Create src/utils/testing\_framework.py to encapsulate pytest.raises, pytest.mark.parametrize, and freezegun.freeze\_time (if freezegun is added as a dev dependency).  

@@ -43,3 +43,190 @@ dev = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+# Set line length to 88 characters (compatible with Black)
+line-length = 88
+
+# Target Python version matching project requirements
+target-version = "py39"
+
+# Exclude common directories and files
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "*.pyi",
+]
+
+[tool.ruff.lint]
+# Enable specific rule categories relevant for scientific/research code
+select = [
+    # Pycodestyle
+    "E",     # Error
+    "W",     # Warning
+    
+    # Pyflakes
+    "F",     # Pyflakes errors
+    
+    # McCabe complexity
+    "C90",   # mccabe
+    
+    # isort (import sorting)
+    "I",     # isort
+    
+    # pydocstyle (documentation style)
+    "D",     # pydocstyle
+    
+    # pyupgrade (upgrade syntax for newer Python versions)
+    "UP",    # pyupgrade
+    
+    # flake8-bugbear (common bugs and design problems)
+    "B",     # flake8-bugbear
+    
+    # flake8-simplify (simplification suggestions)
+    "SIM",   # flake8-simplify
+    
+    # flake8-comprehensions (comprehension improvements)
+    "C4",    # flake8-comprehensions
+    
+    # flake8-bandit (security issues)
+    "S",     # flake8-bandit
+    
+    # flake8-print (print statement issues)
+    "T20",   # flake8-print
+    
+    # flake8-return (return statement issues)
+    "RET",   # flake8-return
+    
+    # flake8-implicit-str-concat (string concatenation issues)
+    "ISC",   # flake8-implicit-str-concat
+    
+    # flake8-pie (miscellaneous improvements)
+    "PIE",   # flake8-pie
+    
+    # flake8-pytest-style (pytest style)
+    "PT",    # flake8-pytest-style
+    
+    # Perflint (performance improvements)
+    "PERF",  # Perflint
+    
+    # Ruff-specific rules
+    "RUF",   # Ruff-specific rules
+    
+    # flake8-errmsg (error message guidelines)
+    "EM",    # flake8-errmsg
+    
+    # flake8-logging-format (logging format)
+    "G",     # flake8-logging-format
+    
+    # NumPy-specific rules (relevant for scientific computing)
+    "NPY",   # NumPy-specific rules
+]
+
+# Disable specific rules that may be too restrictive for research code
+ignore = [
+    # Documentation rules that may be too strict for research code
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in __init__
+    
+    # Allow print statements (common in research/debugging)
+    "T201",  # print found
+    
+    # Allow assert statements (common in research code)
+    "S101",  # Use of assert detected
+    
+    # Allow hardcoded passwords in tests and configuration
+    "S105",  # Possible hardcoded password
+    "S106",  # Possible hardcoded password
+    
+    # Allow subprocess without shell=False (may be needed for research tools)
+    "S602",  # subprocess call with shell=True
+    
+    # Allow TODO comments (common in research development)
+    "FIX002", # Line contains TODO
+    
+    # Complexity rules that may be too strict for research algorithms
+    "C901",  # Function is too complex
+    
+    # Allow long lines in docstrings for scientific references
+    "E501",  # Line too long (handled by formatter)
+    
+    # Allow relative imports (common in research packages) - updated rule code
+    "TID252",  # Relative imports from parent modules
+]
+
+# Allow fix for all enabled rules
+fixable = ["ALL"]
+
+# Never automatically fix these rules
+unfixable = [
+    "F401",  # Unused imports (may be intentional for API exposure)
+    "F841",  # Unused variables (may be intentional in research code)
+]
+
+[tool.ruff.lint.mccabe]
+# Set maximum complexity for research code (slightly higher than default)
+max-complexity = 12
+
+[tool.ruff.lint.pydocstyle]
+# Use Google docstring convention (common in scientific Python)
+convention = "google"
+
+[tool.ruff.lint.isort]
+# Configure import sorting for scientific libraries
+known-first-party = ["c_spirit"]
+known-third-party = ["owlready2", "Bio", "fitz", "fuzzywuzzy", "Levenshtein"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+split-on-trailing-comma = true
+force-single-line = false
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-pytest-style]
+# Configure pytest style checking
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.lint.flake8-bandit]
+# Configure security checking for research code
+check-typed-exception = true
+
+[tool.ruff.lint.per-file-ignores]
+# Allow different rules for different file types
+"tests/*" = [
+    "D",      # No docstring requirements in tests
+    "S101",   # Allow assert in tests
+    "PT011",  # Allow broad exception catching in tests
+    "PLR2004", # Allow magic values in tests
+]
+"__init__.py" = [
+    "D104",   # Missing docstring in public package
+    "F401",   # Allow unused imports in __init__.py
+]
+"scripts/*" = [
+    "T201",   # Allow print statements in scripts
+    "S101",   # Allow assert in scripts
+]
