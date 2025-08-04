@@ -41,8 +41,8 @@ Independent: No
 - [x] **AIM2-ODIE-003-T3:** Configure black in pyproject.toml or a dedicated config file (e.g., pyproject.toml).  
 - [x] **AIM2-ODIE-003-T4:** Create tests/conftest.py for pytest configuration (if needed for shared fixtures).  
 - [x] **AIM2-ODIE-003-T5:** Create src/utils/testing\_framework.py to encapsulate pytest.raises, pytest.mark.parametrize, and freezegun.freeze\_time (if freezegun is added as a dev dependency).  
-- [ ] **AIM2-ODIE-003-T6:** Implement initial "Fakers" (e.g., fake\_text, fake\_entity) within src/utils/testing\_framework.py for common data types.  
-- [ ] **AIM2-ODIE-003-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-003-T6:** Implement initial "Fakers" (e.g., fake\_text, fake\_entity) within src/utils/testing\_framework.py for common data types.  
+- [x] **AIM2-ODIE-003-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-004  
 Description: Document Non-Python Dependencies: Create a docs/INSTALL.md or similar document detailing manual installation steps for non-Python dependencies (e.g., Java for HermiT/Pellet reasoners in Owlready2, ollama for local LLMs).  
