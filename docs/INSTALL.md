@@ -58,18 +58,320 @@ sudo apt install libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext 
 1. Install WSL2 with Ubuntu 20.04+
 2. Follow Ubuntu installation steps above
 
-### 3. Java Runtime (Optional but Recommended)
-Some ontology reasoning tools may require Java:
+### 3. Java Development Kit (JDK) - Required for Owlready2 Reasoners
 
+The C-Spirit project uses Owlready2 for ontology management and reasoning. Owlready2's reasoning capabilities rely on Java-based reasoners like **HermiT** and **Pellet**, which require a Java Development Kit (JDK) to function properly.
+
+#### Version Requirements
+- **Minimum**: Java 5 (JDK 1.5) or higher
+- **Recommended**: Java 8 (JDK 1.8) minimum
+- **Production**: Java 11+ recommended for optimal performance and security
+- **Maximum Tested**: Java 21 (latest LTS version)
+
+#### Recommended JDK Distributions
+- **Eclipse Adoptium** (formerly AdoptOpenJDK) - Recommended
+- **Oracle OpenJDK** - Free and open source
+- **Amazon Corretto** - Long-term support with performance optimizations
+- **Azul Zulu** - Enterprise-grade with extensive testing
+
+#### Platform-Specific Installation
+
+##### macOS
 ```bash
-# macOS
+# Option 1: Homebrew (Recommended - Eclipse Adoptium)
+brew install --cask temurin
+
+# Option 2: Homebrew OpenJDK
 brew install openjdk@11
 
-# Ubuntu/Debian
+# Option 3: Oracle JDK (manual download from Oracle website required)
+# Download from: https://www.oracle.com/java/technologies/downloads/
+
+# Link the JDK for system-wide access (Homebrew OpenJDK only)
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+```
+
+##### Linux (Ubuntu/Debian)
+```bash
+# Option 1: Eclipse Adoptium (Recommended)
+wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
+echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+sudo apt update
+sudo apt install temurin-11-jdk
+
+# Option 2: OpenJDK from default repository
+sudo apt update
 sudo apt install openjdk-11-jdk
 
-# Verify Java installation
+# Option 3: Amazon Corretto
+wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
+echo "deb https://apt.corretto.aws stable main" | sudo tee /etc/apt/sources.list.d/corretto.list
+sudo apt update
+sudo apt install java-11-amazon-corretto-jdk
+```
+
+##### Linux (RHEL/CentOS/Fedora)
+```bash
+# RHEL/CentOS (yum)
+sudo yum install java-11-openjdk-devel
+
+# Fedora (dnf)
+sudo dnf install java-11-openjdk-devel
+
+# Amazon Corretto
+sudo rpm --import https://yum.corretto.aws/corretto.key
+sudo curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+sudo yum install java-11-amazon-corretto-devel
+```
+
+##### Windows
+```powershell
+# Option 1: Chocolatey (Recommended)
+choco install adoptopenjdk11
+
+# Option 2: Scoop
+scoop bucket add java
+scoop install adopt11-hotspot
+
+# Option 3: Manual Installation
+# Download from Eclipse Adoptium: https://adoptium.net/releases.html
+# Or Oracle: https://www.oracle.com/java/technologies/downloads/
+```
+
+#### Verification and Configuration
+
+##### Verify Installation
+```bash
+# Check Java version
 java -version
+
+# Check Java compiler (should show same version)
+javac -version
+
+# Check JAVA_HOME environment variable
+echo $JAVA_HOME
+
+# List all installed Java versions (Linux/macOS)
+# Ubuntu/Debian
+update-java-alternatives --list
+
+# macOS
+/usr/libexec/java_home -V
+```
+
+##### Expected Output
+```
+java version "11.0.19" 2023-04-18 LTS
+Java(TM) SE Runtime Environment (build 11.0.19+7-LTS)
+Java HotSpot(TM) 64-Bit Server VM (build 11.0.19+7-LTS, mixed mode)
+```
+
+#### Owlready2 Configuration
+
+##### Automatic Java Detection
+Owlready2 typically auto-detects Java installations on Linux and macOS. For most users, no additional configuration is needed after JDK installation.
+
+##### Manual Java Path Configuration (if needed)
+If Owlready2 cannot find Java automatically, configure it manually:
+
+```python
+# In your Python code, before importing Owlready2
+import os
+import owlready2
+
+# Set Java path explicitly (adjust path as needed)
+# Windows
+# owlready2.JAVA_EXE = r"C:\Program Files\Java\jdk-11.0.19\bin\java.exe"
+
+# macOS (Homebrew)
+# owlready2.JAVA_EXE = "/opt/homebrew/bin/java"
+
+# Linux
+# owlready2.JAVA_EXE = "/usr/bin/java"
+
+# Alternative: Set JAVA_HOME environment variable
+# os.environ['JAVA_HOME'] = '/path/to/your/jdk'
+```
+
+##### Environment Variables
+Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash
+# Linux/macOS
+export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"  # Adjust path
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# macOS (Homebrew)
+export JAVA_HOME="/opt/homebrew/opt/openjdk@11"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+Windows (System Environment Variables):
+```
+JAVA_HOME=C:\Program Files\Java\jdk-11.0.19
+PATH=%JAVA_HOME%\bin;%PATH%
+```
+
+#### Testing Owlready2 Reasoners
+
+Verify that Owlready2 can use Java-based reasoners:
+
+```python
+# Test script - save as test_reasoners.py
+"""Test Owlready2 reasoners with Java."""
+
+import owlready2 as owl2
+
+def test_hermit_reasoner():
+    """Test HermiT reasoner."""
+    try:
+        # Create a simple ontology
+        onto = owl2.get_ontology("http://test.org/onto.owl")
+        
+        with onto:
+            class Person(owl2.Thing): pass
+            class hasAge(owl2.DataProperty):
+                domain = [Person]
+                range = [int]
+        
+        # Try to sync with HermiT reasoner
+        with onto:
+            owl2.sync_reasoner_hermit([onto])
+        
+        print("✅ HermiT reasoner working correctly")
+        return True
+        
+    except Exception as e:
+        print(f"❌ HermiT reasoner failed: {e}")
+        return False
+
+def test_pellet_reasoner():
+    """Test Pellet reasoner."""
+    try:
+        # Create a simple ontology
+        onto = owl2.get_ontology("http://test.org/onto2.owl")
+        
+        with onto:
+            class Animal(owl2.Thing): pass
+            class Dog(Animal): pass
+        
+        # Try to sync with Pellet reasoner
+        with onto:
+            owl2.sync_reasoner_pellet([onto])
+        
+        print("✅ Pellet reasoner working correctly")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Pellet reasoner failed: {e}")
+        return False
+
+if __name__ == "__main__":
+    print("Testing Owlready2 reasoners...")
+    hermit_ok = test_hermit_reasoner()
+    pellet_ok = test_pellet_reasoner()
+    
+    if hermit_ok and pellet_ok:
+        print("🎉 All reasoners working correctly!")
+    else:
+        print("⚠️  Some reasoners failed. Check Java installation.")
+```
+
+Run the test:
+```bash
+python test_reasoners.py
+```
+
+#### Troubleshooting Java/Owlready2 Issues
+
+##### Common Problems and Solutions
+
+**Problem**: `java.exe not found` or `Java not found`
+```bash
+# Solution 1: Verify Java is in PATH
+which java  # Linux/macOS
+where java  # Windows
+
+# Solution 2: Set JAVA_HOME explicitly
+export JAVA_HOME="/path/to/your/jdk"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Solution 3: Configure Owlready2 directly
+# In Python:
+import owlready2
+owlready2.JAVA_EXE = "/path/to/java"
+```
+
+**Problem**: `OutofMemoryError` during reasoning
+```python
+# Solution: Increase Java heap size
+import owlready2
+
+# Set JVM arguments before first use
+owlready2.JAVA_ARGS.extend(["-Xmx4g", "-Xms1g"])  # 4GB max, 1GB initial
+```
+
+**Problem**: `ClassNotFoundException` for reasoners
+```bash
+# Solution: Verify Owlready2 installation includes reasoner JARs
+pip install --force-reinstall owlready2
+
+# Check if JAR files exist
+python -c "import owlready2; print(owlready2.__file__)"
+# Look for .jar files in the Owlready2 installation directory
+```
+
+**Problem**: Permission errors on macOS Catalina+
+```bash
+# Solution: Grant permission to Java executable
+# System Preferences > Security & Privacy > Privacy > Developer Tools
+# Add Terminal or your IDE to the list
+
+# Or use signed JDK distributions like Eclipse Adoptium
+brew install --cask temurin
+```
+
+**Problem**: Reasoner hangs or takes too long
+```python
+# Solution: Set timeout for reasoning operations
+import owlready2
+
+# Configure reasoning timeout (in seconds)
+owlready2.JAVA_ARGS.extend(["-Dnet.sourceforge.owlapi.util.TimerUtils.timeout=30"])
+```
+
+##### Performance Optimization
+
+For better reasoning performance:
+
+```python
+# Optimize JVM settings for reasoning
+import owlready2
+
+# Set optimal JVM arguments
+owlready2.JAVA_ARGS.extend([
+    "-Xmx8g",           # Maximum heap size (adjust based on available RAM)
+    "-Xms2g",           # Initial heap size
+    "-XX:+UseG1GC",     # Use G1 garbage collector
+    "-XX:+UseStringDeduplication",  # Reduce memory usage
+    "-server"           # Server mode for better performance
+])
+```
+
+#### Version Management
+
+If you need multiple Java versions:
+
+```bash
+# Linux: Use update-alternatives
+sudo update-alternatives --config java
+
+# macOS: Use jenv
+brew install jenv
+jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+jenv global 11.0
+
+# Windows: Use multiple installations and update PATH as needed
 ```
 
 ## Installation Steps
