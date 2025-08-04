@@ -6,7 +6,7 @@ authors = [
     {name = "Research Team"}
 ]
 readme = "README.md"
-requires-python = "^3.8"
+requires-python = ">=3.8"
 dependencies = [
     # Ontology manipulation and knowledge representation
     "Owlready2>=0.48,<1.0",
@@ -40,6 +40,23 @@ dependencies = [
     "ncbi-taxonomist>=1.2.0,<2.0"
 ]
 
+[project.optional-dependencies]
+dev = [
+    # Testing framework
+    "pytest>=8.0.0,<9.0",
+    "pytest-cov>=4.0.0,<7.0",  # Test coverage reporting
+    "pytest-mock>=3.12.0,<4.0",  # Mock objects for testing
+    
+    # Code quality and linting
+    "ruff>=0.6.0,<1.0",  # Fast Python linter and formatter
+    "black>=24.0.0",  # Code formatting
+    
+    # Development utilities
+    "pre-commit>=3.6.0,<4.0",  # Git hooks for code quality
+    "mypy>=1.8.0,<2.0",  # Static type checking
+    "freezegun>=1.4.0,<2.0",  # Time-based testing utilities
+    "tox>=4.11.0,<5.0",  # Testing across multiple Python versions
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
