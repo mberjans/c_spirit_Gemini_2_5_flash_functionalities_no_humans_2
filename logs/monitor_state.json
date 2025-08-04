@@ -1,0 +1,2032 @@
+{
+  "line_14": {
+    "line_number": 14,
+    "original_line": "- [x] **AIM2-ODIE-001-T1:** Initialize Git repository in the project root.",
+    "task_id": "line_14",
+    "task_description": "**AIM2-ODIE-001-T1:** Initialize Git repository in the project root.",
+    "is_checked": true,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:36:45.302999",
+    "is_failed": false
+  },
+  "line_15": {
+    "line_number": 15,
+    "original_line": "- [x] **AIM2-ODIE-001-T2:** Create src/ directory for source code.",
+    "task_id": "line_15",
+    "task_description": "**AIM2-ODIE-001-T2:** Create src/ directory for source code.",
+    "is_checked": true,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:38:40.644723",
+    "is_failed": false
+  },
+  "line_16": {
+    "line_number": 16,
+    "original_line": "- [x] **AIM2-ODIE-001-T3:** Create data/ directory for input/output data.",
+    "task_id": "line_16",
+    "task_description": "**AIM2-ODIE-001-T3:** Create data/ directory for input/output data.",
+    "is_checked": true,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:41:11.055016",
+    "is_failed": false
+  },
+  "line_17": {
+    "line_number": 17,
+    "original_line": "- [x] **AIM2-ODIE-001-T4:** Create tests/ directory for unit and integration tests.",
+    "task_id": "line_17",
+    "task_description": "**AIM2-ODIE-001-T4:** Create tests/ directory for unit and integration tests.",
+    "is_checked": true,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:43:16.438789",
+    "is_failed": false
+  },
+  "line_18": {
+    "line_number": 18,
+    "original_line": "- [x] **AIM2-ODIE-001-T5:** Create docs/ directory for documentation.",
+    "task_id": "line_18",
+    "task_description": "**AIM2-ODIE-001-T5:** Create docs/ directory for documentation.",
+    "is_checked": true,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:47:57.450131",
+    "is_failed": false
+  },
+  "line_19": {
+    "line_number": 19,
+    "original_line": "- [ ] **AIM2-ODIE-001-T6:** Create initial README.md file with a brief project overview.",
+    "task_id": "line_19",
+    "task_description": "**AIM2-ODIE-001-T6:** Create initial README.md file with a brief project overview.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": "2025-08-04T15:49:37.778417",
+    "is_failed": false
+  },
+  "line_26": {
+    "line_number": 26,
+    "original_line": "- [ ] **AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \\-c \"import owlready2\").",
+    "task_id": "line_26",
+    "task_description": "**AIM2-ODIE-002-T1:** **Develop Unit Tests:** Write unit tests (tests/test\\_dependencies.py) to verify Poetry installation and basic dependency imports (e.g., poetry run python \\-c \"import owlready2\").",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_27": {
+    "line_number": 27,
+    "original_line": "- [ ] **AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.",
+    "task_id": "line_27",
+    "task_description": "**AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_28": {
+    "line_number": 28,
+    "original_line": "- [ ] **AIM2-ODIE-002-T3:** Initialize Poetry project in the root directory (poetry init).",
+    "task_id": "line_28",
+    "task_description": "**AIM2-ODIE-002-T3:** Initialize Poetry project in the root directory (poetry init).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_29": {
+    "line_number": 29,
+    "original_line": "- [ ] **AIM2-ODIE-002-T4:** Add core runtime dependencies to pyproject.toml (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist).",
+    "task_id": "line_29",
+    "task_description": "**AIM2-ODIE-002-T4:** Add core runtime dependencies to pyproject.toml (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_30": {
+    "line_number": 30,
+    "original_line": "- [ ] **AIM2-ODIE-002-T5:** Add development dependencies to pyproject.toml (e.g., pytest, ruff, black).",
+    "task_id": "line_30",
+    "task_description": "**AIM2-ODIE-002-T5:** Add development dependencies to pyproject.toml (e.g., pytest, ruff, black).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_31": {
+    "line_number": 31,
+    "original_line": "- [ ] **AIM2-ODIE-002-T6:** Run poetry install to generate poetry.lock and install all specified dependencies.",
+    "task_id": "line_31",
+    "task_description": "**AIM2-ODIE-002-T6:** Run poetry install to generate poetry.lock and install all specified dependencies.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_32": {
+    "line_number": 32,
+    "original_line": "- [ ] **AIM2-ODIE-002-T7:** **Conduct Unit Tests:** Run unit tests developed in T1 to confirm successful dependency setup.",
+    "task_id": "line_32",
+    "task_description": "**AIM2-ODIE-002-T7:** **Conduct Unit Tests:** Run unit tests developed in T1 to confirm successful dependency setup.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_39": {
+    "line_number": 39,
+    "original_line": "- [ ] **AIM2-ODIE-003-T1:** **Develop Unit Tests:** Write a dummy Python file (src/temp\\_test\\_file.py) with intentional linting/formatting errors and a simple pytest test case. Write a test (tests/test\\_code\\_quality.py) to run ruff/black checks and pytest on this dummy file.",
+    "task_id": "line_39",
+    "task_description": "**AIM2-ODIE-003-T1:** **Develop Unit Tests:** Write a dummy Python file (src/temp\\_test\\_file.py) with intentional linting/formatting errors and a simple pytest test case. Write a test (tests/test\\_code\\_quality.py) to run ruff/black checks and pytest on this dummy file.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_40": {
+    "line_number": 40,
+    "original_line": "- [ ] **AIM2-ODIE-003-T2:** Configure ruff (or flake8) in pyproject.toml or a dedicated config file (e.g., .ruff.toml).",
+    "task_id": "line_40",
+    "task_description": "**AIM2-ODIE-003-T2:** Configure ruff (or flake8) in pyproject.toml or a dedicated config file (e.g., .ruff.toml).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_41": {
+    "line_number": 41,
+    "original_line": "- [ ] **AIM2-ODIE-003-T3:** Configure black in pyproject.toml or a dedicated config file (e.g., pyproject.toml).",
+    "task_id": "line_41",
+    "task_description": "**AIM2-ODIE-003-T3:** Configure black in pyproject.toml or a dedicated config file (e.g., pyproject.toml).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_42": {
+    "line_number": 42,
+    "original_line": "- [ ] **AIM2-ODIE-003-T4:** Create tests/conftest.py for pytest configuration (if needed for shared fixtures).",
+    "task_id": "line_42",
+    "task_description": "**AIM2-ODIE-003-T4:** Create tests/conftest.py for pytest configuration (if needed for shared fixtures).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_43": {
+    "line_number": 43,
+    "original_line": "- [ ] **AIM2-ODIE-003-T5:** Create src/utils/testing\\_framework.py to encapsulate pytest.raises, pytest.mark.parametrize, and freezegun.freeze\\_time (if freezegun is added as a dev dependency).",
+    "task_id": "line_43",
+    "task_description": "**AIM2-ODIE-003-T5:** Create src/utils/testing\\_framework.py to encapsulate pytest.raises, pytest.mark.parametrize, and freezegun.freeze\\_time (if freezegun is added as a dev dependency).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_44": {
+    "line_number": 44,
+    "original_line": "- [ ] **AIM2-ODIE-003-T6:** Implement initial \"Fakers\" (e.g., fake\\_text, fake\\_entity) within src/utils/testing\\_framework.py for common data types.",
+    "task_id": "line_44",
+    "task_description": "**AIM2-ODIE-003-T6:** Implement initial \"Fakers\" (e.g., fake\\_text, fake\\_entity) within src/utils/testing\\_framework.py for common data types.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_45": {
+    "line_number": 45,
+    "original_line": "- [ ] **AIM2-ODIE-003-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_45",
+    "task_description": "**AIM2-ODIE-003-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_52": {
+    "line_number": 52,
+    "original_line": "- [ ] **AIM2-ODIE-004-T1:** Create docs/INSTALL.md file.",
+    "task_id": "line_52",
+    "task_description": "**AIM2-ODIE-004-T1:** Create docs/INSTALL.md file.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_53": {
+    "line_number": 53,
+    "original_line": "- [ ] **AIM2-ODIE-004-T2:** Document Java Development Kit (JDK) installation instructions, specifying minimum version required for Owlready2 reasoners (HermiT/Pellet).",
+    "task_id": "line_53",
+    "task_description": "**AIM2-ODIE-004-T2:** Document Java Development Kit (JDK) installation instructions, specifying minimum version required for Owlready2 reasoners (HermiT/Pellet).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_54": {
+    "line_number": 54,
+    "original_line": "- [ ] **AIM2-ODIE-004-T3:** Document ollama installation instructions for running local LLM models.",
+    "task_id": "line_54",
+    "task_description": "**AIM2-ODIE-004-T3:** Document ollama installation instructions for running local LLM models.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_55": {
+    "line_number": 55,
+    "original_line": "- [ ] **AIM2-ODIE-004-T4:** Add a section for any other known non-Python dependencies that might arise (e.g., Graphviz if graph visualization were to be added later).",
+    "task_id": "line_55",
+    "task_description": "**AIM2-ODIE-004-T4:** Add a section for any other known non-Python dependencies that might arise (e.g., Graphviz if graph visualization were to be added later).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_56": {
+    "line_number": 56,
+    "original_line": "- [ ] **AIM2-ODIE-004-T5:** Include a disclaimer about potential system-specific variations and troubleshooting tips for non-Python dependencies.",
+    "task_id": "line_56",
+    "task_description": "**AIM2-ODIE-004-T5:** Include a disclaimer about potential system-specific variations and troubleshooting tips for non-Python dependencies.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_65": {
+    "line_number": 65,
+    "original_line": "- [ ] **AIM2-ODIE-005-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_loader.py) for src/ontology/loader.py to cover:",
+    "task_id": "line_65",
+    "task_description": "**AIM2-ODIE-005-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_loader.py) for src/ontology/loader.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_71": {
+    "line_number": 71,
+    "original_line": "- [ ] **AIM2-ODIE-005-T2:** Create src/ontology/loader.py.",
+    "task_id": "line_71",
+    "task_description": "**AIM2-ODIE-005-T2:** Create src/ontology/loader.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_72": {
+    "line_number": 72,
+    "original_line": "- [ ] **AIM2-ODIE-005-T3:** Implement load\\_ontology\\_from\\_file(file\\_path: str) function using Owlready2.get\\_ontology(f\"file://{file\\_path}\").load().",
+    "task_id": "line_72",
+    "task_description": "**AIM2-ODIE-005-T3:** Implement load\\_ontology\\_from\\_file(file\\_path: str) function using Owlready2.get\\_ontology(f\"file://{file\\_path}\").load().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_73": {
+    "line_number": 73,
+    "original_line": "- [ ] **AIM2-ODIE-005-T4:** Implement load\\_ontology\\_from\\_url(url: str) function using Owlready2.get\\_ontology(url).load().",
+    "task_id": "line_73",
+    "task_description": "**AIM2-ODIE-005-T4:** Implement load\\_ontology\\_from\\_url(url: str) function using Owlready2.get\\_ontology(url).load().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_74": {
+    "line_number": 74,
+    "original_line": "- [ ] **AIM2-ODIE-005-T5:** Add try-except blocks to catch relevant exceptions during ontology loading and re-raise custom, more informative exceptions.",
+    "task_id": "line_74",
+    "task_description": "**AIM2-ODIE-005-T5:** Add try-except blocks to catch relevant exceptions during ontology loading and re-raise custom, more informative exceptions.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_75": {
+    "line_number": 75,
+    "original_line": "- [ ] **AIM2-ODIE-005-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_75",
+    "task_description": "**AIM2-ODIE-005-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_82": {
+    "line_number": 82,
+    "original_line": "- [ ] **AIM2-ODIE-006-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_trimmer.py) for src/ontology/trimmer.py to cover:",
+    "task_id": "line_82",
+    "task_description": "**AIM2-ODIE-006-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_trimmer.py) for src/ontology/trimmer.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_88": {
+    "line_number": 88,
+    "original_line": "- [ ] **AIM2-ODIE-006-T2:** Create src/ontology/trimmer.py.",
+    "task_id": "line_88",
+    "task_description": "**AIM2-ODIE-006-T2:** Create src/ontology/trimmer.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_89": {
+    "line_number": 89,
+    "original_line": "- [ ] **AIM2-ODIE-006-T3:** Implement filter\\_classes\\_by\\_keyword(ontology, keyword: str) function.",
+    "task_id": "line_89",
+    "task_description": "**AIM2-ODIE-006-T3:** Implement filter\\_classes\\_by\\_keyword(ontology, keyword: str) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_90": {
+    "line_number": 90,
+    "original_line": "- [ ] **AIM2-ODIE-006-T4:** Implement filter\\_individuals\\_by\\_property(ontology, property\\_name: str, value: Any) function.",
+    "task_id": "line_90",
+    "task_description": "**AIM2-ODIE-006-T4:** Implement filter\\_individuals\\_by\\_property(ontology, property\\_name: str, value: Any) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_91": {
+    "line_number": 91,
+    "original_line": "- [ ] **AIM2-ODIE-006-T5:** Implement get\\_subclasses(ontology, base\\_class\\_iri: str) function.",
+    "task_id": "line_91",
+    "task_description": "**AIM2-ODIE-006-T5:** Implement get\\_subclasses(ontology, base\\_class\\_iri: str) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_92": {
+    "line_number": 92,
+    "original_line": "- [ ] **AIM2-ODIE-006-T6:** Implement a general apply\\_filters(ontology, filters: dict) function that combines multiple filtering criteria.",
+    "task_id": "line_92",
+    "task_description": "**AIM2-ODIE-006-T6:** Implement a general apply\\_filters(ontology, filters: dict) function that combines multiple filtering criteria.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_93": {
+    "line_number": 93,
+    "original_line": "- [ ] **AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_93",
+    "task_description": "**AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_100": {
+    "line_number": 100,
+    "original_line": "- [ ] **AIM2-ODIE-007-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_editor.py) for src/ontology/editor.py to cover:",
+    "task_id": "line_100",
+    "task_description": "**AIM2-ODIE-007-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_editor.py) for src/ontology/editor.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_106": {
+    "line_number": 106,
+    "original_line": "- [ ] **AIM2-ODIE-007-T2:** Create src/ontology/editor.py.",
+    "task_id": "line_106",
+    "task_description": "**AIM2-ODIE-007-T2:** Create src/ontology/editor.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_107": {
+    "line_number": 107,
+    "original_line": "- [ ] **AIM2-ODIE-007-T3:** Implement delete\\_class(ontology, class\\_iri: str) function using destroy\\_entity().",
+    "task_id": "line_107",
+    "task_description": "**AIM2-ODIE-007-T3:** Implement delete\\_class(ontology, class\\_iri: str) function using destroy\\_entity().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_108": {
+    "line_number": 108,
+    "original_line": "- [ ] **AIM2-ODIE-007-T4:** Implement delete\\_individual(ontology, individual\\_iri: str) function using destroy\\_entity().",
+    "task_id": "line_108",
+    "task_description": "**AIM2-ODIE-007-T4:** Implement delete\\_individual(ontology, individual\\_iri: str) function using destroy\\_entity().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_109": {
+    "line_number": 109,
+    "original_line": "- [ ] **AIM2-ODIE-007-T5:** Implement delete\\_property(ontology, property\\_iri: str) function using destroy\\_entity().",
+    "task_id": "line_109",
+    "task_description": "**AIM2-ODIE-007-T5:** Implement delete\\_property(ontology, property\\_iri: str) function using destroy\\_entity().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_110": {
+    "line_number": 110,
+    "original_line": "- [ ] **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_110",
+    "task_description": "**AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_117": {
+    "line_number": 117,
+    "original_line": "- [ ] **AIM2-ODIE-008-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_exporter.py) for src/ontology/exporter.py to cover:",
+    "task_id": "line_117",
+    "task_description": "**AIM2-ODIE-008-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_exporter.py) for src/ontology/exporter.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_122": {
+    "line_number": 122,
+    "original_line": "- [ ] **AIM2-ODIE-008-T2:** Create src/ontology/exporter.py.",
+    "task_id": "line_122",
+    "task_description": "**AIM2-ODIE-008-T2:** Create src/ontology/exporter.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_123": {
+    "line_number": 123,
+    "original_line": "- [ ] **AIM2-ODIE-008-T3:** Implement export\\_ontology(ontology, file\\_path: str, format: str \\= 'rdfxml') function using ontology.save(file=file\\_path, format=format).",
+    "task_id": "line_123",
+    "task_description": "**AIM2-ODIE-008-T3:** Implement export\\_ontology(ontology, file\\_path: str, format: str \\= 'rdfxml') function using ontology.save(file=file\\_path, format=format).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_124": {
+    "line_number": 124,
+    "original_line": "- [ ] **AIM2-ODIE-008-T4:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_124",
+    "task_description": "**AIM2-ODIE-008-T4:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_131": {
+    "line_number": 131,
+    "original_line": "- [ ] **AIM2-ODIE-009-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_structural.py) for src/ontology/scheme\\_structural.py to cover:",
+    "task_id": "line_131",
+    "task_description": "**AIM2-ODIE-009-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_structural.py) for src/ontology/scheme\\_structural.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_135": {
+    "line_number": 135,
+    "original_line": "- [ ] **AIM2-ODIE-009-T2:** Create src/ontology/scheme\\_structural.py.",
+    "task_id": "line_135",
+    "task_description": "**AIM2-ODIE-009-T2:** Create src/ontology/scheme\\_structural.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_136": {
+    "line_number": 136,
+    "original_line": "- [ ] **AIM2-ODIE-009-T3:** Define Python classes for core structural annotation concepts (e.g., ChemontClass, NPClass, PMNCompound) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "task_id": "line_136",
+    "task_description": "**AIM2-ODIE-009-T3:** Define Python classes for core structural annotation concepts (e.g., ChemontClass, NPClass, PMNCompound) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_137": {
+    "line_number": 137,
+    "original_line": "- [ ] **AIM2-ODIE-009-T4:** Programmatically add initial key terms/instances from Chemont, NP Classifier, and PMN (as representative examples) to the ontology.",
+    "task_id": "line_137",
+    "task_description": "**AIM2-ODIE-009-T4:** Programmatically add initial key terms/instances from Chemont, NP Classifier, and PMN (as representative examples) to the ontology.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_138": {
+    "line_number": 138,
+    "original_line": "- [ ] **AIM2-ODIE-009-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_138",
+    "task_description": "**AIM2-ODIE-009-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_145": {
+    "line_number": 145,
+    "original_line": "- [ ] **AIM2-ODIE-010-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_source.py) for src/ontology/scheme\\_source.py to cover:",
+    "task_id": "line_145",
+    "task_description": "**AIM2-ODIE-010-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_source.py) for src/ontology/scheme\\_source.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_149": {
+    "line_number": 149,
+    "original_line": "- [ ] **AIM2-ODIE-010-T2:** Create src/ontology/scheme\\_source.py.",
+    "task_id": "line_149",
+    "task_description": "**AIM2-ODIE-010-T2:** Create src/ontology/scheme\\_source.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_150": {
+    "line_number": 150,
+    "original_line": "- [ ] **AIM2-ODIE-010-T3:** Define Python classes for core source annotation concepts (e.g., PlantAnatomy, Species, ExperimentalCondition) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "task_id": "line_150",
+    "task_description": "**AIM2-ODIE-010-T3:** Define Python classes for core source annotation concepts (e.g., PlantAnatomy, Species, ExperimentalCondition) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_151": {
+    "line_number": 151,
+    "original_line": "- [ ] **AIM2-ODIE-010-T4:** Programmatically add initial key terms/instances from Plant Ontology, NCBI Taxonomy, and PECO (as representative examples) to the ontology.",
+    "task_id": "line_151",
+    "task_description": "**AIM2-ODIE-010-T4:** Programmatically add initial key terms/instances from Plant Ontology, NCBI Taxonomy, and PECO (as representative examples) to the ontology.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_152": {
+    "line_number": 152,
+    "original_line": "- [ ] **AIM2-ODIE-010-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_152",
+    "task_description": "**AIM2-ODIE-010-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_159": {
+    "line_number": 159,
+    "original_line": "- [ ] **AIM2-ODIE-011-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_functional.py) for src/ontology/scheme\\_functional.py to cover:",
+    "task_id": "line_159",
+    "task_description": "**AIM2-ODIE-011-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_scheme\\_functional.py) for src/ontology/scheme\\_functional.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_163": {
+    "line_number": 163,
+    "original_line": "- [ ] **AIM2-ODIE-011-T2:** Create src/ontology/scheme\\_functional.py.",
+    "task_id": "line_163",
+    "task_description": "**AIM2-ODIE-011-T2:** Create src/ontology/scheme\\_functional.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_164": {
+    "line_number": 164,
+    "original_line": "- [ ] **AIM2-ODIE-011-T3:** Define Python classes for core functional annotation concepts (e.g., MolecularTrait, PlantTrait, HumanTrait) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "task_id": "line_164",
+    "task_description": "**AIM2-ODIE-011-T3:** Define Python classes for core functional annotation concepts (e.g., MolecularTrait, PlantTrait, HumanTrait) inheriting from owlready2.Thing and associating them with the main ontology namespace.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_165": {
+    "line_number": 165,
+    "original_line": "- [ ] **AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.",
+    "task_id": "line_165",
+    "task_description": "**AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_166": {
+    "line_number": 166,
+    "original_line": "- [ ] **AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_166",
+    "task_description": "**AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_173": {
+    "line_number": 173,
+    "original_line": "- [ ] **AIM2-ODIE-012-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_relationships.py) for src/ontology/relationships.py to cover:",
+    "task_id": "line_173",
+    "task_description": "**AIM2-ODIE-012-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_relationships.py) for src/ontology/relationships.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_178": {
+    "line_number": 178,
+    "original_line": "- [ ] **AIM2-ODIE-012-T2:** Create src/ontology/relationships.py.",
+    "task_id": "line_178",
+    "task_description": "**AIM2-ODIE-012-T2:** Create src/ontology/relationships.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_179": {
+    "line_number": 179,
+    "original_line": "- [ ] **AIM2-ODIE-012-T3:** Define ObjectProperty classes for \"made\\_via\", \"accumulates\\_in\", \"affects\" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \\-010, \\-011.",
+    "task_id": "line_179",
+    "task_description": "**AIM2-ODIE-012-T3:** Define ObjectProperty classes for \"made\\_via\", \"accumulates\\_in\", \"affects\" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \\-010, \\-011.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_180": {
+    "line_number": 180,
+    "original_line": "- [ ] **AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.",
+    "task_id": "line_180",
+    "task_description": "**AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_181": {
+    "line_number": 181,
+    "original_line": "- [ ] **AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\\_made\\_via as inverse of made\\_via).",
+    "task_id": "line_181",
+    "task_description": "**AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\\_made\\_via as inverse of made\\_via).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_182": {
+    "line_number": 182,
+    "original_line": "- [ ] **AIM2-ODIE-012-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_182",
+    "task_description": "**AIM2-ODIE-012-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_189": {
+    "line_number": 189,
+    "original_line": "- [ ] **AIM2-ODIE-013-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_reasoner.py) for src/ontology/reasoner.py to cover:",
+    "task_id": "line_189",
+    "task_description": "**AIM2-ODIE-013-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\\_reasoner.py) for src/ontology/reasoner.py to cover:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_194": {
+    "line_number": 194,
+    "original_line": "- [ ] **AIM2-ODIE-013-T2:** Create src/ontology/reasoner.py.",
+    "task_id": "line_194",
+    "task_description": "**AIM2-ODIE-013-T2:** Create src/ontology/reasoner.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_195": {
+    "line_number": 195,
+    "original_line": "- [ ] **AIM2-ODIE-013-T3:** Implement run\\_reasoner(ontology, infer\\_property\\_values: bool \\= False) function using sync\\_reasoner().",
+    "task_id": "line_195",
+    "task_description": "**AIM2-ODIE-013-T3:** Implement run\\_reasoner(ontology, infer\\_property\\_values: bool \\= False) function using sync\\_reasoner().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_196": {
+    "line_number": 196,
+    "original_line": "- [ ] **AIM2-ODIE-013-T4:** Ensure the Java executable path is correctly configured for Owlready2 to find HermiT/Pellet (referencing AIM2-ODIE-004).",
+    "task_id": "line_196",
+    "task_description": "**AIM2-ODIE-013-T4:** Ensure the Java executable path is correctly configured for Owlready2 to find HermiT/Pellet (referencing AIM2-ODIE-004).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_197": {
+    "line_number": 197,
+    "original_line": "- [ ] **AIM2-ODIE-013-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_197",
+    "task_description": "**AIM2-ODIE-013-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_204": {
+    "line_number": 204,
+    "original_line": "- [ ] **AIM2-ODIE-014-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_ontology\\_cli.py) for the CLI:",
+    "task_id": "line_204",
+    "task_description": "**AIM2-ODIE-014-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_ontology\\_cli.py) for the CLI:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_209": {
+    "line_number": 209,
+    "original_line": "- [ ] **AIM2-ODIE-014-T2:** Choose a CLI framework (e.g., Typer or Click) and set up the main CLI entry point (src/cli.py).",
+    "task_id": "line_209",
+    "task_description": "**AIM2-ODIE-014-T2:** Choose a CLI framework (e.g., Typer or Click) and set up the main CLI entry point (src/cli.py).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_210": {
+    "line_number": 210,
+    "original_line": "- [ ] **AIM2-ODIE-014-T3:** Implement ontology load subcommand, calling functions from src/ontology/loader.py.",
+    "task_id": "line_210",
+    "task_description": "**AIM2-ODIE-014-T3:** Implement ontology load subcommand, calling functions from src/ontology/loader.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_211": {
+    "line_number": 211,
+    "original_line": "- [ ] **AIM2-ODIE-014-T4:** Implement ontology trim subcommand, calling functions from src/ontology/trimmer.py with appropriate arguments for filtering criteria.",
+    "task_id": "line_211",
+    "task_description": "**AIM2-ODIE-014-T4:** Implement ontology trim subcommand, calling functions from src/ontology/trimmer.py with appropriate arguments for filtering criteria.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_212": {
+    "line_number": 212,
+    "original_line": "- [ ] **AIM2-ODIE-014-T5:** Implement ontology export subcommand, calling functions from src/ontology/exporter.py.",
+    "task_id": "line_212",
+    "task_description": "**AIM2-ODIE-014-T5:** Implement ontology export subcommand, calling functions from src/ontology/exporter.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_213": {
+    "line_number": 213,
+    "original_line": "- [ ] **AIM2-ODIE-014-T6:** Add comprehensive help messages for all commands and arguments using the chosen CLI framework's features.",
+    "task_id": "line_213",
+    "task_description": "**AIM2-ODIE-014-T6:** Add comprehensive help messages for all commands and arguments using the chosen CLI framework's features.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_214": {
+    "line_number": 214,
+    "original_line": "- [ ] **AIM2-ODIE-014-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "task_id": "line_214",
+    "task_description": "**AIM2-ODIE-014-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_223": {
+    "line_number": 223,
+    "original_line": "- [ ] **AIM2-ODIE-015-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_pubmed.py) for src/data\\_acquisition/pubmed.py (mocking Biopython.Entrez calls using unittest.mock or pytest-mock):",
+    "task_id": "line_223",
+    "task_description": "**AIM2-ODIE-015-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_pubmed.py) for src/data\\_acquisition/pubmed.py (mocking Biopython.Entrez calls using unittest.mock or pytest-mock):",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_229": {
+    "line_number": 229,
+    "original_line": "- [ ] **AIM2-ODIE-015-T2:** Create src/data\\_acquisition/pubmed.py.",
+    "task_id": "line_229",
+    "task_description": "**AIM2-ODIE-015-T2:** Create src/data\\_acquisition/pubmed.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_230": {
+    "line_number": 230,
+    "original_line": "- [ ] **AIM2-ODIE-015-T3:** Implement search\\_pubmed(query: str, max\\_results: int \\= 100\\) function using Bio.Entrez.esearch.",
+    "task_id": "line_230",
+    "task_description": "**AIM2-ODIE-015-T3:** Implement search\\_pubmed(query: str, max\\_results: int \\= 100\\) function using Bio.Entrez.esearch.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_231": {
+    "line_number": 231,
+    "original_line": "- [ ] **AIM2-ODIE-015-T4:** Implement fetch\\_pubmed\\_xml(id\\_list: list\\[str\\]) function using Bio.Entrez.efetch.",
+    "task_id": "line_231",
+    "task_description": "**AIM2-ODIE-015-T4:** Implement fetch\\_pubmed\\_xml(id\\_list: list\\[str\\]) function using Bio.Entrez.efetch.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_232": {
+    "line_number": 232,
+    "original_line": "- [ ] **AIM2-ODIE-015-T5:** Implement rate limiting (e.g., using time.sleep or a custom decorator) to comply with NCBI E-utilities guidelines (max 3 requests/sec without API key, 10 requests/sec with).",
+    "task_id": "line_232",
+    "task_description": "**AIM2-ODIE-015-T5:** Implement rate limiting (e.g., using time.sleep or a custom decorator) to comply with NCBI E-utilities guidelines (max 3 requests/sec without API key, 10 requests/sec with).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_233": {
+    "line_number": 233,
+    "original_line": "- [ ] **AIM2-ODIE-015-T6:** Add robust error handling for Biopython.Entrez exceptions and API responses.",
+    "task_id": "line_233",
+    "task_description": "**AIM2-ODIE-015-T6:** Add robust error handling for Biopython.Entrez exceptions and API responses.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_234": {
+    "line_number": 234,
+    "original_line": "- [ ] **AIM2-ODIE-015-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_234",
+    "task_description": "**AIM2-ODIE-015-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_241": {
+    "line_number": 241,
+    "original_line": "- [ ] **AIM2-ODIE-016-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_pdf\\_extractor.py) for src/data\\_acquisition/pdf\\_extractor.py:",
+    "task_id": "line_241",
+    "task_description": "**AIM2-ODIE-016-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_pdf\\_extractor.py) for src/data\\_acquisition/pdf\\_extractor.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_247": {
+    "line_number": 247,
+    "original_line": "- [ ] **AIM2-ODIE-016-T2:** Create src/data\\_acquisition/pdf\\_extractor.py.",
+    "task_id": "line_247",
+    "task_description": "**AIM2-ODIE-016-T2:** Create src/data\\_acquisition/pdf\\_extractor.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_248": {
+    "line_number": 248,
+    "original_line": "- [ ] **AIM2-ODIE-016-T3:** Implement extract\\_text\\_from\\_pdf(file\\_path: str) function using PyMuPDF (fitz.open().get\\_text()) or pdfplumber (pdf.pages\\[i\\].extract\\_text()).",
+    "task_id": "line_248",
+    "task_description": "**AIM2-ODIE-016-T3:** Implement extract\\_text\\_from\\_pdf(file\\_path: str) function using PyMuPDF (fitz.open().get\\_text()) or pdfplumber (pdf.pages\\[i\\].extract\\_text()).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_249": {
+    "line_number": 249,
+    "original_line": "- [ ] **AIM2-ODIE-016-T4:** Implement extract\\_tables\\_from\\_pdf(file\\_path: str) function using pdfplumber (page.extract\\_tables()) or Camelot/Tabula-py.",
+    "task_id": "line_249",
+    "task_description": "**AIM2-ODIE-016-T4:** Implement extract\\_tables\\_from\\_pdf(file\\_path: str) function using pdfplumber (page.extract\\_tables()) or Camelot/Tabula-py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_250": {
+    "line_number": 250,
+    "original_line": "- [ ] **AIM2-ODIE-016-T5:** Add error handling for PDF parsing issues specific to the chosen libraries.",
+    "task_id": "line_250",
+    "task_description": "**AIM2-ODIE-016-T5:** Add error handling for PDF parsing issues specific to the chosen libraries.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_251": {
+    "line_number": 251,
+    "original_line": "- [ ] **AIM2-ODIE-016-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_251",
+    "task_description": "**AIM2-ODIE-016-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_258": {
+    "line_number": 258,
+    "original_line": "- [ ] **AIM2-ODIE-017-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_journal\\_scraper.py) for src/data\\_acquisition/journal\\_scraper.py (mocking external requests and paperscraper calls):",
+    "task_id": "line_258",
+    "task_description": "**AIM2-ODIE-017-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_acquisition/test\\_journal\\_scraper.py) for src/data\\_acquisition/journal\\_scraper.py (mocking external requests and paperscraper calls):",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_265": {
+    "line_number": 265,
+    "original_line": "- [ ] **AIM2-ODIE-017-T2:** Create src/data\\_acquisition/journal\\_scraper.py.",
+    "task_id": "line_265",
+    "task_description": "**AIM2-ODIE-017-T2:** Create src/data\\_acquisition/journal\\_scraper.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_266": {
+    "line_number": 266,
+    "original_line": "- [ ] **AIM2-ODIE-017-T3:** Implement scrape\\_journal\\_metadata(journal\\_name: str, query: str) function using paperscraper.",
+    "task_id": "line_266",
+    "task_description": "**AIM2-ODIE-017-T3:** Implement scrape\\_journal\\_metadata(journal\\_name: str, query: str) function using paperscraper.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_267": {
+    "line_number": 267,
+    "original_line": "- [ ] **AIM2-ODIE-017-T4:** Implement download\\_journal\\_fulltext(article\\_url: str, output\\_path: str) function using paperscraper or requests with appropriate headers.",
+    "task_id": "line_267",
+    "task_description": "**AIM2-ODIE-017-T4:** Implement download\\_journal\\_fulltext(article\\_url: str, output\\_path: str) function using paperscraper or requests with appropriate headers.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_268": {
+    "line_number": 268,
+    "original_line": "- [ ] **AIM2-ODIE-017-T5:** Implement check\\_robots\\_txt(url: str) to parse and respect robots.txt rules before scraping.",
+    "task_id": "line_268",
+    "task_description": "**AIM2-ODIE-017-T5:** Implement check\\_robots\\_txt(url: str) to parse and respect robots.txt rules before scraping.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_269": {
+    "line_number": 269,
+    "original_line": "- [ ] **AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.",
+    "task_id": "line_269",
+    "task_description": "**AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_270": {
+    "line_number": 270,
+    "original_line": "- [ ] **AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_270",
+    "task_description": "**AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_277": {
+    "line_number": 277,
+    "original_line": "- [ ] **AIM2-ODIE-018-T1:** **Develop Unit Tests:** Write unit tests (tests/text\\_processing/test\\_cleaner.py) for src/text\\_processing/cleaner.py:",
+    "task_id": "line_277",
+    "task_description": "**AIM2-ODIE-018-T1:** **Develop Unit Tests:** Write unit tests (tests/text\\_processing/test\\_cleaner.py) for src/text\\_processing/cleaner.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_283": {
+    "line_number": 283,
+    "original_line": "- [ ] **AIM2-ODIE-018-T2:** Create src/text\\_processing/cleaner.py.",
+    "task_id": "line_283",
+    "task_description": "**AIM2-ODIE-018-T2:** Create src/text\\_processing/cleaner.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_284": {
+    "line_number": 284,
+    "original_line": "- [ ] **AIM2-ODIE-018-T3:** Implement normalize\\_text(text: str) function using regex and string methods.",
+    "task_id": "line_284",
+    "task_description": "**AIM2-ODIE-018-T3:** Implement normalize\\_text(text: str) function using regex and string methods.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_285": {
+    "line_number": 285,
+    "original_line": "- [ ] **AIM2-ODIE-018-T4:** Implement tokenize\\_text(text: str) function using spaCy or NLTK.",
+    "task_id": "line_285",
+    "task_description": "**AIM2-ODIE-018-T4:** Implement tokenize\\_text(text: str) function using spaCy or NLTK.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_286": {
+    "line_number": 286,
+    "original_line": "- [ ] **AIM2-ODIE-018-T5:** Implement remove\\_duplicates(text\\_list: list\\[str\\], fuzzy\\_threshold: int \\= 90\\) function using FuzzyWuzzy.",
+    "task_id": "line_286",
+    "task_description": "**AIM2-ODIE-018-T5:** Implement remove\\_duplicates(text\\_list: list\\[str\\], fuzzy\\_threshold: int \\= 90\\) function using FuzzyWuzzy.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_287": {
+    "line_number": 287,
+    "original_line": "- [ ] **AIM2-ODIE-018-T6:** Implement filter\\_stopwords(tokens: list\\[str\\], custom\\_stopwords\\_list: list\\[str\\] \\= None) function.",
+    "task_id": "line_287",
+    "task_description": "**AIM2-ODIE-018-T6:** Implement filter\\_stopwords(tokens: list\\[str\\], custom\\_stopwords\\_list: list\\[str\\] \\= None) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_288": {
+    "line_number": 288,
+    "original_line": "- [ ] **AIM2-ODIE-018-T7:** Implement standardize\\_encoding(text: bytes, target\\_encoding: str \\= 'utf-8') function.",
+    "task_id": "line_288",
+    "task_description": "**AIM2-ODIE-018-T7:** Implement standardize\\_encoding(text: bytes, target\\_encoding: str \\= 'utf-8') function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_289": {
+    "line_number": 289,
+    "original_line": "- [ ] **AIM2-ODIE-018-T8:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_289",
+    "task_description": "**AIM2-ODIE-018-T8:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_296": {
+    "line_number": 296,
+    "original_line": "- [ ] **AIM2-ODIE-019-T1:** **Develop Unit Tests:** Write unit tests (tests/text\\_processing/test\\_chunker.py) for src/text\\_processing/chunker.py:",
+    "task_id": "line_296",
+    "task_description": "**AIM2-ODIE-019-T1:** **Develop Unit Tests:** Write unit tests (tests/text\\_processing/test\\_chunker.py) for src/text\\_processing/chunker.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_302": {
+    "line_number": 302,
+    "original_line": "- [ ] **AIM2-ODIE-019-T2:** Create src/text\\_processing/chunker.py.",
+    "task_id": "line_302",
+    "task_description": "**AIM2-ODIE-019-T2:** Create src/text\\_processing/chunker.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_303": {
+    "line_number": 303,
+    "original_line": "- [ ] **AIM2-ODIE-019-T3:** Implement chunk\\_fixed\\_size(text: str, chunk\\_size: int, chunk\\_overlap: int) function.",
+    "task_id": "line_303",
+    "task_description": "**AIM2-ODIE-019-T3:** Implement chunk\\_fixed\\_size(text: str, chunk\\_size: int, chunk\\_overlap: int) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_304": {
+    "line_number": 304,
+    "original_line": "- [ ] **AIM2-ODIE-019-T4:** Implement chunk\\_by\\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.",
+    "task_id": "line_304",
+    "task_description": "**AIM2-ODIE-019-T4:** Implement chunk\\_by\\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_305": {
+    "line_number": 305,
+    "original_line": "- [ ] **AIM2-ODIE-019-T5:** Implement chunk\\_recursive\\_char(text: str, chunk\\_size: int, chunk\\_overlap: int, separators: list\\[str\\] \\= None) function using LangChain's RecursiveCharacterTextSplitter.",
+    "task_id": "line_305",
+    "task_description": "**AIM2-ODIE-019-T5:** Implement chunk\\_recursive\\_char(text: str, chunk\\_size: int, chunk\\_overlap: int, separators: list\\[str\\] \\= None) function using LangChain's RecursiveCharacterTextSplitter.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_306": {
+    "line_number": 306,
+    "original_line": "- [ ] **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_306",
+    "task_description": "**AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_313": {
+    "line_number": 313,
+    "original_line": "- [ ] **AIM2-ODIE-020-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\\_extraction/test\\_ner.py) for src/llm\\_extraction/ner.py (mocking LLM API calls using unittest.mock or pytest-mock):",
+    "task_id": "line_313",
+    "task_description": "**AIM2-ODIE-020-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\\_extraction/test\\_ner.py) for src/llm\\_extraction/ner.py (mocking LLM API calls using unittest.mock or pytest-mock):",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_319": {
+    "line_number": 319,
+    "original_line": "- [ ] **AIM2-ODIE-020-T2:** Create src/llm\\_extraction/ner.py.",
+    "task_id": "line_319",
+    "task_description": "**AIM2-ODIE-020-T2:** Create src/llm\\_extraction/ner.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_320": {
+    "line_number": 320,
+    "original_line": "- [ ] **AIM2-ODIE-020-T3:** Implement extract\\_entities(text: str, entity\\_schema: dict, llm\\_model\\_name: str, prompt\\_template: str, few\\_shot\\_examples: list \\= None) function using LLM-IE or OntoGPT.",
+    "task_id": "line_320",
+    "task_description": "**AIM2-ODIE-020-T3:** Implement extract\\_entities(text: str, entity\\_schema: dict, llm\\_model\\_name: str, prompt\\_template: str, few\\_shot\\_examples: list \\= None) function using LLM-IE or OntoGPT.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_321": {
+    "line_number": 321,
+    "original_line": "- [ ] **AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.",
+    "task_id": "line_321",
+    "task_description": "**AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_322": {
+    "line_number": 322,
+    "original_line": "- [ ] **AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.",
+    "task_id": "line_322",
+    "task_description": "**AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_323": {
+    "line_number": 323,
+    "original_line": "- [ ] **AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_323",
+    "task_description": "**AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_330": {
+    "line_number": 330,
+    "original_line": "- [ ] **AIM2-ODIE-021-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\\_extraction/test\\_relations.py) for src/llm\\_extraction/relations.py (mocking LLM API calls):",
+    "task_id": "line_330",
+    "task_description": "**AIM2-ODIE-021-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\\_extraction/test\\_relations.py) for src/llm\\_extraction/relations.py (mocking LLM API calls):",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_336": {
+    "line_number": 336,
+    "original_line": "- [ ] **AIM2-ODIE-021-T2:** Create src/llm\\_extraction/relations.py.",
+    "task_id": "line_336",
+    "task_description": "**AIM2-ODIE-021-T2:** Create src/llm\\_extraction/relations.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_337": {
+    "line_number": 337,
+    "original_line": "- [ ] **AIM2-ODIE-021-T3:** Implement extract\\_relationships(text: str, entities: list\\[dict\\], relationship\\_schema: dict, llm\\_model\\_name: str, prompt\\_template: str, few\\_shot\\_examples: list \\= None) function using LLM-IE or OntoGPT.",
+    "task_id": "line_337",
+    "task_description": "**AIM2-ODIE-021-T3:** Implement extract\\_relationships(text: str, entities: list\\[dict\\], relationship\\_schema: dict, llm\\_model\\_name: str, prompt\\_template: str, few\\_shot\\_examples: list \\= None) function using LLM-IE or OntoGPT.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_338": {
+    "line_number": 338,
+    "original_line": "- [ ] **AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).",
+    "task_id": "line_338",
+    "task_description": "**AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_339": {
+    "line_number": 339,
+    "original_line": "- [ ] **AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.",
+    "task_id": "line_339",
+    "task_description": "**AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_340": {
+    "line_number": 340,
+    "original_line": "- [ ] **AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_340",
+    "task_description": "**AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_347": {
+    "line_number": 347,
+    "original_line": "- [ ] **AIM2-ODIE-022-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_corpus\\_cli.py) for the CLI:",
+    "task_id": "line_347",
+    "task_description": "**AIM2-ODIE-022-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_corpus\\_cli.py) for the CLI:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_352": {
+    "line_number": 352,
+    "original_line": "- [ ] **AIM2-ODIE-022-T2:** Extend src/cli.py with a corpus subcommand using the chosen CLI framework.",
+    "task_id": "line_352",
+    "task_description": "**AIM2-ODIE-022-T2:** Extend src/cli.py with a corpus subcommand using the chosen CLI framework.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_353": {
+    "line_number": 353,
+    "original_line": "- [ ] **AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\\_acquisition/pubmed.py and handling output saving.",
+    "task_id": "line_353",
+    "task_description": "**AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\\_acquisition/pubmed.py and handling output saving.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_354": {
+    "line_number": 354,
+    "original_line": "- [ ] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\\_acquisition/pdf\\_extractor.py and handling output saving.",
+    "task_id": "line_354",
+    "task_description": "**AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\\_acquisition/pdf\\_extractor.py and handling output saving.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_355": {
+    "line_number": 355,
+    "original_line": "- [ ] **AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\\_acquisition/journal\\_scraper.py and handling output saving.",
+    "task_id": "line_355",
+    "task_description": "**AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\\_acquisition/journal\\_scraper.py and handling output saving.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_356": {
+    "line_number": 356,
+    "original_line": "- [ ] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.",
+    "task_id": "line_356",
+    "task_description": "**AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_357": {
+    "line_number": 357,
+    "original_line": "- [ ] **AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "task_id": "line_357",
+    "task_description": "**AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_364": {
+    "line_number": 364,
+    "original_line": "- [ ] **AIM2-ODIE-023-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_extraction\\_cli.py) for the CLI:",
+    "task_id": "line_364",
+    "task_description": "**AIM2-ODIE-023-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_extraction\\_cli.py) for the CLI:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_370": {
+    "line_number": 370,
+    "original_line": "- [ ] **AIM2-ODIE-023-T2:** Extend src/cli.py with process and extract subcommands.",
+    "task_id": "line_370",
+    "task_description": "**AIM2-ODIE-023-T2:** Extend src/cli.py with process and extract subcommands.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_371": {
+    "line_number": 371,
+    "original_line": "- [ ] **AIM2-ODIE-023-T3:** Implement process clean subcommand, calling functions from src/text\\_processing/cleaner.py.",
+    "task_id": "line_371",
+    "task_description": "**AIM2-ODIE-023-T3:** Implement process clean subcommand, calling functions from src/text\\_processing/cleaner.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_372": {
+    "line_number": 372,
+    "original_line": "- [ ] **AIM2-ODIE-023-T4:** Implement process chunk subcommand, calling functions from src/text\\_processing/chunker.py.",
+    "task_id": "line_372",
+    "task_description": "**AIM2-ODIE-023-T4:** Implement process chunk subcommand, calling functions from src/text\\_processing/chunker.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_373": {
+    "line_number": 373,
+    "original_line": "- [ ] **AIM2-ODIE-023-T5:** Implement extract ner subcommand, calling functions from src/llm\\_extraction/ner.py.",
+    "task_id": "line_373",
+    "task_description": "**AIM2-ODIE-023-T5:** Implement extract ner subcommand, calling functions from src/llm\\_extraction/ner.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_374": {
+    "line_number": 374,
+    "original_line": "- [ ] **AIM2-ODIE-023-T6:** Implement extract relations subcommand, calling functions from src/llm\\_extraction/relations.py.",
+    "task_id": "line_374",
+    "task_description": "**AIM2-ODIE-023-T6:** Implement extract relations subcommand, calling functions from src/llm\\_extraction/relations.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_375": {
+    "line_number": 375,
+    "original_line": "- [ ] **AIM2-ODIE-023-T7:** Add comprehensive help messages for all process and extract commands and their arguments.",
+    "task_id": "line_375",
+    "task_description": "**AIM2-ODIE-023-T7:** Add comprehensive help messages for all process and extract commands and their arguments.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_376": {
+    "line_number": 376,
+    "original_line": "- [ ] **AIM2-ODIE-023-T8:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "task_id": "line_376",
+    "task_description": "**AIM2-ODIE-023-T8:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_385": {
+    "line_number": 385,
+    "original_line": "- [ ] **AIM2-ODIE-024-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\\_mapping/test\\_entity\\_mapper.py) for src/ontology\\_mapping/entity\\_mapper.py:",
+    "task_id": "line_385",
+    "task_description": "**AIM2-ODIE-024-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\\_mapping/test\\_entity\\_mapper.py) for src/ontology\\_mapping/entity\\_mapper.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_391": {
+    "line_number": 391,
+    "original_line": "- [ ] **AIM2-ODIE-024-T2:** Create src/ontology\\_mapping/entity\\_mapper.py.",
+    "task_id": "line_391",
+    "task_description": "**AIM2-ODIE-024-T2:** Create src/ontology\\_mapping/entity\\_mapper.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_392": {
+    "line_number": 392,
+    "original_line": "- [ ] **AIM2-ODIE-024-T3:** Implement map\\_entities\\_to\\_ontology(entities: list\\[str\\], ontology\\_iri: str, mapping\\_method: str \\= 'tfidf', min\\_score: float \\= 0.3, term\\_type: str \\= 'class') function using text2term.map\\_terms().",
+    "task_id": "line_392",
+    "task_description": "**AIM2-ODIE-024-T3:** Implement map\\_entities\\_to\\_ontology(entities: list\\[str\\], ontology\\_iri: str, mapping\\_method: str \\= 'tfidf', min\\_score: float \\= 0.3, term\\_type: str \\= 'class') function using text2term.map\\_terms().",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_393": {
+    "line_number": 393,
+    "original_line": "- [ ] **AIM2-ODIE-024-T4:** Integrate Owlready2 loaded ontology for text2term's target\\_ontology parameter if direct Owlready2 object passing is preferred over IRI.",
+    "task_id": "line_393",
+    "task_description": "**AIM2-ODIE-024-T4:** Integrate Owlready2 loaded ontology for text2term's target\\_ontology parameter if direct Owlready2 object passing is preferred over IRI.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_394": {
+    "line_number": 394,
+    "original_line": "- [ ] **AIM2-ODIE-024-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_394",
+    "task_description": "**AIM2-ODIE-024-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_401": {
+    "line_number": 401,
+    "original_line": "- [ ] **AIM2-ODIE-025-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\\_mapping/test\\_relation\\_mapper.py) for src/ontology\\_mapping/relation\\_mapper.py:",
+    "task_id": "line_401",
+    "task_description": "**AIM2-ODIE-025-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\\_mapping/test\\_relation\\_mapper.py) for src/ontology\\_mapping/relation\\_mapper.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_406": {
+    "line_number": 406,
+    "original_line": "- [ ] **AIM2-ODIE-025-T2:** Create src/ontology\\_mapping/relation\\_mapper.py.",
+    "task_id": "line_406",
+    "task_description": "**AIM2-ODIE-025-T2:** Create src/ontology\\_mapping/relation\\_mapper.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_407": {
+    "line_number": 407,
+    "original_line": "- [ ] **AIM2-ODIE-025-T3:** Implement map\\_relationships\\_to\\_ontology(relationships: list\\[tuple\\], ontology\\_obj: Any) function. This function will likely involve iterating through relationships, attempting to map relation\\_text to Owlready2.ObjectProperty instances, and potentially mapping subject/object texts to ontology entities using text2term (from AIM2-ODIE-024).",
+    "task_id": "line_407",
+    "task_description": "**AIM2-ODIE-025-T3:** Implement map\\_relationships\\_to\\_ontology(relationships: list\\[tuple\\], ontology\\_obj: Any) function. This function will likely involve iterating through relationships, attempting to map relation\\_text to Owlready2.ObjectProperty instances, and potentially mapping subject/object texts to ontology entities using text2term (from AIM2-ODIE-024).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_408": {
+    "line_number": 408,
+    "original_line": "- [ ] **AIM2-ODIE-025-T4:** Add logic to verify that mapped subjects and objects conform to the domain and range of the mapped ObjectProperty in the ontology.",
+    "task_id": "line_408",
+    "task_description": "**AIM2-ODIE-025-T4:** Add logic to verify that mapped subjects and objects conform to the domain and range of the mapped ObjectProperty in the ontology.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_409": {
+    "line_number": 409,
+    "original_line": "- [ ] **AIM2-ODIE-025-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_409",
+    "task_description": "**AIM2-ODIE-025-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_416": {
+    "line_number": 416,
+    "original_line": "- [ ] **AIM2-ODIE-026-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_normalizer.py) for src/data\\_quality/normalizer.py:",
+    "task_id": "line_416",
+    "task_description": "**AIM2-ODIE-026-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_normalizer.py) for src/data\\_quality/normalizer.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_420": {
+    "line_number": 420,
+    "original_line": "- [ ] **AIM2-ODIE-026-T2:** Create src/data\\_quality/normalizer.py.",
+    "task_id": "line_420",
+    "task_description": "**AIM2-ODIE-026-T2:** Create src/data\\_quality/normalizer.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_421": {
+    "line_number": 421,
+    "original_line": "- [ ] **AIM2-ODIE-026-T3:** Implement normalize\\_name(name: str) function using string methods and potentially regex.",
+    "task_id": "line_421",
+    "task_description": "**AIM2-ODIE-026-T3:** Implement normalize\\_name(name: str) function using string methods and potentially regex.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_422": {
+    "line_number": 422,
+    "original_line": "- [ ] **AIM2-ODIE-026-T4:** Implement find\\_fuzzy\\_matches(query: str, candidates: list\\[str\\], threshold: int \\= 80\\) function using FuzzyWuzzy.process.extract.",
+    "task_id": "line_422",
+    "task_description": "**AIM2-ODIE-026-T4:** Implement find\\_fuzzy\\_matches(query: str, candidates: list\\[str\\], threshold: int \\= 80\\) function using FuzzyWuzzy.process.extract.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_423": {
+    "line_number": 423,
+    "original_line": "- [ ] **AIM2-ODIE-026-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_423",
+    "task_description": "**AIM2-ODIE-026-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_430": {
+    "line_number": 430,
+    "original_line": "- [ ] **AIM2-ODIE-027-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_deduplicator.py) for src/data\\_quality/deduplicator.py:",
+    "task_id": "line_430",
+    "task_description": "**AIM2-ODIE-027-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_deduplicator.py) for src/data\\_quality/deduplicator.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_435": {
+    "line_number": 435,
+    "original_line": "- [ ] **AIM2-ODIE-027-T2:** Create src/data\\_quality/deduplicator.py.",
+    "task_id": "line_435",
+    "task_description": "**AIM2-ODIE-027-T2:** Create src/data\\_quality/deduplicator.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_436": {
+    "line_number": 436,
+    "original_line": "- [ ] **AIM2-ODIE-027-T3:** Implement deduplicate\\_entities(records: list\\[dict\\], fields: list\\[str\\], settings\\_file: str \\= None, training\\_file: str \\= None) function using dedupe or recordlinkage. This will involve setting up the deduplication process (e.g., defining fields, training if dedupe is used).",
+    "task_id": "line_436",
+    "task_description": "**AIM2-ODIE-027-T3:** Implement deduplicate\\_entities(records: list\\[dict\\], fields: list\\[str\\], settings\\_file: str \\= None, training\\_file: str \\= None) function using dedupe or recordlinkage. This will involve setting up the deduplication process (e.g., defining fields, training if dedupe is used).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_437": {
+    "line_number": 437,
+    "original_line": "- [ ] **AIM2-ODIE-027-T4:** Integrate normalize\\_name from AIM2-ODIE-026 as a preprocessing step for fields used in deduplication.",
+    "task_id": "line_437",
+    "task_description": "**AIM2-ODIE-027-T4:** Integrate normalize\\_name from AIM2-ODIE-026 as a preprocessing step for fields used in deduplication.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_438": {
+    "line_number": 438,
+    "original_line": "- [ ] **AIM2-ODIE-027-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_438",
+    "task_description": "**AIM2-ODIE-027-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_445": {
+    "line_number": 445,
+    "original_line": "- [ ] **AIM2-ODIE-028-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_taxonomy.py) for src/data\\_quality/taxonomy.py (mocking external multitax/ncbi-taxonomist calls if they access external APIs):",
+    "task_id": "line_445",
+    "task_description": "**AIM2-ODIE-028-T1:** **Develop Unit Tests:** Write unit tests (tests/data\\_quality/test\\_taxonomy.py) for src/data\\_quality/taxonomy.py (mocking external multitax/ncbi-taxonomist calls if they access external APIs):",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_450": {
+    "line_number": 450,
+    "original_line": "- [ ] **AIM2-ODIE-028-T2:** Create src/data\\_quality/taxonomy.py.",
+    "task_id": "line_450",
+    "task_description": "**AIM2-ODIE-028-T2:** Create src/data\\_quality/taxonomy.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_451": {
+    "line_number": 451,
+    "original_line": "- [ ] **AIM2-ODIE-028-T3:** Implement load\\_ncbi\\_taxonomy() function using multitax.NcbiTx() to load the NCBI taxonomy.",
+    "task_id": "line_451",
+    "task_description": "**AIM2-ODIE-028-T3:** Implement load\\_ncbi\\_taxonomy() function using multitax.NcbiTx() to load the NCBI taxonomy.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_452": {
+    "line_number": 452,
+    "original_line": "- [ ] **AIM2-ODIE-028-T4:** Implement filter\\_species\\_by\\_lineage(taxonomy\\_obj, target\\_lineage: str) function using multitax.filter() or ncbi-taxonomist's subtree command.",
+    "task_id": "line_452",
+    "task_description": "**AIM2-ODIE-028-T4:** Implement filter\\_species\\_by\\_lineage(taxonomy\\_obj, target\\_lineage: str) function using multitax.filter() or ncbi-taxonomist's subtree command.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_453": {
+    "line_number": 453,
+    "original_line": "- [ ] **AIM2-ODIE-028-T5:** Implement get\\_lineage\\_for\\_species(taxonomy\\_obj, species\\_name\\_or\\_id: str) function using multitax or ncbi-taxonomist's resolve command.",
+    "task_id": "line_453",
+    "task_description": "**AIM2-ODIE-028-T5:** Implement get\\_lineage\\_for\\_species(taxonomy\\_obj, species\\_name\\_or\\_id: str) function using multitax or ncbi-taxonomist's resolve command.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_454": {
+    "line_number": 454,
+    "original_line": "- [ ] **AIM2-ODIE-028-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_454",
+    "task_description": "**AIM2-ODIE-028-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_461": {
+    "line_number": 461,
+    "original_line": "- [ ] **AIM2-ODIE-029-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_postprocessing\\_cli.py) for the CLI:",
+    "task_id": "line_461",
+    "task_description": "**AIM2-ODIE-029-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_postprocessing\\_cli.py) for the CLI:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_468": {
+    "line_number": 468,
+    "original_line": "- [ ] **AIM2-ODIE-029-T2:** Extend src/cli.py with map and clean (subcommands for normalize, deduplicate), and taxonomy subcommands.",
+    "task_id": "line_468",
+    "task_description": "**AIM2-ODIE-029-T2:** Extend src/cli.py with map and clean (subcommands for normalize, deduplicate), and taxonomy subcommands.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_469": {
+    "line_number": 469,
+    "original_line": "- [ ] **AIM2-ODIE-029-T3:** Implement map entities subcommand, calling functions from src/ontology\\_mapping/entity\\_mapper.py.",
+    "task_id": "line_469",
+    "task_description": "**AIM2-ODIE-029-T3:** Implement map entities subcommand, calling functions from src/ontology\\_mapping/entity\\_mapper.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_470": {
+    "line_number": 470,
+    "original_line": "- [ ] **AIM2-ODIE-029-T4:** Implement map relations subcommand, calling functions from src/ontology\\_mapping/relation\\_mapper.py.",
+    "task_id": "line_470",
+    "task_description": "**AIM2-ODIE-029-T4:** Implement map relations subcommand, calling functions from src/ontology\\_mapping/relation\\_mapper.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_471": {
+    "line_number": 471,
+    "original_line": "- [ ] **AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\\_quality/normalizer.py.",
+    "task_id": "line_471",
+    "task_description": "**AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\\_quality/normalizer.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_472": {
+    "line_number": 472,
+    "original_line": "- [ ] **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\\_quality/deduplicator.py.",
+    "task_id": "line_472",
+    "task_description": "**AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\\_quality/deduplicator.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_473": {
+    "line_number": 473,
+    "original_line": "- [ ] **AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\\_quality/taxonomy.py.",
+    "task_id": "line_473",
+    "task_description": "**AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\\_quality/taxonomy.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_474": {
+    "line_number": 474,
+    "original_line": "- [ ] **AIM2-ODIE-029-T8:** Add comprehensive help messages for all new commands and arguments.",
+    "task_id": "line_474",
+    "task_description": "**AIM2-ODIE-029-T8:** Add comprehensive help messages for all new commands and arguments.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_475": {
+    "line_number": 475,
+    "original_line": "- [ ] **AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "task_id": "line_475",
+    "task_description": "**AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_484": {
+    "line_number": 484,
+    "original_line": "- [ ] **AIM2-ODIE-030-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_gold\\_standard\\_tool.py) for src/evaluation/gold\\_standard\\_tool.py:",
+    "task_id": "line_484",
+    "task_description": "**AIM2-ODIE-030-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_gold\\_standard\\_tool.py) for src/evaluation/gold\\_standard\\_tool.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_490": {
+    "line_number": 490,
+    "original_line": "- [ ] **AIM2-ODIE-030-T2:** Create src/evaluation/gold\\_standard\\_tool.py.",
+    "task_id": "line_490",
+    "task_description": "**AIM2-ODIE-030-T2:** Create src/evaluation/gold\\_standard\\_tool.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_491": {
+    "line_number": 491,
+    "original_line": "- [ ] **AIM2-ODIE-030-T3:** Implement load\\_document\\_for\\_annotation(file\\_path: str) function.",
+    "task_id": "line_491",
+    "task_description": "**AIM2-ODIE-030-T3:** Implement load\\_document\\_for\\_annotation(file\\_path: str) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_492": {
+    "line_number": 492,
+    "original_line": "- [ ] **AIM2-ODIE-030-T4:** Implement add\\_entity\\_annotation(doc\\_id: str, entity\\_type: str, text: str, start\\_char: int, end\\_char: int) function to store annotations in memory.",
+    "task_id": "line_492",
+    "task_description": "**AIM2-ODIE-030-T4:** Implement add\\_entity\\_annotation(doc\\_id: str, entity\\_type: str, text: str, start\\_char: int, end\\_char: int) function to store annotations in memory.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_493": {
+    "line_number": 493,
+    "original_line": "- [ ] **AIM2-ODIE-030-T5:** Implement add\\_relationship\\_annotation(doc\\_id: str, subject\\_id: str, relation\\_type: str, object\\_id: str) function.",
+    "task_id": "line_493",
+    "task_description": "**AIM2-ODIE-030-T5:** Implement add\\_relationship\\_annotation(doc\\_id: str, subject\\_id: str, relation\\_type: str, object\\_id: str) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_494": {
+    "line_number": 494,
+    "original_line": "- [ ] **AIM2-ODIE-030-T6:** Implement export\\_annotations(output\\_file: str) function to save annotations in a structured format (e.g., JSON Lines).",
+    "task_id": "line_494",
+    "task_description": "**AIM2-ODIE-030-T6:** Implement export\\_annotations(output\\_file: str) function to save annotations in a structured format (e.g., JSON Lines).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_495": {
+    "line_number": 495,
+    "original_line": "- [ ] **AIM2-ODIE-030-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_495",
+    "task_description": "**AIM2-ODIE-030-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_502": {
+    "line_number": 502,
+    "original_line": "- [ ] **AIM2-ODIE-031-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_benchmarker.py) for src/evaluation/benchmarker.py:",
+    "task_id": "line_502",
+    "task_description": "**AIM2-ODIE-031-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_benchmarker.py) for src/evaluation/benchmarker.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_507": {
+    "line_number": 507,
+    "original_line": "- [ ] **AIM2-ODIE-031-T2:** Create src/evaluation/benchmarker.py.",
+    "task_id": "line_507",
+    "task_description": "**AIM2-ODIE-031-T2:** Create src/evaluation/benchmarker.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_508": {
+    "line_number": 508,
+    "original_line": "- [ ] **AIM2-ODIE-031-T3:** Implement calculate\\_ner\\_metrics(gold\\_entities: list\\[dict\\], predicted\\_entities: list\\[dict\\]) function.",
+    "task_id": "line_508",
+    "task_description": "**AIM2-ODIE-031-T3:** Implement calculate\\_ner\\_metrics(gold\\_entities: list\\[dict\\], predicted\\_entities: list\\[dict\\]) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_509": {
+    "line_number": 509,
+    "original_line": "- [ ] **AIM2-ODIE-031-T4:** Implement calculate\\_relation\\_metrics(gold\\_relations: list\\[tuple\\], predicted\\_relations: list\\[tuple\\]) function.",
+    "task_id": "line_509",
+    "task_description": "**AIM2-ODIE-031-T4:** Implement calculate\\_relation\\_metrics(gold\\_relations: list\\[tuple\\], predicted\\_relations: list\\[tuple\\]) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_510": {
+    "line_number": 510,
+    "original_line": "- [ ] **AIM2-ODIE-031-T5:** Implement run\\_benchmark(gold\\_standard\\_data: list\\[dict\\], llm\\_ner\\_function, llm\\_relation\\_function) function that iterates through gold data, calls LLM extraction functions (AIM2-ODIE-020, \\-021), and aggregates metrics.",
+    "task_id": "line_510",
+    "task_description": "**AIM2-ODIE-031-T5:** Implement run\\_benchmark(gold\\_standard\\_data: list\\[dict\\], llm\\_ner\\_function, llm\\_relation\\_function) function that iterates through gold data, calls LLM extraction functions (AIM2-ODIE-020, \\-021), and aggregates metrics.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_511": {
+    "line_number": 511,
+    "original_line": "- [ ] **AIM2-ODIE-031-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_511",
+    "task_description": "**AIM2-ODIE-031-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_518": {
+    "line_number": 518,
+    "original_line": "- [ ] **AIM2-ODIE-032-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_curation\\_tool.py) for src/evaluation/curation\\_tool.py:",
+    "task_id": "line_518",
+    "task_description": "**AIM2-ODIE-032-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\\_curation\\_tool.py) for src/evaluation/curation\\_tool.py:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_523": {
+    "line_number": 523,
+    "original_line": "- [ ] **AIM2-ODIE-032-T2:** Create src/evaluation/curation\\_tool.py.",
+    "task_id": "line_523",
+    "task_description": "**AIM2-ODIE-032-T2:** Create src/evaluation/curation\\_tool.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_524": {
+    "line_number": 524,
+    "original_line": "- [ ] **AIM2-ODIE-032-T3:** Implement load\\_llm\\_output(file\\_path: str) function to load LLM-generated extractions.",
+    "task_id": "line_524",
+    "task_description": "**AIM2-ODIE-032-T3:** Implement load\\_llm\\_output(file\\_path: str) function to load LLM-generated extractions.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_525": {
+    "line_number": 525,
+    "original_line": "- [ ] **AIM2-ODIE-032-T4:** Implement display\\_for\\_review(text: str, entities: list\\[dict\\], relations: list\\[tuple\\]) function (CLI-based display).",
+    "task_id": "line_525",
+    "task_description": "**AIM2-ODIE-032-T4:** Implement display\\_for\\_review(text: str, entities: list\\[dict\\], relations: list\\[tuple\\]) function (CLI-based display).",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_526": {
+    "line_number": 526,
+    "original_line": "- [ ] **AIM2-ODIE-032-T5:** Implement apply\\_correction(extracted\\_data: dict, correction\\_type: str, old\\_value: Any, new\\_value: Any) function to modify entities/relations.",
+    "task_id": "line_526",
+    "task_description": "**AIM2-ODIE-032-T5:** Implement apply\\_correction(extracted\\_data: dict, correction\\_type: str, old\\_value: Any, new\\_value: Any) function to modify entities/relations.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_527": {
+    "line_number": 527,
+    "original_line": "- [ ] **AIM2-ODIE-032-T6:** Implement save\\_curated\\_output(curated\\_data: dict, output\\_file: str) function.",
+    "task_id": "line_527",
+    "task_description": "**AIM2-ODIE-032-T6:** Implement save\\_curated\\_output(curated\\_data: dict, output\\_file: str) function.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_528": {
+    "line_number": 528,
+    "original_line": "- [ ] **AIM2-ODIE-032-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "task_id": "line_528",
+    "task_description": "**AIM2-ODIE-032-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_535": {
+    "line_number": 535,
+    "original_line": "- [ ] **AIM2-ODIE-033-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_evaluation\\_cli.py) for the CLI:",
+    "task_id": "line_535",
+    "task_description": "**AIM2-ODIE-033-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\\_evaluation\\_cli.py) for the CLI:",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_539": {
+    "line_number": 539,
+    "original_line": "- [ ] **AIM2-ODIE-033-T2:** Extend src/cli.py with an eval subcommand.",
+    "task_id": "line_539",
+    "task_description": "**AIM2-ODIE-033-T2:** Extend src/cli.py with an eval subcommand.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_540": {
+    "line_number": 540,
+    "original_line": "- [ ] **AIM2-ODIE-033-T3:** Implement eval benchmark subcommand, calling functions from src/evaluation/benchmarker.py.",
+    "task_id": "line_540",
+    "task_description": "**AIM2-ODIE-033-T3:** Implement eval benchmark subcommand, calling functions from src/evaluation/benchmarker.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_541": {
+    "line_number": 541,
+    "original_line": "- [ ] **AIM2-ODIE-033-T4:** Implement eval curate subcommand, calling functions from src/evaluation/curation\\_tool.py.",
+    "task_id": "line_541",
+    "task_description": "**AIM2-ODIE-033-T4:** Implement eval curate subcommand, calling functions from src/evaluation/curation\\_tool.py.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_542": {
+    "line_number": 542,
+    "original_line": "- [ ] **AIM2-ODIE-033-T5:** Add comprehensive help messages for all eval commands and their arguments.",
+    "task_id": "line_542",
+    "task_description": "**AIM2-ODIE-033-T5:** Add comprehensive help messages for all eval commands and their arguments.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  },
+  "line_543": {
+    "line_number": 543,
+    "original_line": "- [ ] **AIM2-ODIE-033-T6:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "task_id": "line_543",
+    "task_description": "**AIM2-ODIE-033-T6:** **Conduct Integration Tests:** Run integration tests developed in T1.",
+    "is_checked": false,
+    "retry_count": 0,
+    "last_attempt": null,
+    "is_failed": false
+  }
+}
