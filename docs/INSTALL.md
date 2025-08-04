@@ -682,12 +682,699 @@ pytest --tb=short  # Shorter tracebacks
 ## Optional Dependencies
 
 ### 1. Ollama (For Local LLM Support)
-```bash
-# Install Ollama for local LLM inference
-curl -fsSL https://ollama.ai/install.sh | sh
 
-# Pull a model (optional)
-ollama pull llama2
+The C-Spirit project leverages Large Language Models (LLMs) for various AI-driven tasks including named entity recognition, relationship extraction, and text processing. While cloud-based models provide excellent capabilities, **Ollama** enables you to run powerful LLMs locally, offering several advantages:
+
+- **Complete Privacy**: All data processing happens locally, ensuring sensitive research data never leaves your system
+- **No Usage Limits**: Run unlimited inference without API costs or rate limits
+- **Offline Functionality**: Continue working even without internet connectivity
+- **Custom Models**: Use specialized or fine-tuned models for plant metabolomics research
+- **Faster Inference**: Eliminate network latency for real-time processing
+
+#### What is Ollama?
+
+Ollama is an open-source platform that makes it easy to run large language models locally on your machine. It provides a simple command-line interface for downloading, managing, and running various LLM models including Llama, Gemma, DeepSeek, and many others.
+
+#### System Requirements
+
+##### Minimum Hardware Requirements
+- **RAM**: 8GB minimum (for 7B parameter models)
+- **Storage**: 10GB+ free space per model
+- **CPU**: Modern multi-core processor (Intel Core i5 or equivalent)
+- **Network**: Internet connection for initial model downloads
+
+##### Recommended Hardware Requirements
+- **RAM**: 16GB+ (for 13B parameter models), 32GB+ (for 33B parameter models)
+- **Storage**: SSD with 50GB+ free space for multiple models
+- **CPU**: High-performance multi-core processor (Intel Core i7/i9 or AMD Ryzen 7/9)
+- **GPU**: Optional but highly recommended for faster inference
+
+##### GPU Acceleration (Optional but Recommended)
+- **NVIDIA**: RTX 3060 or newer with 8GB+ VRAM, CUDA 11.8+ drivers
+- **AMD**: RX 6600 XT or newer (Linux only, experimental support)
+- **Apple Silicon**: M1/M2/M3/M4 chips with 16GB+ unified memory (automatic acceleration)
+
+#### Operating System Support
+
+##### macOS Requirements
+- **Version**: macOS 12 Monterey or later
+- **Architecture**: Intel x86_64 or Apple Silicon (M1/M2/M3/M4)
+- **Memory**: 8GB RAM minimum, 16GB+ recommended
+
+##### Linux Requirements  
+- **Distributions**: Ubuntu 20.04+, Debian 11+, CentOS 8+, Fedora 35+, or equivalent
+- **Kernel**: Linux kernel 4.18+ with glibc 2.17+
+- **Architecture**: x86_64 or ARM64
+
+##### Windows Requirements
+- **Version**: Windows 10 (64-bit) or Windows 11
+- **Architecture**: x86_64 (Intel/AMD 64-bit processors)
+- **WSL**: Windows Subsystem for Linux (optional but recommended for development)
+
+#### Platform-Specific Installation
+
+##### macOS Installation
+
+**Option 1: Direct Download (Recommended)**
+```bash
+# Download the official installer
+curl -L https://ollama.com/download/Ollama.dmg -o Ollama.dmg
+
+# Open the DMG file and drag Ollama to Applications
+open Ollama.dmg
+
+# After installation, verify the installation
+ollama --version
+```
+
+**Option 2: Homebrew**
+```bash
+# Install using Homebrew
+brew install ollama
+
+# Start the Ollama service
+brew services start ollama
+
+# Verify installation
+ollama --version
+```
+
+##### Linux Installation
+
+**Option 1: Universal Install Script (Recommended)**
+```bash
+# Download and install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Verify installation
+ollama --version
+
+# Start Ollama service (if systemd is available)
+sudo systemctl enable ollama
+sudo systemctl start ollama
+```
+
+**Option 2: Manual Installation**
+```bash
+# Download the binary
+sudo curl -L https://ollama.com/download/ollama-linux-amd64 -o /usr/bin/ollama
+
+# Make it executable
+sudo chmod +x /usr/bin/ollama
+
+# Create a system user for Ollama (optional but recommended)
+sudo useradd -r -s /bin/false -m -d /usr/share/ollama ollama
+```
+
+**Option 3: Docker Installation**
+```bash
+# Pull the official Ollama Docker image
+docker pull ollama/ollama
+
+# Run Ollama in a container
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
+# For GPU support (NVIDIA)
+docker run -d --gpus all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+```
+
+##### Windows Installation
+
+**Option 1: Official Installer (Recommended)**
+```powershell
+# Download the installer
+Invoke-WebRequest -Uri https://ollama.com/download/OllamaSetup.exe -OutFile OllamaSetup.exe
+
+# Run the installer
+.\OllamaSetup.exe
+
+# Verify installation (after restart)
+ollama --version
+```
+
+**Option 2: Package Managers**
+```powershell
+# Using winget
+winget install Ollama.Ollama
+
+# Using Chocolatey
+choco install ollama
+
+# Using Scoop
+scoop install ollama
+```
+
+**Option 3: WSL2 (For Development)**
+```bash
+# Inside WSL2 Ubuntu/Debian environment
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+#### Initial Configuration and Setup
+
+##### 1. Start Ollama Service
+
+**macOS/Linux:**
+```bash
+# Start Ollama server (runs in background)
+ollama serve
+
+# Or use system service (Linux with systemd)
+sudo systemctl start ollama
+sudo systemctl enable ollama  # Auto-start on boot
+```
+
+**Windows:**
+```powershell
+# Ollama starts automatically after installation
+# Check if service is running
+Get-Service -Name "Ollama*"
+
+# Manually start if needed
+Start-Service -Name "OllamaService"
+```
+
+##### 2. Configure Environment Variables (Optional)
+
+```bash
+# Set custom model storage location (optional)
+export OLLAMA_MODELS="/path/to/your/models/directory"
+
+# Set custom host/port (default: localhost:11434)
+export OLLAMA_HOST="0.0.0.0:11434"
+
+# Configure GPU settings (if applicable)
+export CUDA_VISIBLE_DEVICES="0"  # Use first GPU only
+
+# Add to your shell profile for persistence
+echo 'export OLLAMA_MODELS="$HOME/.ollama/models"' >> ~/.bashrc
+echo 'export OLLAMA_HOST="localhost:11434"' >> ~/.bashrc
+```
+
+#### Model Management
+
+##### Downloading Models
+
+C-Spirit works well with various model sizes depending on your hardware:
+
+```bash
+# Small models (good for 8GB RAM systems)
+ollama pull llama3.2:3b          # 3 billion parameters, ~2GB
+ollama pull gemma2:2b            # 2 billion parameters, ~1.4GB
+ollama pull qwen2.5:3b           # 3 billion parameters, ~2GB
+
+# Medium models (good for 16GB RAM systems)  
+ollama pull llama3.2:7b          # 7 billion parameters, ~4.7GB
+ollama pull gemma2:7b            # 7 billion parameters, ~4.7GB
+ollama pull qwen2.5:7b           # 7 billion parameters, ~4.7GB
+
+# Large models (requires 32GB+ RAM)
+ollama pull llama3.1:13b         # 13 billion parameters, ~7.4GB
+ollama pull llama3.1:70b         # 70 billion parameters, ~40GB
+
+# Specialized models for code and reasoning
+ollama pull deepseek-coder:6.7b  # Code generation and analysis
+ollama pull codellama:7b         # Meta's code-focused model
+```
+
+##### Model Management Commands
+
+```bash
+# List installed models
+ollama list
+
+# Show model information
+ollama show llama3.2:7b
+
+# Remove a model to free space
+ollama rm llama3.2:3b
+
+# Update a model to latest version
+ollama pull llama3.2:7b
+
+# Copy a model with different name
+ollama cp llama3.2:7b my-custom-model
+```
+
+#### Verification and Testing
+
+##### 1. Basic Functionality Test
+
+```bash
+# Test basic model interaction
+ollama run llama3.2:3b "Hello, can you help me with plant metabolomics research?"
+
+# Test with a simple scientific query
+ollama run llama3.2:3b "What are the main classes of plant secondary metabolites?"
+
+# Exit the interactive session
+# Type /bye or press Ctrl+D
+```
+
+##### 2. API Endpoint Test
+
+```bash
+# Test HTTP API (Ollama server must be running)
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2:3b",
+  "prompt": "List three common plant alkaloids:",
+  "stream": false
+}'
+
+# Test model list endpoint
+curl http://localhost:11434/api/tags
+```
+
+##### 3. Python Integration Test
+
+Create a test script for C-Spirit integration:
+
+```python
+# save as test_ollama_integration.py
+"""Test Ollama integration for C-Spirit project."""
+
+import json
+import requests
+from typing import Optional
+
+def test_ollama_connection() -> bool:
+    """Test if Ollama server is accessible."""
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=10)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
+
+def test_model_inference(model: str = "llama3.2:3b") -> Optional[str]:
+    """Test model inference with a plant metabolomics query."""
+    if not test_ollama_connection():
+        print("❌ Ollama server not accessible")
+        return None
+    
+    try:
+        payload = {
+            "model": model,
+            "prompt": "What is the molecular formula of caffeine, a common plant alkaloid?",
+            "stream": False
+        }
+        
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            answer = result.get("response", "").strip()
+            print(f"✅ Model {model} responded successfully")
+            print(f"Response: {answer[:100]}...")
+            return answer
+        else:
+            print(f"❌ API request failed: {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Inference test failed: {e}")
+        return None
+
+def list_available_models() -> list:
+    """List all available models."""
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=10)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            return [model["name"] for model in models]
+        return []
+    except:
+        return []
+
+if __name__ == "__main__":
+    print("Testing Ollama integration for C-Spirit...")
+    
+    # Test connection
+    if test_ollama_connection():
+        print("✅ Ollama server is running")
+        
+        # List models
+        models = list_available_models()
+        if models:
+            print(f"✅ Available models: {', '.join(models)}")
+            
+            # Test inference with first available model
+            test_model_inference(models[0])
+        else:
+            print("❌ No models found. Please pull a model first:")
+            print("   ollama pull llama3.2:3b")
+    else:
+        print("❌ Ollama server not running. Please start it:")
+        print("   ollama serve")
+```
+
+Run the test:
+```bash
+python test_ollama_integration.py
+```
+
+#### Usage Examples for C-Spirit
+
+##### 1. Named Entity Recognition
+
+```bash
+# Extract metabolite names from text
+ollama run llama3.2:7b "Extract all plant metabolite names from this text: 'The study found high levels of quercetin, kaempferol, and chlorogenic acid in the leaf extracts, along with trace amounts of caffeine and theobromine.'"
+```
+
+##### 2. Relationship Extraction
+
+```bash
+# Identify relationships between compounds and plants
+ollama run llama3.2:7b "What is the relationship between salicin and willow bark? Explain the biosynthetic pathway."
+```
+
+##### 3. Text Classification
+
+```bash
+# Classify research abstracts
+ollama run llama3.2:7b "Classify this abstract by research area: 'This study investigates the antimicrobial properties of essential oils extracted from Lavandula angustifolia against various bacterial strains.'"
+```
+
+#### Integration with C-Spirit
+
+To use Ollama in your C-Spirit code:
+
+```python
+# Example integration in C-Spirit project
+import requests
+import json
+from typing import Dict, Any, Optional
+
+class OllamaLLMProvider:
+    """Ollama LLM provider for C-Spirit."""
+    
+    def __init__(self, base_url: str = "http://localhost:11434", model: str = "llama3.2:7b"):
+        self.base_url = base_url
+        self.model = model
+    
+    def generate(self, prompt: str, **kwargs) -> Optional[str]:
+        """Generate text using Ollama model."""
+        try:
+            payload = {
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                **kwargs
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/api/generate",
+                json=payload,
+                timeout=kwargs.get("timeout", 60)
+            )
+            
+            if response.status_code == 200:
+                return response.json().get("response", "").strip()
+            return None
+            
+        except Exception as e:
+            print(f"Error generating text: {e}")
+            return None
+    
+    def extract_entities(self, text: str) -> list:
+        """Extract named entities from text."""
+        prompt = f"""Extract all plant metabolite names from the following text. Return only the names, one per line:
+
+Text: {text}
+
+Metabolite names:"""
+        
+        response = self.generate(prompt)
+        if response:
+            return [line.strip() for line in response.split('\n') if line.strip()]
+        return []
+
+# Usage example
+if __name__ == "__main__":
+    llm = OllamaLLMProvider(model="llama3.2:7b")
+    
+    text = "The plant contains quercetin, kaempferol, and chlorogenic acid."
+    entities = llm.extract_entities(text)
+    print(f"Extracted entities: {entities}")
+```
+
+#### Performance Optimization
+
+##### 1. Model Selection Guidelines
+
+For C-Spirit workloads, choose models based on your hardware:
+
+| Hardware | Recommended Models | Use Cases |
+|----------|-------------------|-----------|
+| 8GB RAM | llama3.2:3b, gemma2:2b | Basic NER, simple classification |
+| 16GB RAM | llama3.2:7b, qwen2.5:7b | Complex NER, relationship extraction |
+| 32GB+ RAM | llama3.1:13b, deepseek-coder:6.7b | Advanced reasoning, code generation |
+
+##### 2. GPU Acceleration
+
+If you have a compatible GPU:
+
+```bash
+# Check GPU usage
+nvidia-smi  # For NVIDIA GPUs
+
+# Monitor GPU usage while running models
+watch -n 1 nvidia-smi
+
+# For Apple Silicon, GPU acceleration is automatic
+```
+
+##### 3. Memory Management
+
+```bash
+# Monitor system memory usage
+htop  # or 'top' on macOS
+
+# Clear model from memory when not in use
+ollama stop llama3.2:7b
+
+# Restart Ollama service to clear all models from memory
+# macOS/Linux
+pkill ollama && ollama serve
+
+# Windows
+Restart-Service -Name "OllamaService"
+```
+
+#### Troubleshooting
+
+##### Common Issues and Solutions
+
+**Problem**: `ollama: command not found`
+```bash
+# Solution 1: Verify installation path
+which ollama
+
+# Solution 2: Add to PATH (if installed manually)
+export PATH="/usr/local/bin:$PATH"
+echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc
+
+# Solution 3: Reinstall using package manager
+# macOS
+brew reinstall ollama
+
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+**Problem**: `connection refused` or `server not running`
+```bash
+# Solution 1: Start Ollama server
+ollama serve
+
+# Solution 2: Check if port is in use
+netstat -an | grep 11434
+lsof -i :11434
+
+# Solution 3: Use different port
+export OLLAMA_HOST="localhost:11435"
+ollama serve
+```
+
+**Problem**: `model not found` or download failures
+```bash
+# Solution 1: Verify model name
+ollama list
+
+# Solution 2: Re-download model
+ollama rm llama3.2:7b
+ollama pull llama3.2:7b
+
+# Solution 3: Check disk space
+df -h  # Linux/macOS
+dir   # Windows
+
+# Solution 4: Clear model cache
+rm -rf ~/.ollama/models/*  # Use with caution
+```
+
+**Problem**: Out of memory errors
+```bash
+# Solution 1: Use smaller model
+ollama pull llama3.2:3b  # Instead of 7b or 13b
+
+# Solution 2: Stop other models
+ollama stop llama3.2:7b
+
+# Solution 3: Restart Ollama service
+pkill ollama && ollama serve
+```
+
+**Problem**: Slow inference performance
+```bash
+# Solution 1: Check available RAM
+free -h  # Linux
+vm_stat  # macOS
+
+# Solution 2: Use quantized models
+ollama pull llama3.2:7b-q4_0  # 4-bit quantized version
+
+# Solution 3: Enable GPU acceleration (if available)
+# Ensure NVIDIA drivers and CUDA are properly installed
+nvidia-smi
+```
+
+**Problem**: GPU not being utilized
+```bash
+# Solution 1: Verify GPU drivers (NVIDIA)
+nvidia-smi
+
+# Solution 2: Check CUDA installation
+nvcc --version
+
+# Solution 3: Restart Ollama after driver installation
+pkill ollama && ollama serve
+
+# Solution 4: For Apple Silicon, check Activity Monitor
+# GPU acceleration is automatic but can be monitored
+```
+
+**Problem**: Permission denied errors (Linux)
+```bash
+# Solution 1: Fix ownership
+sudo chown -R $USER:$USER ~/.ollama
+
+# Solution 2: Run with proper permissions
+sudo ollama serve
+
+# Solution 3: Add user to ollama group (if created)
+sudo usermod -a -G ollama $USER
+```
+
+##### Advanced Troubleshooting
+
+**Enable Debug Logging:**
+```bash
+# Set debug environment variable
+export OLLAMA_DEBUG=1
+ollama serve
+
+# Check logs location
+# Linux: /var/log/ollama.log or journalctl -u ollama
+# macOS: ~/Library/Logs/Ollama/
+# Windows: Check Event Viewer
+```
+
+**Check System Resources:**
+```bash
+# Monitor resource usage during model operation
+htop  # or top
+
+# Check disk I/O
+iotop  # Linux only
+
+# Monitor network usage (for model downloads)
+nethogs  # Linux
+nettop   # macOS
+```
+
+**Reset Ollama Configuration:**
+```bash
+# Remove all models and configuration (nuclear option)
+rm -rf ~/.ollama
+
+# Reinstall and reconfigure
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3.2:3b
+```
+
+#### Security Considerations
+
+##### 1. Network Security
+
+```bash
+# By default, Ollama only listens on localhost
+# To allow external connections (use with caution):
+export OLLAMA_HOST="0.0.0.0:11434"
+
+# For production, use reverse proxy with authentication
+# nginx, Apache, or similar
+```
+
+##### 2. Model Verification
+
+```bash
+# Verify model checksums when possible
+ollama show llama3.2:7b --verbose
+
+# Only download models from trusted sources
+# Official Ollama model library: https://ollama.com/library
+```
+
+##### 3. Data Privacy
+
+- All processing happens locally - no data sent to external servers
+- Model files are stored locally in `~/.ollama/models/`
+- Consider encrypting the models directory for sensitive deployments
+
+#### Model Recommendations for C-Spirit
+
+Based on C-Spirit's use cases in plant metabolomics research:
+
+##### For Named Entity Recognition:
+- **llama3.2:7b** - Best balance of accuracy and speed
+- **qwen2.5:7b** - Excellent for scientific text
+- **gemma2:7b** - Good general-purpose model
+
+##### For Relationship Extraction:
+- **llama3.1:13b** - Superior reasoning capabilities (if you have enough RAM)
+- **deepseek-coder:6.7b** - Good for structured data extraction
+
+##### For Text Classification:
+- **llama3.2:3b** - Fast and sufficient for most classification tasks
+- **gemma2:2b** - Minimal resource usage
+
+##### Development and Testing:
+- **llama3.2:3b** - Quick iteration and testing
+- **qwen2.5:3b** - Good for prototyping scientific applications
+
+#### Integration with Development Workflow
+
+```bash
+# Add to your development environment
+# Add these to your .env file or shell profile:
+
+# Ollama configuration
+export OLLAMA_HOST="localhost:11434"
+export OLLAMA_MODELS="$HOME/.ollama/models"
+
+# C-Spirit LLM configuration  
+export C_SPIRIT_LLM_PROVIDER="ollama"
+export C_SPIRIT_LLM_MODEL="llama3.2:7b"
+export C_SPIRIT_LLM_ENDPOINT="http://localhost:11434"
+
+# Performance tuning
+export OLLAMA_NUM_PARALLEL=2
+export OLLAMA_MAX_LOADED_MODELS=1
 ```
 
 ### 2. Additional NLP Tools

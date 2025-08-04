@@ -51,7 +51,7 @@ Independent: Yes
 
 - [x] **AIM2-ODIE-004-T1:** Create docs/INSTALL.md file.  
 - [x] **AIM2-ODIE-004-T2:** Document Java Development Kit (JDK) installation instructions, specifying minimum version required for Owlready2 reasoners (HermiT/Pellet).  
-- [ ] **AIM2-ODIE-004-T3:** Document ollama installation instructions for running local LLM models.  
+- [x] **AIM2-ODIE-004-T3:** Document ollama installation instructions for running local LLM models.  
 - [ ] **AIM2-ODIE-004-T4:** Add a section for any other known non-Python dependencies that might arise (e.g., Graphviz if graph visualization were to be added later).  
 - [ ] **AIM2-ODIE-004-T5:** Include a disclaimer about potential system-specific variations and troubleshooting tips for non-Python dependencies.
 
