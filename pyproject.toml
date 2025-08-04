@@ -230,3 +230,64 @@ check-typed-exception = true
     "T201",   # Allow print statements in scripts
     "S101",   # Allow assert in scripts
 ]
+
+[tool.black]
+# Set line length to 88 characters (compatible with ruff configuration)
+line-length = 88
+
+# Target Python version matching project requirements
+target-version = ['py39']
+
+# Include patterns - format all Python files
+include = '\.pyi?$'
+
+# Exclude common directories and files (matching ruff exclude patterns)
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.nox
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+  | __pycache__
+  | \.eggs
+  | \.git-rewrite
+  | \.pytype
+  | \.ruff_cache
+  | \.svn
+  | node_modules
+)/
+'''
+
+# Preview features - enable stable preview features for better formatting
+preview = false
+
+# String handling - use double quotes (Python convention)
+skip-string-normalization = false
+
+# Magic trailing comma - respect existing trailing commas in collections
+skip-magic-trailing-comma = false
+
+# Line ending handling - let Black handle line endings automatically
+force-exclude = '''
+/(
+    migrations/
+  | \.git/
+  | \.hg/
+  | \.mypy_cache/
+  | \.nox/
+  | \.tox/
+  | \.venv/
+  | _build/
+  | buck-out/
+  | build/
+  | dist/
+  | venv/
+)/
+'''
