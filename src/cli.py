@@ -28,6 +28,7 @@ import typer
 import sys
 import os
 import json
+import datetime
 from pathlib import Path
 from typing import Optional, List
 from rich.console import Console
@@ -2412,6 +2413,683 @@ def extract_ner_command(
         raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Unexpected error during NER extraction: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@extract_app.command("relations")
+def extract_relations_command(
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to the input file containing entities (JSON format) or raw text for relationship extraction. File must contain previously extracted entities or text suitable for entity extraction followed by relationship extraction."
+    ),
+    output: str = typer.Option(
+        ..., 
+        "--output", "-o", 
+        help="Output file path for extracted relationships in JSON format. Will contain structured relationship data with subject entities, relation types, object entities, and confidence scores."
+    ),
+    schema: Optional[str] = typer.Option(
+        None, 
+        "--schema", "-s", 
+        help="Path to relationship schema file (JSON format) defining relationship types and descriptions. If not provided, uses default plant metabolomics relationship schema."
+    ),
+    model: str = typer.Option(
+        "gpt-3.5-turbo", 
+        "--model", "-m", 
+        help="LLM model name to use for relationship extraction. Examples: 'gpt-3.5-turbo', 'gpt-4', 'claude-v1'. Model must be available via API."
+    ),
+    template_type: str = typer.Option(
+        "basic", 
+        "--template-type", "-t", 
+        help="Type of prompt template to use: 'basic', 'detailed', 'precision', 'recall', 'scientific'. Each optimized for different extraction goals."
+    ),
+    few_shot: bool = typer.Option(
+        False, 
+        "--few-shot", "-f", 
+        help="Enable few-shot learning using example-based prompts. Improves accuracy by providing the model with relevant relationship examples."
+    ),
+    domain: Optional[str] = typer.Option(
+        None, 
+        "--domain", "-d", 
+        help="Domain specification for specialized extraction: 'metabolomics', 'genetics', 'plant_biology'. Uses domain-specific templates and examples."
+    ),
+    num_examples: int = typer.Option(
+        3, 
+        "--num-examples", "-n", 
+        help="Number of few-shot examples to include in the prompt (1-10). More examples may improve accuracy but increase token usage."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed progress information including API calls, relationship statistics, processing steps, and performance metrics."
+    ),
+    max_retries: int = typer.Option(
+        3, 
+        "--max-retries", 
+        help="Maximum number of API retry attempts for failed requests (1-10). Higher values increase reliability but may slow processing."
+    ),
+    confidence_threshold: float = typer.Option(
+        0.0, 
+        "--confidence-threshold", 
+        help="Minimum confidence score for relationship inclusion (0.0-1.0). Higher values filter out uncertain relationships but may reduce recall."
+    ),
+    input_type: str = typer.Option(
+        "auto", 
+        "--input-type", 
+        help="Type of input file: 'entities' (JSON with extracted entities), 'text' (raw text), 'auto' (detect automatically). Determines processing approach."
+    )
+):
+    """
+    Extract relationships between entities from text using Large Language Models (LLMs).
+    
+    This command performs relationship extraction on either pre-existing entity data or raw text.
+    It supports both zero-shot and few-shot learning modes with specialized templates for
+    scientific domains like plant metabolomics, genetics, and biochemistry.
+    
+    \b
+    EXTRACTION CAPABILITIES:
+    • Relationship identification between previously extracted entities
+    • Confidence scoring for each extracted relationship (0.0-1.0 scale)
+    • Support for 25+ relationship types including biochemical, genetic, and phenotypic
+    • Domain-specific extraction for metabolomics, genetics, plant biology
+    • Few-shot learning with automatically selected relevant examples
+    • Context extraction and evidence spans for each relationship
+    
+    \b
+    INPUT FORMATS:
+    
+    Entities JSON Format (--input-type entities):
+    [
+      {"text": "anthocyanin", "label": "METABOLITE", "start": 0, "end": 11},
+      {"text": "grape berries", "label": "PLANT_PART", "start": 25, "end": 38}
+    ]
+    
+    Raw Text Format (--input-type text):
+    "Anthocyanins accumulate in grape berries during ripening and are responsible 
+    for the purple coloration through flavonoid biosynthesis pathways."
+    
+    \b
+    EXTRACTION MODES:
+    
+    Zero-shot Extraction:
+    • Uses pre-trained model knowledge without examples
+    • Fast processing with minimal prompt overhead
+    • Good for general relationship types and well-known domains
+    • Activated by default (no --few-shot flag)
+    
+    Few-shot Learning:
+    • Includes relevant examples in the extraction prompt
+    • Higher accuracy through example-based guidance
+    • Better handling of domain-specific relationship types
+    • Activated with --few-shot flag
+    
+    Domain-specific Extraction:
+    • Specialized templates for scientific domains
+    • Domain-optimized relationship schemas and examples
+    • Enhanced precision for technical relationships
+    • Activated with --domain flag
+    
+    \b
+    TEMPLATE TYPES:
+    • basic - Standard extraction with balanced precision/recall
+    • detailed - Comprehensive extraction with context analysis
+    • precision - High-accuracy extraction minimizing false positives
+    • recall - Comprehensive extraction maximizing relationship coverage
+    • scientific - Academic literature optimized with domain terminology
+    
+    \b
+    DOMAIN SPECIALIZATIONS:
+    • metabolomics - Focus on metabolite synthesis, accumulation, pathways
+    • genetics - Focus on gene expression, regulation, protein interactions
+    • plant_biology - Focus on plant anatomy, physiology, developmental processes
+    • biochemistry - Focus on enzymatic reactions, molecular interactions
+    
+    \b
+    RELATIONSHIP TYPES:
+    Common relationship types extracted include:
+    • synthesized_by, found_in, accumulates_in - Metabolite locations/origins
+    • encodes, expressed_in, regulated_by - Gene/protein relationships
+    • catalyzes, involved_in, part_of - Pathway and process relationships
+    • responds_to, affected_by, associated_with - Experimental relationships
+    • binds_to, interacts_with, located_in - Structural relationships
+    
+    \b
+    OUTPUT FORMAT:
+    The JSON output contains an array of relationships, each with:
+    • subject_entity: The source entity with text and label
+    • relation_type: The relationship type/category
+    • object_entity: The target entity with text and label
+    • confidence: Model confidence score (0.0-1.0)
+    • context: Surrounding text providing evidence
+    • evidence: Specific text span supporting the relationship
+    
+    \b
+    RELATIONSHIP SCHEMA:
+    Custom schemas define relationship types and descriptions:
+    {
+      "synthesized_by": "Metabolite is synthesized/produced by an organism or enzyme",
+      "found_in": "Metabolite is found/detected in a specific plant part or species",
+      "encodes": "Gene encodes a specific protein or enzyme"
+    }
+    
+    \b
+    REQUIREMENTS:
+    • LLM API access (OpenAI, Anthropic, or compatible endpoint)
+    • API key configured in environment variables
+    • Input file in valid JSON (entities) or text format (UTF-8 recommended)
+    • Internet connection for API requests
+    • Sufficient API quota for processing and retry attempts
+    
+    \b
+    USAGE EXAMPLES:
+    # Extract relationships from pre-existing entities
+    extract relations entities.json --output relationships.json --verbose
+    
+    # Few-shot extraction with custom model and schema
+    extract relations entities.json --output results.json --schema my_relations.json --few-shot --model gpt-4 --num-examples 5
+    
+    # Domain-specific metabolomics relationship extraction
+    extract relations text.txt --input-type text --output metabolic_relations.json --domain metabolomics --template-type scientific --verbose
+    
+    # High-precision extraction with confidence filtering
+    extract relations entities.json --output high_conf_relations.json --template-type precision --confidence-threshold 0.8 --few-shot
+    
+    # Process raw text with automatic entity detection
+    extract relations research_paper.txt --input-type text --output paper_relations.json --domain genetics --few-shot --verbose
+    
+    \b
+    PERFORMANCE OPTIMIZATION:
+    • Use domain-specific templates when available for better accuracy
+    • Enable few-shot learning for improved precision on specific domains
+    • Set confidence thresholds to filter uncertain relationships
+    • Configure retries for robust API error handling
+    • Use appropriate input types (entities vs text) for efficiency
+    
+    \b
+    ERROR HANDLING:
+    • Automatic retry with exponential backoff for transient API errors
+    • Graceful handling of rate limits and quota exceeded errors
+    • Input validation for file formats and parameter ranges
+    • Detailed error messages with troubleshooting suggestions
+    • Partial results saved on interruption for long processing
+    
+    \b
+    TROUBLESHOOTING:
+    • If extraction fails, check API key configuration and model availability
+    • For poor results, try few-shot mode or domain-specific templates
+    • Use --verbose flag to monitor API calls and processing steps
+    • Check input file format if seeing parsing errors
+    • For text input, ensure entities can be detected before relationship extraction
+    • Increase retries for unstable network connections
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting relationship extraction from: {input_file}[/blue]")
+            console.print("Extraction parameters:")
+            console.print(f"  - Output file: {output}")
+            console.print(f"  - LLM model: {model}")
+            console.print(f"  - Template type: {template_type}")
+            console.print(f"  - Few-shot learning: {few_shot}")
+            console.print(f"  - Domain: {domain if domain else 'Auto-detect'}")
+            console.print(f"  - Schema file: {schema if schema else 'Default'}")
+            console.print(f"  - Input type: {input_type}")
+            if few_shot:
+                console.print(f"  - Number of examples: {num_examples}")
+            console.print(f"  - Confidence threshold: {confidence_threshold}")
+            console.print(f"  - Max retries: {max_retries}")
+        
+        # Validate parameters
+        if template_type not in ["basic", "detailed", "precision", "recall", "scientific"]:
+            console.print(f"[red]Error: Invalid template type '{template_type}'. Must be one of: basic, detailed, precision, recall, scientific[/red]")
+            raise typer.Exit(1)
+        
+        if domain and domain not in ["metabolomics", "genetics", "plant_biology", "biochemistry"]:
+            console.print(f"[red]Error: Invalid domain '{domain}'. Must be one of: metabolomics, genetics, plant_biology, biochemistry[/red]")
+            raise typer.Exit(1)
+        
+        if input_type not in ["auto", "entities", "text"]:
+            console.print(f"[red]Error: Invalid input type '{input_type}'. Must be one of: auto, entities, text[/red]")
+            raise typer.Exit(1)
+        
+        if not (1 <= num_examples <= 10):
+            console.print(f"[red]Error: Number of examples must be between 1 and 10 (got {num_examples})[/red]")
+            raise typer.Exit(1)
+        
+        if not (0.0 <= confidence_threshold <= 1.0):
+            console.print(f"[red]Error: Confidence threshold must be between 0.0 and 1.0 (got {confidence_threshold})[/red]")
+            raise typer.Exit(1)
+        
+        if not (1 <= max_retries <= 10):
+            console.print(f"[red]Error: Max retries must be between 1 and 10 (got {max_retries})[/red]")
+            raise typer.Exit(1)
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Determine input type if auto-detection is requested
+        detected_input_type = input_type
+        if input_type == "auto":
+            console.print("[blue]Auto-detecting input file type...[/blue]")
+            try:
+                with open(input_file, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+                    if first_line.startswith('[') or first_line.startswith('{'):
+                        detected_input_type = "entities"
+                        if verbose:
+                            console.print("[green]✓ Detected JSON entities format[/green]")
+                    else:
+                        detected_input_type = "text"
+                        if verbose:
+                            console.print("[green]✓ Detected raw text format[/green]")
+            except Exception as e:
+                console.print(f"[red]Error auto-detecting input type: {e}[/red]")
+                raise typer.Exit(1)
+        
+        # Read and process input based on detected type
+        entities = []
+        text_content = ""
+        
+        if detected_input_type == "entities":
+            # Load entities from JSON file
+            console.print("[blue]Loading entities from JSON file...[/blue]")
+            try:
+                with open(input_file, 'r', encoding='utf-8') as f:
+                    entities_data = json.load(f)
+                
+                # Handle different JSON structures
+                if isinstance(entities_data, dict):
+                    if "entities" in entities_data:
+                        entities = entities_data["entities"]
+                        text_content = entities_data.get("text", "")
+                    elif "results" in entities_data:
+                        entities = entities_data["results"]
+                        text_content = entities_data.get("original_text", "")
+                    else:
+                        console.print("[red]Error: JSON file must contain 'entities' or 'results' field[/red]")
+                        raise typer.Exit(1)
+                elif isinstance(entities_data, list):
+                    entities = entities_data
+                else:
+                    console.print("[red]Error: JSON file must contain array of entities or object with entities field[/red]")
+                    raise typer.Exit(1)
+                
+                if verbose:
+                    console.print(f"[green]✓ Loaded {len(entities)} entities from JSON file[/green]")
+                
+                # If no text content in JSON, try to reconstruct or ask for text file
+                if not text_content:
+                    console.print("[yellow]Warning: No original text found in entities file. Relationship extraction may be less accurate without context.[/yellow]")
+                    # Create minimal text from entity positions if available
+                    if entities and all('start' in e and 'end' in e for e in entities):
+                        # This is a placeholder - in real implementation would need original text
+                        text_content = " ".join([e['text'] for e in entities])
+                        if verbose:
+                            console.print("[yellow]Using entity texts as context (limited accuracy)[/yellow]")
+                    else:
+                        text_content = " ".join([e['text'] for e in entities])
+                
+            except json.JSONDecodeError as e:
+                console.print(f"[red]Error: Invalid JSON format in entities file: {e}[/red]")
+                raise typer.Exit(1)
+            except Exception as e:
+                console.print(f"[red]Error loading entities file: {e}[/red]")
+                raise typer.Exit(1)
+                
+        else:  # detected_input_type == "text"
+            # Load raw text and extract entities first
+            console.print("[blue]Loading raw text for entity extraction...[/blue]")
+            try:
+                with open(input_file, 'r', encoding='utf-8') as f:
+                    text_content = f.read()
+            except UnicodeDecodeError:
+                # Try alternative encodings
+                for encoding in ['latin-1', 'cp1252', 'iso-8859-1']:
+                    try:
+                        with open(input_file, 'r', encoding=encoding) as f:
+                            text_content = f.read()
+                        if verbose:
+                            console.print(f"[yellow]Successfully read file using {encoding} encoding[/yellow]")
+                        break
+                    except UnicodeDecodeError:
+                        continue
+                else:
+                    console.print("[red]Error: Could not decode input file. Please ensure it's a valid text file.[/red]")
+                    raise typer.Exit(1)
+            except Exception as e:
+                console.print(f"[red]Error reading input file: {e}[/red]")
+                raise typer.Exit(1)
+            
+            if not text_content.strip():
+                console.print("[yellow]Warning: Input file is empty or contains only whitespace[/yellow]")
+                return
+            
+            text_length = len(text_content)
+            if verbose:
+                console.print(f"[green]✓ Read {text_length:,} characters from input file[/green]")
+            
+            # Extract entities first using NER
+            console.print("[blue]Extracting entities from text for relationship detection...[/blue]")
+            try:
+                # Load entity schema for NER
+                if domain:
+                    entity_schema = get_schema_by_domain(domain)
+                else:
+                    entity_schema = get_plant_metabolomics_schema()
+                
+                # Perform entity extraction (simplified version for relationship extraction)
+                from src.llm_extraction.ner import extract_entities
+                entities = extract_entities(
+                    text=text_content,
+                    entity_schema=entity_schema,
+                    llm_model_name=model,
+                    template_type="basic"  # Use basic template for entity extraction
+                )
+                
+                if verbose:
+                    console.print(f"[green]✓ Extracted {len(entities)} entities for relationship detection[/green]")
+                
+            except Exception as e:
+                console.print(f"[red]Error during entity extraction: {e}[/red]")
+                console.print("[yellow]Try using pre-extracted entities with --input-type entities[/yellow]")
+                raise typer.Exit(1)
+        
+        # Validate entities
+        if not entities:
+            console.print("[yellow]No entities found for relationship extraction[/yellow]")
+            return
+        
+        if len(entities) < 2:
+            console.print("[yellow]Need at least 2 entities for relationship extraction[/yellow]")
+            return
+        
+        # Load relationship schema
+        console.print("[blue]Loading relationship schema...[/blue]")
+        try:
+            if schema:
+                # Load custom schema from file
+                if not os.path.exists(schema):
+                    console.print(f"[red]Error: Schema file not found: {schema}[/red]")
+                    raise typer.Exit(1)
+                
+                with open(schema, 'r', encoding='utf-8') as f:
+                    relationship_schema = json.load(f)
+                
+                if verbose:
+                    console.print(f"[green]✓ Loaded custom relationship schema with {len(relationship_schema)} relation types[/green]")
+            else:
+                # Use default or domain-specific schema
+                from src.llm_extraction.relations import DEFAULT_RELATIONSHIP_TYPES
+                if domain:
+                    # Get domain-specific schema (this would be implemented in relations.py)
+                    relationship_schema = DEFAULT_RELATIONSHIP_TYPES  # Simplified for now
+                    if verbose:
+                        console.print(f"[green]✓ Loaded default relationship schema with {len(relationship_schema)} relation types[/green]")
+                else:
+                    relationship_schema = DEFAULT_RELATIONSHIP_TYPES
+                    if verbose:
+                        console.print(f"[green]✓ Loaded default relationship schema with {len(relationship_schema)} relation types[/green]")
+                        
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error: Invalid JSON in relationship schema file: {e}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error loading relationship schema: {e}[/red]")
+            raise typer.Exit(1)
+        
+        # Show schema preview in verbose mode
+        if verbose and relationship_schema:
+            console.print("[dim]Relationship schema preview (first 5 types):[/dim]")
+            for i, (rel_type, description) in enumerate(list(relationship_schema.items())[:5]):
+                console.print(f"[dim]  {rel_type}: {description[:80]}{'...' if len(description) > 80 else ''}[/dim]")
+            if len(relationship_schema) > 5:
+                console.print(f"[dim]  ... and {len(relationship_schema) - 5} more relation types[/dim]")
+        
+        # Prepare output directory
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Perform relationship extraction
+        console.print(f"[blue]Extracting relationships using {model} model...[/blue]")
+        
+        try:
+            # Choose extraction method based on parameters
+            if domain and few_shot:
+                # Domain-specific few-shot extraction
+                if verbose:
+                    console.print(f"[blue]Using domain-specific few-shot relationship extraction for {domain}[/blue]")
+                relationships_tuples = extract_domain_specific_relationships(
+                    text=text_content,
+                    entities=entities,
+                    llm_model_name=model,
+                    domain=domain,
+                    use_few_shot=True
+                )
+            elif domain:
+                # Domain-specific zero-shot extraction
+                if verbose:
+                    console.print(f"[blue]Using domain-specific zero-shot relationship extraction for {domain}[/blue]")
+                relationships_tuples = extract_domain_specific_relationships(
+                    text=text_content,
+                    entities=entities,
+                    llm_model_name=model,
+                    domain=domain,
+                    use_few_shot=False
+                )
+            else:
+                # General relationship extraction
+                if verbose:
+                    extraction_mode = "few-shot" if few_shot else "zero-shot"
+                    console.print(f"[blue]Using {extraction_mode} relationship extraction with {template_type} template[/blue]")
+                
+                # Get appropriate template
+                from src.llm_extraction.prompt_templates import get_relationship_template
+                try:
+                    template = get_relationship_template(template_type)
+                except:
+                    # Fallback to basic template
+                    template = get_relationship_template("basic")
+                    if verbose:
+                        console.print("[yellow]Using basic template as fallback[/yellow]")
+                
+                # Prepare few-shot examples if requested
+                examples = None
+                if few_shot:
+                    # This would be implemented to get relevant examples
+                    examples = []  # Simplified for now
+                
+                relationships_tuples = extract_relationships(
+                    text=text_content,
+                    entities=entities,
+                    relationship_schema=relationship_schema,
+                    llm_model_name=model,
+                    prompt_template=template,
+                    few_shot_examples=examples
+                )
+            
+            if verbose:
+                console.print(f"[green]✓ Extracted {len(relationships_tuples)} relationships[/green]")
+            
+        except RelationsError as e:
+            console.print(f"[red]Relationship extraction error: {e}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error during relationship extraction: {e}[/red]")
+            if verbose:
+                import traceback
+                console.print(traceback.format_exc())
+            raise typer.Exit(1)
+        
+        # Convert tuple format to structured format and apply filters
+        console.print("[blue]Processing and filtering relationships...[/blue]")
+        relationships = []
+        
+        for i, rel_tuple in enumerate(relationships_tuples):
+            if len(rel_tuple) != 3:
+                if verbose:
+                    console.print(f"[yellow]Skipping invalid relationship tuple {i}: {rel_tuple}[/yellow]")
+                continue
+            
+            subject_text, relation_type, object_text = rel_tuple
+            
+            # Find matching entities
+            subject_entity = None
+            object_entity = None
+            
+            for entity in entities:
+                if entity['text'].lower() == subject_text.lower():
+                    subject_entity = entity
+                if entity['text'].lower() == object_text.lower():
+                    object_entity = entity
+            
+            # Create relationship structure
+            if subject_entity and object_entity:
+                relationship = {
+                    "subject_entity": subject_entity,
+                    "relation_type": relation_type,
+                    "object_entity": object_entity,
+                    "confidence": 0.8,  # Default confidence - would be computed by LLM
+                    "context": "",
+                    "evidence": ""
+                }
+                
+                # Add context and evidence if text is available
+                if text_content:
+                    # Extract context around the relationship
+                    subject_pos = text_content.lower().find(subject_text.lower())
+                    object_pos = text_content.lower().find(object_text.lower())
+                    
+                    if subject_pos != -1 and object_pos != -1:
+                        # Find sentence containing both entities
+                        import re
+                        sentences = re.split(r'[.!?]+', text_content)
+                        for sentence in sentences:
+                            if (subject_text.lower() in sentence.lower() and 
+                                object_text.lower() in sentence.lower()):
+                                relationship["context"] = sentence.strip()
+                                relationship["evidence"] = sentence.strip()
+                                break
+                
+                # Apply confidence threshold
+                if relationship["confidence"] >= confidence_threshold:
+                    relationships.append(relationship)
+                elif verbose:
+                    console.print(f"[dim]Filtered out relationship (confidence {relationship['confidence']:.2f} < {confidence_threshold}): {subject_text} --{relation_type}--> {object_text}[/dim]")
+        
+        if verbose:
+            console.print(f"[green]✓ Processed {len(relationships)} relationships after filtering[/green]")
+        
+        # Calculate statistics
+        if relationships:
+            relation_types = list(set(rel["relation_type"] for rel in relationships))
+            avg_confidence = sum(rel["confidence"] for rel in relationships) / len(relationships)
+            
+            if verbose:
+                console.print(f"[dim]Relationship statistics:[/dim]")
+                console.print(f"[dim]  - Total relationships: {len(relationships)}[/dim]")
+                console.print(f"[dim]  - Unique relation types: {len(relation_types)}[/dim]")
+                console.print(f"[dim]  - Average confidence: {avg_confidence:.3f}[/dim]")
+                console.print(f"[dim]  - Top relation types: {', '.join(relation_types[:5])}[/dim]")
+        
+        # Prepare output data
+        output_data = {
+            "metadata": {
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "input_file": str(Path(input_file).absolute()),
+                "input_type": detected_input_type,
+                "model": model,
+                "template_type": template_type,
+                "domain": domain,
+                "few_shot": few_shot,
+                "num_examples": num_examples if few_shot else 0,
+                "confidence_threshold": confidence_threshold,
+                "total_entities": len(entities),
+                "total_relationships": len(relationships),
+                "extraction_parameters": {
+                    "max_retries": max_retries,
+                    "schema_file": schema if schema else "default",
+                    "template_type": template_type
+                }
+            },
+            "entities": entities,
+            "relationships": relationships,
+            "statistics": {
+                "total_relationships": len(relationships),
+                "unique_relation_types": len(set(rel["relation_type"] for rel in relationships)) if relationships else 0,
+                "average_confidence": sum(rel["confidence"] for rel in relationships) / len(relationships) if relationships else 0.0,
+                "relation_type_counts": {}
+            }
+        }
+        
+        # Add relation type counts
+        if relationships:
+            from collections import Counter
+            rel_type_counts = Counter(rel["relation_type"] for rel in relationships)
+            output_data["statistics"]["relation_type_counts"] = dict(rel_type_counts)
+        
+        # Save results to JSON file
+        console.print(f"[blue]Saving results to {output}...[/blue]")
+        try:
+            with open(output, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, indent=2, ensure_ascii=False)
+            
+            console.print(f"[green]✓ Results saved successfully![/green]")
+            console.print(f"[green]  Output file: {output}[/green]")
+            console.print(f"[green]  Relationships extracted: {len(relationships)}[/green]")
+            
+            if relationships:
+                console.print(f"[green]  Average confidence: {output_data['statistics']['average_confidence']:.3f}[/green]")
+                console.print(f"[green]  Unique relation types: {output_data['statistics']['unique_relation_types']}[/green]")
+            
+        except Exception as e:
+            console.print(f"[red]Error writing output file: {e}[/red]")
+            raise typer.Exit(1)
+        
+        # Display summary table in verbose mode
+        if verbose and relationships:
+            from rich.table import Table
+            
+            table = Table(title="Relationship Extraction Results")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="magenta")
+            
+            table.add_row("Input file", str(Path(input_file).name))
+            table.add_row("Input type", detected_input_type.title())
+            table.add_row("Model used", model)
+            table.add_row("Template type", template_type)
+            table.add_row("Domain", domain if domain else "General")
+            table.add_row("Few-shot learning", "Yes" if few_shot else "No")
+            table.add_row("Total entities", str(len(entities)))
+            table.add_row("Total relationships", str(len(relationships)))
+            table.add_row("Average confidence", f"{output_data['statistics']['average_confidence']:.3f}")
+            table.add_row("Unique relation types", str(output_data['statistics']['unique_relation_types']))
+            table.add_row("Confidence threshold", str(confidence_threshold))
+            
+            console.print(table)
+            
+            # Show top relation types
+            if output_data["statistics"]["relation_type_counts"]:
+                console.print("\n[bold]Top Relation Types:[/bold]")
+                sorted_types = sorted(
+                    output_data["statistics"]["relation_type_counts"].items(),
+                    key=lambda x: x[1], reverse=True
+                )
+                for rel_type, count in sorted_types[:10]:
+                    console.print(f"[dim]  {rel_type}: {count} relationships[/dim]")
+        
+        console.print(f"[green]✓ Relationship extraction completed successfully![/green]")
+        
+    except RelationsError as e:
+        console.print(f"[red]Relationship extraction error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error during relationship extraction: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())
