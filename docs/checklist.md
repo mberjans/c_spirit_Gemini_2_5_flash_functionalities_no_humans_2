@@ -128,7 +128,7 @@ Description: Refined Ontology Scheme Definition (Structural): Programmatically d
 Dependencies: AIM2-ODIE-005, AIM2-ODIE-007  
 Independent: No
 
-- [ ] **AIM2-ODIE-009-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_structural.py) for src/ontology/scheme\_structural.py to cover:  
+- [x] **AIM2-ODIE-009-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_structural.py) for src/ontology/scheme\_structural.py to cover:  
   * Creation of new Owlready2 classes representing Chemont, NP Classifier, and PMN categories within the target ontology.  
   * Verification that these classes are correctly added and accessible in the ontology.  
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., NPClass is a subclass of ChemicalClass).  
