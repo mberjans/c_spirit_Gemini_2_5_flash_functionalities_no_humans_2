@@ -1,13 +1,16 @@
 """
-Command-Line Interface for Ontology Management
+Command-Line Interface for AIM2 Project
 
-This module provides a comprehensive CLI for ontology operations including
-loading, trimming/filtering, and exporting ontologies.
+This module provides a comprehensive CLI for ontology management and corpus
+development operations in the AIM2 project.
 
 Features:
 - Load ontologies from various formats
 - Trim/filter ontologies based on keywords
 - Export ontologies to different formats
+- Download papers from PubMed
+- Extract content from PDF files
+- Scrape content from journal websites
 - Comprehensive error handling and user feedback
 
 Dependencies:
@@ -47,6 +50,13 @@ ontology_app = typer.Typer(
     help="Ontology management commands (load, trim, export)"
 )
 app.add_typer(ontology_app, name="ontology")
+
+# Create corpus subcommand group
+corpus_app = typer.Typer(
+    name="corpus",
+    help="Corpus management commands (pubmed-download, pdf-extract, journal-scrape)"
+)
+app.add_typer(corpus_app, name="corpus")
 
 
 @ontology_app.command("load")
@@ -275,6 +285,171 @@ def export_ontology_command(
         raise typer.Exit(1)
 
 
+@corpus_app.command("pubmed-download")
+def pubmed_download_command(
+    query: str = typer.Argument(..., help="PubMed search query"),
+    output: str = typer.Option("./pubmed_data", "--output", "-o", help="Output directory for downloaded papers"),
+    max_results: int = typer.Option(100, "--max-results", "-m", help="Maximum number of results to download"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    format: str = typer.Option("xml", "--format", "-f", help="Download format (xml, json, txt)")
+):
+    """
+    Download papers from PubMed based on search query.
+    
+    Downloads academic papers and metadata from PubMed database using the specified
+    search query and saves them to the output directory.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting PubMed download with query: '{query}'[/blue]")
+            console.print(f"Output directory: {output}")
+            console.print(f"Maximum results: {max_results}")
+            console.print(f"Format: {format}")
+        
+        # Create output directory if it doesn't exist
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        if verbose:
+            console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
+        
+        # Placeholder implementation
+        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
+        console.print(f"[green]Would download papers for query: '{query}'[/green]")
+        console.print(f"[green]Would save {max_results} results to: {output}[/green]")
+        console.print(f"[green]Would use format: {format}[/green]")
+        
+        # TODO: Call actual PubMed download function from src.data_acquisition.pubmed
+        # from src.data_acquisition.pubmed import download_papers
+        # results = download_papers(query=query, max_results=max_results, output_dir=output, format=format)
+        
+        console.print(f"[green]✓ PubMed download completed (placeholder)[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error during PubMed download: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@corpus_app.command("pdf-extract")
+def pdf_extract_command(
+    input_file: str = typer.Argument(..., help="Path to the PDF file to extract"),
+    output: str = typer.Option("./extracted_text", "--output", "-o", help="Output directory for extracted content"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    extract_images: bool = typer.Option(False, "--extract-images", help="Also extract images from PDF"),
+    extract_tables: bool = typer.Option(False, "--extract-tables", help="Also extract tables from PDF")
+):
+    """
+    Extract text and content from PDF files.
+    
+    Processes PDF files to extract text, images, and tables for further analysis
+    and corpus development.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting PDF extraction from: {input_file}[/blue]")
+            console.print(f"Output directory: {output}")
+            console.print(f"Extract images: {extract_images}")
+            console.print(f"Extract tables: {extract_tables}")
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: PDF file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Create output directory if it doesn't exist
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        if verbose:
+            console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
+        
+        # Placeholder implementation
+        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
+        console.print(f"[green]Would extract content from: {input_file}[/green]")
+        console.print(f"[green]Would save extracted content to: {output}[/green]")
+        
+        if extract_images:
+            console.print("[green]Would extract images from PDF[/green]")
+        if extract_tables:
+            console.print("[green]Would extract tables from PDF[/green]")
+        
+        # TODO: Call actual PDF extraction function from src.data_acquisition.pdf_extractor
+        # from src.data_acquisition.pdf_extractor import extract_pdf_content
+        # results = extract_pdf_content(input_file, output_dir=output, extract_images=extract_images, extract_tables=extract_tables)
+        
+        console.print(f"[green]✓ PDF extraction completed (placeholder)[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error during PDF extraction: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@corpus_app.command("journal-scrape")
+def journal_scrape_command(
+    url: str = typer.Argument(..., help="URL of the journal or article to scrape"),
+    output: str = typer.Option("./scraped_content", "--output", "-o", help="Output directory for scraped content"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    max_depth: int = typer.Option(1, "--max-depth", help="Maximum depth for recursive scraping"),
+    delay: float = typer.Option(1.0, "--delay", help="Delay between requests in seconds"),
+    include_metadata: bool = typer.Option(True, "--include-metadata/--no-metadata", help="Include article metadata")
+):
+    """
+    Scrape content from journal websites and articles.
+    
+    Extracts article content, metadata, and related information from academic
+    journal websites for corpus development.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting journal scraping from: {url}[/blue]")
+            console.print(f"Output directory: {output}")
+            console.print(f"Maximum depth: {max_depth}")
+            console.print(f"Request delay: {delay}s")
+            console.print(f"Include metadata: {include_metadata}")
+        
+        # Basic URL validation
+        if not url.startswith(('http://', 'https://')):
+            console.print(f"[red]Error: Invalid URL format: {url}[/red]")
+            console.print("URL must start with http:// or https://")
+            raise typer.Exit(1)
+        
+        # Create output directory if it doesn't exist
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        if verbose:
+            console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
+        
+        # Placeholder implementation
+        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
+        console.print(f"[green]Would scrape content from: {url}[/green]")
+        console.print(f"[green]Would save scraped content to: {output}[/green]")
+        console.print(f"[green]Would use max depth: {max_depth}[/green]")
+        console.print(f"[green]Would use delay: {delay}s between requests[/green]")
+        
+        if include_metadata:
+            console.print("[green]Would include article metadata[/green]")
+        
+        # TODO: Call actual journal scraping function from src.data_acquisition.journal_scraper
+        # from src.data_acquisition.journal_scraper import scrape_journal
+        # results = scrape_journal(url=url, output_dir=output, max_depth=max_depth, delay=delay, include_metadata=include_metadata)
+        
+        console.print(f"[green]✓ Journal scraping completed (placeholder)[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error during journal scraping: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
 @app.command("version")
 def version():
     """Show version information."""
@@ -291,8 +466,8 @@ def main(
     """
     AIM2 Ontology Development and Information Extraction CLI
     
-    A comprehensive command-line tool for ontology management and information extraction
-    tasks in the AIM2 project.
+    A comprehensive command-line tool for ontology management, corpus development,
+    and information extraction tasks in the AIM2 project.
     """
     if debug:
         import logging
