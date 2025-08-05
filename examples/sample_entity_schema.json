@@ -1,0 +1,10 @@
+{
+  "METABOLITE": "Chemical compounds and metabolic products including primary and secondary metabolites",
+  "GENE": "Gene names and genetic elements including protein-coding genes and regulatory sequences",
+  "ORGANISM": "Scientific names of organisms including species, genus, and common names",
+  "PLANT_PART": "Plant anatomical structures and organs such as leaves, roots, stems, and flowers",
+  "ENZYME": "Enzyme names and classifications including EC numbers and protein identifiers",
+  "COMPOUND": "Chemical compounds including drugs, natural products, and synthetic molecules",
+  "PATHWAY": "Biological pathways and metabolic processes including biochemical reactions",
+  "ANALYTICAL_METHOD": "Laboratory techniques and analytical methods used in research"
+}

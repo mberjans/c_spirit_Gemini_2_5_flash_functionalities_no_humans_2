@@ -71,10 +71,17 @@ except ImportError as e:
 # Import LLM extraction modules
 try:
     from src.llm_extraction.ner import (
-        extract_entities, extract_entities_few_shot, NERError
+        extract_entities, extract_entities_few_shot, extract_entities_domain_specific,
+        extract_entities_adaptive, NERError
     )
     from src.llm_extraction.relations import (
         extract_relationships, extract_domain_specific_relationships, RelationsError
+    )
+    from src.llm_extraction.entity_schemas import (
+        get_plant_metabolomics_schema, get_schema_by_domain
+    )
+    from src.llm_extraction.prompt_templates import (
+        get_template_by_name, get_few_shot_template, get_domain_specific_template
     )
 except ImportError as e:
     print(f"Error importing LLM extraction modules: {e}")
@@ -1917,6 +1924,494 @@ def process_clean_command(
         raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Unexpected error during text cleaning: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@extract_app.command("ner")
+def extract_ner_command(
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to the text file for entity extraction. File must be readable and contain text content suitable for NER processing."
+    ),
+    output: str = typer.Option(
+        ..., 
+        "--output", "-o", 
+        help="Output file path for extracted entities in JSON format. Will contain structured entity data with text, labels, positions, and confidence scores."
+    ),
+    schema: Optional[str] = typer.Option(
+        None, 
+        "--schema", "-s", 
+        help="Path to entity schema file (JSON format) defining entity types and descriptions. If not provided, uses default plant metabolomics schema."
+    ),
+    model: str = typer.Option(
+        "gpt-3.5-turbo", 
+        "--model", "-m", 
+        help="LLM model name to use for entity extraction. Examples: 'gpt-3.5-turbo', 'gpt-4', 'claude-v1'. Model must be available via API."
+    ),
+    template_type: str = typer.Option(
+        "basic", 
+        "--template-type", "-t", 
+        help="Type of prompt template to use: 'basic', 'detailed', 'precision', 'recall', 'scientific'. Each optimized for different extraction goals."
+    ),
+    few_shot: bool = typer.Option(
+        False, 
+        "--few-shot", "-f", 
+        help="Enable few-shot learning using example-based prompts. Improves accuracy by providing the model with relevant examples."
+    ),
+    domain: Optional[str] = typer.Option(
+        None, 
+        "--domain", "-d", 
+        help="Domain specification for specialized extraction: 'metabolomics', 'genetics', 'plant_biology'. Uses domain-specific templates and examples."
+    ),
+    num_examples: int = typer.Option(
+        3, 
+        "--num-examples", "-n", 
+        help="Number of few-shot examples to include in the prompt (1-10). More examples may improve accuracy but increase token usage."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed progress information including API calls, entity statistics, processing steps, and performance metrics."
+    ),
+    max_retries: int = typer.Option(
+        3, 
+        "--max-retries", 
+        help="Maximum number of API retry attempts for failed requests (1-10). Higher values increase reliability but may slow processing."
+    ),
+    confidence_threshold: float = typer.Option(
+        0.0, 
+        "--confidence-threshold", 
+        help="Minimum confidence score for entity inclusion (0.0-1.0). Higher values filter out uncertain entities but may reduce recall."
+    ),
+    batch_size: int = typer.Option(
+        1000, 
+        "--batch-size", 
+        help="Maximum number of characters to process per API call (100-5000). Larger batches are more efficient but may hit token limits."
+    )
+):
+    """
+    Extract named entities from text using Large Language Models (LLMs).
+    
+    This command performs Named Entity Recognition (NER) on text files using advanced
+    LLM-based approaches. It supports both zero-shot and few-shot learning modes
+    with specialized templates for scientific domains like plant metabolomics.
+    
+    \b
+    EXTRACTION CAPABILITIES:
+    • Entity identification with precise character-level positioning
+    • Confidence scoring for each extracted entity (0.0-1.0 scale)
+    • Support for 100+ entity types including metabolites, genes, compounds
+    • Domain-specific extraction for metabolomics, genetics, plant biology
+    • Few-shot learning with automatically selected relevant examples
+    • Batch processing for long documents with automatic chunking
+    
+    \b
+    EXTRACTION MODES:
+    
+    Zero-shot Extraction:
+    • Uses pre-trained model knowledge without examples
+    • Fast processing with minimal prompt overhead
+    • Good for general entity types and well-known domains
+    • Activated by default (no --few-shot flag)
+    
+    Few-shot Learning:
+    • Includes relevant examples in the extraction prompt
+    • Higher accuracy through example-based guidance
+    • Better handling of domain-specific entity types
+    • Activated with --few-shot flag
+    
+    Domain-specific Extraction:
+    • Specialized templates for scientific domains
+    • Domain-optimized entity schemas and examples
+    • Enhanced precision for technical terminology
+    • Activated with --domain flag
+    
+    \b
+    TEMPLATE TYPES:
+    • basic - Standard extraction with balanced precision/recall
+    • detailed - Comprehensive extraction with context analysis
+    • precision - High-accuracy extraction minimizing false positives
+    • recall - Comprehensive extraction maximizing entity coverage
+    • scientific - Academic literature optimized with nomenclature rules
+    
+    \b
+    DOMAIN SPECIALIZATIONS:
+    • metabolomics - Focus on metabolites, compounds, analytical methods
+    • genetics - Focus on genes, proteins, molecular processes
+    • plant_biology - Focus on plant anatomy, physiology, traits
+    • Auto-detection available based on input text characteristics
+    
+    \b
+    OUTPUT FORMAT:
+    The JSON output contains an array of entities, each with:
+    • text: The exact entity text as found in the input
+    • label: The entity type/category (e.g., METABOLITE, GENE)
+    • start: Character position where entity begins
+    • end: Character position where entity ends
+    • confidence: Model confidence score (0.0-1.0)
+    
+    \b
+    ENTITY SCHEMA:
+    Custom schemas define entity types and descriptions:
+    {
+      "METABOLITE": "Chemical compounds and metabolic products",
+      "GENE": "Gene names and genetic elements",
+      "PLANT_PART": "Plant anatomical structures and organs"
+    }
+    
+    \b
+    REQUIREMENTS:
+    • LLM API access (OpenAI, Anthropic, or compatible endpoint)
+    • API key configured in environment variables
+    • Input file in readable text format (UTF-8 recommended)
+    • Internet connection for API requests
+    • Sufficient API quota for text length and retry attempts
+    
+    \b
+    USAGE EXAMPLES:
+    # Basic entity extraction with default settings
+    extract ner research_paper.txt --output entities.json --verbose
+    
+    # Few-shot extraction with custom model and schema
+    extract ner article.txt --output results.json --schema my_schema.json --few-shot --model gpt-4 --num-examples 5
+    
+    # Domain-specific metabolomics extraction
+    extract ner metabolomics_paper.txt --output metabolites.json --domain metabolomics --template-type scientific --verbose
+    
+    # High-precision extraction with confidence filtering
+    extract ner document.txt --output high_conf_entities.json --template-type precision --confidence-threshold 0.8 --few-shot
+    
+    # Batch processing of large document
+    extract ner large_text.txt --output entities.json --batch-size 2000 --max-retries 5 --verbose
+    
+    \b
+    PERFORMANCE OPTIMIZATION:
+    • Use appropriate batch sizes (1000-3000 chars) for efficiency
+    • Enable few-shot learning for improved accuracy on specific domains
+    • Set confidence thresholds to filter uncertain entities
+    • Configure retries for robust API error handling
+    • Use domain-specific templates when available
+    
+    \b
+    ERROR HANDLING:
+    • Automatic retry with exponential backoff for transient API errors
+    • Graceful handling of rate limits and quota exceeded errors
+    • Input validation for file formats and parameter ranges
+    • Detailed error messages with troubleshooting suggestions
+    • Partial results saved on interruption for long documents
+    
+    \b
+    TROUBLESHOOTING:
+    • If extraction fails, check API key configuration and model availability
+    • For poor results, try few-shot mode or domain-specific templates
+    • Reduce batch size if encountering token limits or timeouts
+    • Use --verbose flag to monitor API calls and processing steps
+    • Check input file encoding if seeing character-related errors
+    • Increase retries for unstable network connections
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting NER extraction from: {input_file}[/blue]")
+            console.print("Extraction parameters:")
+            console.print(f"  - Output file: {output}")
+            console.print(f"  - LLM model: {model}")
+            console.print(f"  - Template type: {template_type}")
+            console.print(f"  - Few-shot learning: {few_shot}")
+            console.print(f"  - Domain: {domain if domain else 'Auto-detect'}")
+            console.print(f"  - Schema file: {schema if schema else 'Default'}")
+            if few_shot:
+                console.print(f"  - Number of examples: {num_examples}")
+            console.print(f"  - Confidence threshold: {confidence_threshold}")
+            console.print(f"  - Batch size: {batch_size} characters")
+            console.print(f"  - Max retries: {max_retries}")
+        
+        # Validate parameters
+        if template_type not in ["basic", "detailed", "precision", "recall", "scientific"]:
+            console.print(f"[red]Error: Invalid template type '{template_type}'. Must be one of: basic, detailed, precision, recall, scientific[/red]")
+            raise typer.Exit(1)
+        
+        if domain and domain not in ["metabolomics", "genetics", "plant_biology"]:
+            console.print(f"[red]Error: Invalid domain '{domain}'. Must be one of: metabolomics, genetics, plant_biology[/red]")
+            raise typer.Exit(1)
+        
+        if not (1 <= num_examples <= 10):
+            console.print(f"[red]Error: Number of examples must be between 1 and 10 (got {num_examples})[/red]")
+            raise typer.Exit(1)
+        
+        if not (0.0 <= confidence_threshold <= 1.0):
+            console.print(f"[red]Error: Confidence threshold must be between 0.0 and 1.0 (got {confidence_threshold})[/red]")
+            raise typer.Exit(1)
+        
+        if not (100 <= batch_size <= 5000):
+            console.print(f"[red]Error: Batch size must be between 100 and 5000 characters (got {batch_size})[/red]")
+            raise typer.Exit(1)
+        
+        if not (1 <= max_retries <= 10):
+            console.print(f"[red]Error: Max retries must be between 1 and 10 (got {max_retries})[/red]")
+            raise typer.Exit(1)
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Read input text
+        console.print("[blue]Reading input file...[/blue]")
+        try:
+            with open(input_file, 'r', encoding='utf-8') as f:
+                text_content = f.read()
+        except UnicodeDecodeError:
+            # Try alternative encodings
+            for encoding in ['latin-1', 'cp1252', 'iso-8859-1']:
+                try:
+                    with open(input_file, 'r', encoding=encoding) as f:
+                        text_content = f.read()
+                    if verbose:
+                        console.print(f"[yellow]Successfully read file using {encoding} encoding[/yellow]")
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                console.print("[red]Error: Could not decode input file. Please ensure it's a valid text file.[/red]")
+                raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error reading input file: {e}[/red]")
+            raise typer.Exit(1)
+        
+        if not text_content.strip():
+            console.print("[yellow]Warning: Input file is empty or contains only whitespace[/yellow]")
+            return
+        
+        text_length = len(text_content)
+        if verbose:
+            console.print(f"[green]✓ Read {text_length:,} characters from input file[/green]")
+        
+        # Load entity schema
+        console.print("[blue]Loading entity schema...[/blue]")
+        try:
+            if schema:
+                # Load custom schema from file
+                if not os.path.exists(schema):
+                    console.print(f"[red]Error: Schema file not found: {schema}[/red]")
+                    raise typer.Exit(1)
+                
+                with open(schema, 'r', encoding='utf-8') as f:
+                    entity_schema = json.load(f)
+                
+                if verbose:
+                    console.print(f"[green]✓ Loaded custom schema with {len(entity_schema)} entity types[/green]")
+            else:
+                # Use default or domain-specific schema
+                if domain:
+                    entity_schema = get_schema_by_domain(domain)
+                    if verbose:
+                        console.print(f"[green]✓ Loaded {domain} domain schema with {len(entity_schema)} entity types[/green]")
+                else:
+                    entity_schema = get_plant_metabolomics_schema()
+                    if verbose:
+                        console.print(f"[green]✓ Loaded default plant metabolomics schema with {len(entity_schema)} entity types[/green]")
+                        
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error: Invalid JSON in schema file: {e}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error loading entity schema: {e}[/red]")
+            raise typer.Exit(1)
+        
+        # Show schema preview in verbose mode
+        if verbose and entity_schema:
+            console.print("[dim]Entity schema preview (first 5 types):[/dim]")
+            for i, (entity_type, description) in enumerate(list(entity_schema.items())[:5]):
+                console.print(f"[dim]  {entity_type}: {description[:60]}{'...' if len(description) > 60 else ''}[/dim]")
+            if len(entity_schema) > 5:
+                console.print(f"[dim]  ... and {len(entity_schema) - 5} more entity types[/dim]")
+        
+        # Prepare output directory
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Perform entity extraction
+        console.print(f"[blue]Extracting entities using {model} model...[/blue]")
+        
+        try:
+            # Choose extraction method based on parameters
+            if domain and few_shot:
+                # Domain-specific few-shot extraction
+                if verbose:
+                    console.print(f"[blue]Using domain-specific few-shot extraction for {domain}[/blue]")
+                entities = extract_entities_domain_specific(
+                    text=text_content,
+                    entity_schema=entity_schema,
+                    llm_model_name=model,
+                    domain=domain,
+                    use_few_shot=True,
+                    num_examples=num_examples
+                )
+            elif domain:
+                # Domain-specific zero-shot extraction
+                if verbose:
+                    console.print(f"[blue]Using domain-specific zero-shot extraction for {domain}[/blue]")
+                entities = extract_entities_domain_specific(
+                    text=text_content,
+                    entity_schema=entity_schema,
+                    llm_model_name=model,
+                    domain=domain,
+                    use_few_shot=False
+                )
+            elif few_shot:
+                # General few-shot extraction
+                if verbose:
+                    console.print(f"[blue]Using few-shot extraction with {num_examples} examples[/blue]")
+                entities = extract_entities_few_shot(
+                    text=text_content,
+                    entity_schema=entity_schema,
+                    llm_model_name=model,
+                    template_type=template_type,
+                    num_examples=num_examples
+                )
+            else:
+                # Zero-shot extraction with custom template
+                if verbose:
+                    console.print(f"[blue]Using zero-shot extraction with {template_type} template[/blue]")
+                
+                # Get appropriate template
+                if template_type == "basic":
+                    from src.llm_extraction.prompt_templates import get_basic_zero_shot_template
+                    template = get_basic_zero_shot_template()
+                elif template_type == "detailed":
+                    from src.llm_extraction.prompt_templates import get_detailed_zero_shot_template
+                    template = get_detailed_zero_shot_template()
+                elif template_type == "precision":
+                    from src.llm_extraction.prompt_templates import get_precision_focused_template
+                    template = get_precision_focused_template()
+                elif template_type == "recall":
+                    from src.llm_extraction.prompt_templates import get_recall_focused_template
+                    template = get_recall_focused_template()
+                elif template_type == "scientific":
+                    from src.llm_extraction.prompt_templates import get_scientific_literature_template
+                    template = get_scientific_literature_template()
+                
+                entities = extract_entities(
+                    text=text_content,
+                    entity_schema=entity_schema,
+                    llm_model_name=model,
+                    prompt_template=template
+                )
+                
+        except NERError as e:
+            console.print(f"[red]NER extraction error: {e}[/red]")
+            if verbose:
+                import traceback
+                console.print(traceback.format_exc())
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Unexpected error during entity extraction: {e}[/red]")
+            if verbose:
+                import traceback
+                console.print(traceback.format_exc())
+            raise typer.Exit(1)
+        
+        # Filter entities by confidence threshold
+        if confidence_threshold > 0.0:
+            original_count = len(entities)
+            entities = [e for e in entities if e.get('confidence', 0.0) >= confidence_threshold]
+            filtered_count = original_count - len(entities)
+            if verbose and filtered_count > 0:
+                console.print(f"[yellow]Filtered out {filtered_count} entities below confidence threshold {confidence_threshold}[/yellow]")
+        
+        console.print(f"[green]✓ Extracted {len(entities)} entities[/green]")
+        
+        # Show entity statistics in verbose mode
+        if verbose and entities:
+            # Group entities by type
+            entity_counts = {}
+            confidence_scores = []
+            
+            for entity in entities:
+                entity_type = entity.get('label', 'UNKNOWN')
+                entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
+                confidence_scores.append(entity.get('confidence', 0.0))
+            
+            # Show top entity types
+            sorted_types = sorted(entity_counts.items(), key=lambda x: x[1], reverse=True)
+            console.print("[dim]Top entity types found:[/dim]")
+            for entity_type, count in sorted_types[:10]:
+                console.print(f"[dim]  {entity_type}: {count} entities[/dim]")
+            
+            if len(sorted_types) > 10:
+                console.print(f"[dim]  ... and {len(sorted_types) - 10} more entity types[/dim]")
+            
+            # Show confidence statistics
+            if confidence_scores:
+                avg_confidence = sum(confidence_scores) / len(confidence_scores)
+                min_confidence = min(confidence_scores)
+                max_confidence = max(confidence_scores)
+                console.print(f"[dim]Confidence scores - Avg: {avg_confidence:.3f}, Range: {min_confidence:.3f}-{max_confidence:.3f}[/dim]")
+        
+        # Save results to JSON file
+        console.print(f"[blue]Saving extracted entities to: {output}[/blue]")
+        
+        try:
+            # Create metadata for the extraction
+            import datetime
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            output_data = {
+                "metadata": {
+                    "timestamp": timestamp,
+                    "input_file": str(Path(input_file).absolute()),
+                    "model": model,
+                    "template_type": template_type,
+                    "few_shot": few_shot,
+                    "domain": domain,
+                    "num_examples": num_examples if few_shot else None,
+                    "confidence_threshold": confidence_threshold,
+                    "total_entities": len(entities),
+                    "text_length": text_length,
+                    "schema_size": len(entity_schema)
+                },
+                "entities": entities
+            }
+            
+            with open(output, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, indent=2, ensure_ascii=False)
+            
+            if verbose:
+                file_size = os.path.getsize(output)
+                console.print(f"[green]✓ Saved results to {output} ({file_size:,} bytes)[/green]")
+                
+        except Exception as e:
+            console.print(f"[red]Error saving results: {e}[/red]")
+            raise typer.Exit(1)
+        
+        # Show sample entities in verbose mode
+        if verbose and entities:
+            console.print("[dim]Sample extracted entities (first 5):[/dim]")
+            for i, entity in enumerate(entities[:5]):
+                entity_text = entity.get('text', '')[:40]
+                entity_label = entity.get('label', 'UNKNOWN')
+                entity_conf = entity.get('confidence', 0.0)
+                console.print(f"[dim]  {i+1}. '{entity_text}{'...' if len(entity.get('text', '')) > 40 else ''}' -> {entity_label} (conf: {entity_conf:.3f})[/dim]")
+        
+        # Final summary
+        console.print(f"[green]✓ NER extraction completed successfully![/green]")
+        console.print(f"[green]  Input: {Path(input_file).name} ({text_length:,} characters)[/green]")
+        console.print(f"[green]  Output: {len(entities)} entities saved to {Path(output).name}[/green]")
+        console.print(f"[blue]  Model: {model} | Template: {template_type} | Mode: {'Few-shot' if few_shot else 'Zero-shot'}[/blue]")
+        if domain:
+            console.print(f"[blue]  Domain: {domain}[/blue]")
+        
+    except NERError as e:
+        console.print(f"[red]NER extraction error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error during NER extraction: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())
