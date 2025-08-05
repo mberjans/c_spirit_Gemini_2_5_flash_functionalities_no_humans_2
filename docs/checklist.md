@@ -301,8 +301,8 @@ Independent: No
   * Verify that chunks maintain semantic coherence where possible (e.g., not splitting mid-word).  
 - [x] **AIM2-ODIE-019-T2:** Create src/text\_processing/chunker.py.  
 - [x] **AIM2-ODIE-019-T3:** Implement chunk\_fixed\_size(text: str, chunk\_size: int, chunk\_overlap: int) function.  
-- [ ] **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.  
-- [ ] **AIM2-ODIE-019-T5:** Implement chunk\_recursive\_char(text: str, chunk\_size: int, chunk\_overlap: int, separators: list\[str\] \= None) function using LangChain's RecursiveCharacterTextSplitter.  
+- [x] **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.  
+- [x] **AIM2-ODIE-019-T5:** Implement chunk\_recursive\_char(text: str, chunk\_size: int, chunk\_overlap: int, separators: list\[str\] \= None) function using LangChain's RecursiveCharacterTextSplitter.  
 - [ ] **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-020  
