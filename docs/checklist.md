@@ -107,7 +107,7 @@ Independent: No
 - [x] **AIM2-ODIE-007-T3:** Implement delete\_class(ontology, class\_iri: str) function using destroy\_entity().  
 - [x] **AIM2-ODIE-007-T4:** Implement delete\_individual(ontology, individual\_iri: str) function using destroy\_entity().  
 - [x] **AIM2-ODIE-007-T5:** Implement delete\_property(ontology, property\_iri: str) function using destroy\_entity().  
-- [ ] **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-008  
 Description: Ontology Export Functionality: Develop a function (src/ontology/exporter.py) to export the refined ontology to OWL/RDF/XML format.  
