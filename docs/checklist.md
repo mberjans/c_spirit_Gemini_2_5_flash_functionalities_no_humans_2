@@ -255,7 +255,7 @@ Description: Scientific Journal Web Scraper (Metadata/Full Text): Develop a modu
 Dependencies: AIM2-ODIE-002  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-017-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_journal\_scraper.py) for src/data\_acquisition/journal\_scraper.py (mocking external requests and paperscraper calls):  
+- [x] **AIM2-ODIE-017-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_journal\_scraper.py) for src/data\_acquisition/journal\_scraper.py (mocking external requests and paperscraper calls):  
   * Test metadata scraping for a known journal article URL.  
   * Test full-text PDF/XML download for a known open-access article URL.  
   * Test User-Agent header setting.  
