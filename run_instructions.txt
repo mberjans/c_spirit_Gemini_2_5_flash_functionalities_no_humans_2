@@ -5,7 +5,7 @@ IMPORTANT: Before creating any new code, always check the existing codebase thor
 For unchecked tasks on the checklists, write the program one task of one ticket at a time. Once task is finshed, check it on the docs/checklist.md, add all changed files to the git using a separate git add command, commit changes with commit message that you generate yourself using individual git commit command, push changes to the git repository with indvidual git push command, and switch to the next task. Once you complete tasks on one ticket, add all changed files to the git using a separate git add command, commit changes with commit message that you generate yourself using individual git commit command, push changes to the git repository with indvidual git push command, switch to the next ticket. After the push, update the momety bank if it exists. Never chain multiple shell command together with & sign. Never use list comprehension in python. Avoid using regular expression for pattern matching. Instead create special pattern matching function to pattern matching. Work until all bugs are fixed. Please do not ask me for conformation whether I want you to proceedto the next ticket. Just keep working until completing the last ticket.
 
 CURRENT TASK TO COMPLETE:
-**AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.
+**AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.
 
 CONTEXT:
 - Project directory: /Users/Mark/Research/C-Spirit/c_spirit_Gemini_2_5_flash_functionalities_no_humans_2
@@ -13,22 +13,22 @@ CONTEXT:
 - Focus on completing the current task above
 - IMPORTANT: After completing the task, update docs/checklist.md to mark the task as complete by changing [ ] to [x]
 
-REMAINING UNCHECKED TASKS (196 total):
-→ CURRENT **AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.
-  2. **AIM2-ODIE-002-T3:** Initialize Poetry project in the root directory (poetry init).
-  3. **AIM2-ODIE-002-T4:** Add core runtime dependencies to pyproject.toml (e.g., Owlready2, Biopython, PyMuPDF, text2term, LLM-IE, OntoGPT, FuzzyWuzzy, dedupe, multitax, ncbi-taxonomist).
-  4. **AIM2-ODIE-002-T5:** Add development dependencies to pyproject.toml (e.g., pytest, ruff, black).
-  5. **AIM2-ODIE-002-T6:** Run poetry install to generate poetry.lock and install all specified dependencies.
-  6. **AIM2-ODIE-002-T7:** **Conduct Unit Tests:** Run unit tests developed in T1 to confirm successful dependency setup.
-  7. **AIM2-ODIE-003-T1:** **Develop Unit Tests:** Write a dummy Python file (src/temp\_test\_file.py) with intentional linting/formatting errors and a simple pytest test case. Write a test (tests/test\_code\_quality.py) to run ruff/black checks and pytest on this dummy file.
-  8. **AIM2-ODIE-003-T2:** Configure ruff (or flake8) in pyproject.toml or a dedicated config file (e.g., .ruff.toml).
-  9. **AIM2-ODIE-003-T3:** Configure black in pyproject.toml or a dedicated config file (e.g., pyproject.toml).
-  10. **AIM2-ODIE-003-T4:** Create tests/conftest.py for pytest configuration (if needed for shared fixtures).
-  ... and 186 more tasks
+REMAINING UNCHECKED TASKS (168 total):
+→ CURRENT **AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.
+  2. **AIM2-ODIE-006-T6:** Implement a general apply\_filters(ontology, filters: dict) function that combines multiple filtering criteria.
+  3. **AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+  4. **AIM2-ODIE-007-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_editor.py) for src/ontology/editor.py to cover:
+  5. **AIM2-ODIE-007-T2:** Create src/ontology/editor.py.
+  6. **AIM2-ODIE-007-T3:** Implement delete\_class(ontology, class\_iri: str) function using destroy\_entity().
+  7. **AIM2-ODIE-007-T4:** Implement delete\_individual(ontology, individual\_iri: str) function using destroy\_entity().
+  8. **AIM2-ODIE-007-T5:** Implement delete\_property(ontology, property\_iri: str) function using destroy\_entity().
+  9. **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+  10. **AIM2-ODIE-008-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_exporter.py) for src/ontology/exporter.py to cover:
+  ... and 158 more tasks
 
 CRITICAL INSTRUCTIONS:
 1. Read docs/checklist.md, docs/plan.md, and docs/tickets.md for context
-2. Focus ONLY on completing the current task: **AIM2-ODIE-002-T2:** Install Poetry on the development environment if not already present.
+2. Focus ONLY on completing the current task: **AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.
 3. Think 
 4. Create to-do list of smaller subtasks
 5. Assign task to software-engeneer subagent. Give subagent only information it needs for the task. You can also give subagent ticket-specific information extracted from docs/tickets.md as well as task specific information extracted from docs/checklist.md 
