@@ -284,7 +284,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-018-T3:** Implement normalize\_text(text: str) function using regex and string methods.  
 - [x] **AIM2-ODIE-018-T4:** Implement tokenize\_text(text: str) function using spaCy or NLTK.  
 - [x] **AIM2-ODIE-018-T5:** Implement remove\_duplicates(text\_list: list\[str\], fuzzy\_threshold: int \= 90\) function using FuzzyWuzzy.  
-- [ ] **AIM2-ODIE-018-T6:** Implement filter\_stopwords(tokens: list\[str\], custom\_stopwords\_list: list\[str\] \= None) function.  
+- [x] **AIM2-ODIE-018-T6:** Implement filter\_stopwords(tokens: list\[str\], custom\_stopwords\_list: list\[str\] \= None) function.  
 - [ ] **AIM2-ODIE-018-T7:** Implement standardize\_encoding(text: bytes, target\_encoding: str \= 'utf-8') function.  
 - [ ] **AIM2-ODIE-018-T8:** **Conduct Unit Tests:** Run unit tests developed in T1.
 

@@ -255,20 +255,20 @@ def remove_duplicates(text_list: List[str], fuzzy_threshold: int = 90, case_sens
     return fuzzy_deduped
 
 
-def filter_stopwords(tokens: List[str], custom_stopwords_list: List[str] = None, case_sensitive: bool = True) -> List[str]:
+def filter_stopwords(tokens: list[str], custom_stopwords_list: list[str] = None) -> list[str]:
     """
     Filter stopwords from a list of tokens using NLTK's English stopwords and custom lists.
     
     This function removes common English stopwords and optionally custom stopwords
-    from a token list. It supports both case-sensitive and case-insensitive filtering.
+    from a token list. Filtering is performed in case-insensitive mode while preserving
+    the original case of non-stopword tokens in the output.
     
     Args:
         tokens: List of token strings to filter
-        custom_stopwords_list: Optional list of additional stopwords to filter
-        case_sensitive: If False, perform case-insensitive stopword matching
+        custom_stopwords_list: Optional list of custom stopwords to use instead of default NLTK stopwords
         
     Returns:
-        List[str]: List of tokens with stopwords removed
+        list[str]: List of tokens with stopwords removed, preserving original case
         
     Raises:
         TextCleaningError: If input is None or not a list
@@ -278,8 +278,8 @@ def filter_stopwords(tokens: List[str], custom_stopwords_list: List[str] = None,
         ['plant', 'metabolomics']
         >>> filter_stopwords(["Plant", "study"], custom_stopwords_list=["study"])
         ['Plant']
-        >>> filter_stopwords(["The", "Plant"], case_sensitive=False)
-        ['Plant']
+        >>> filter_stopwords(["The", "Plant", "AND", "research"])
+        ['Plant', 'research']
     """
     if tokens is None:
         raise TextCleaningError("Input tokens cannot be None")
@@ -317,13 +317,13 @@ def filter_stopwords(tokens: List[str], custom_stopwords_list: List[str] = None,
         # Use only custom stopwords (replace default ones)
         all_stopwords = set(custom_stopwords_list)
     
-    # Filter tokens
+    # Convert stopwords to lowercase for case-insensitive comparison
+    lowercase_stopwords = {sw.lower() for sw in all_stopwords}
+    
+    # Filter tokens (case-insensitive comparison, preserving original case)
     filtered_tokens = []
     for token in tokens:
-        comparison_token = token.lower() if not case_sensitive else token
-        comparison_stopwords = {sw.lower() for sw in all_stopwords} if not case_sensitive else all_stopwords
-        
-        if comparison_token not in comparison_stopwords:
+        if token.lower() not in lowercase_stopwords:
             filtered_tokens.append(token)
     
     return filtered_tokens
