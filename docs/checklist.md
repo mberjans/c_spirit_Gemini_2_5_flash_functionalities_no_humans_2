@@ -201,7 +201,7 @@ Description: CLI for Ontology Management (Load, Trim, Export): Create a command-
 Dependencies: AIM2-ODIE-005, AIM2-ODIE-006, AIM2-ODIE-008  
 Independent: No
 
-- [ ] **AIM2-ODIE-014-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_ontology\_cli.py) for the CLI:  
+- [x] **AIM2-ODIE-014-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_ontology\_cli.py) for the CLI:  
   * Test ontology load \<file\_path\> command with a dummy OWL file.  
   * Test ontology trim \<file\_path\> \--keyword \<keyword\> command with filtering criteria on a dummy ontology.  
   * Test ontology export \<input\_file\> \<output\_file\> command to a temporary file and verify output.  
