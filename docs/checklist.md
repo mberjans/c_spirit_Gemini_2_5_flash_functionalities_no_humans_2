@@ -267,7 +267,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-017-T4:** Implement download\_journal\_fulltext(article\_url: str, output\_path: str) function using paperscraper or requests with appropriate headers.  
 - [x] **AIM2-ODIE-017-T5:** Implement check\_robots\_txt(url: str) to parse and respect robots.txt rules before scraping.  
 - [x] **AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.  
-- [ ] **AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-018  
 Description: Text Cleaning & Preprocessing Module: Implement core text cleaning functionalities (src/text\_processing/cleaner.py): normalization (lowercase, special character removal), tokenization (spaCy/NLTK), duplicate removal (exact/fuzzy), stopword filtering, encoding standardization.  
