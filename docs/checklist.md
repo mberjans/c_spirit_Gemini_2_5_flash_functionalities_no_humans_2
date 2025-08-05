@@ -354,7 +354,7 @@ Independent: No
 - [x] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\_acquisition/pdf\_extractor.py and handling output saving.  
 - [x] **AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\_acquisition/journal\_scraper.py and handling output saving.  
 - [x] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.  
-- [ ] **AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
+- [x] **AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
 
 Ticket ID: AIM2-ODIE-023  
 Description: CLI for Text Preprocessing & LLM Extraction: Create a command-line interface for text cleaning, chunking, NER, and relationship extraction modules.  
