@@ -403,9 +403,9 @@ Independent: No
   * Test mapping of relation\_text to existing Owlready2.ObjectProperty instances.  
   * Test handling of relationships that do not have a direct match in the ontology.  
   * Ensure semantic consistency (e.g., verifying that mapped subjects/objects adhere to the domain/range of the mapped property).  
-- [ ] **AIM2-ODIE-025-T2:** Create src/ontology\_mapping/relation\_mapper.py.  
-- [ ] **AIM2-ODIE-025-T3:** Implement map\_relationships\_to\_ontology(relationships: list\[tuple\], ontology\_obj: Any) function. This function will likely involve iterating through relationships, attempting to map relation\_text to Owlready2.ObjectProperty instances, and potentially mapping subject/object texts to ontology entities using text2term (from AIM2-ODIE-024).  
-- [ ] **AIM2-ODIE-025-T4:** Add logic to verify that mapped subjects and objects conform to the domain and range of the mapped ObjectProperty in the ontology.  
+- [x] **AIM2-ODIE-025-T2:** Create src/ontology\_mapping/relation\_mapper.py.  
+- [x] **AIM2-ODIE-025-T3:** Implement map\_relationships\_to\_ontology(relationships: list\[tuple\], ontology\_obj: Any) function. This function will likely involve iterating through relationships, attempting to map relation\_text to Owlready2.ObjectProperty instances, and potentially mapping subject/object texts to ontology entities using text2term (from AIM2-ODIE-024).  
+- [x] **AIM2-ODIE-025-T4:** Add logic to verify that mapped subjects and objects conform to the domain and range of the mapped ObjectProperty in the ontology.  
 - [ ] **AIM2-ODIE-025-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-026  
