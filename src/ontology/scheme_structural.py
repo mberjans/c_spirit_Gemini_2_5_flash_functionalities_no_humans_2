@@ -853,6 +853,292 @@ def establish_structural_hierarchy(ontology: Any, classes: Dict[str, Any]) -> No
         raise StructuralClassError(f"Failed to establish structural hierarchy: {e}")
 
 
+def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
+    """Add initial key terms/instances from Chemont, NP Classifier, and PMN to the ontology.
+    
+    Creates representative instances of ChemontClass, NPClass, and PMNCompound classes
+    to populate the ontology with initial key terms from each classification system.
+    This function implements AIM2-ODIE-009-T4 by adding concrete examples from each
+    structural annotation system.
+    
+    Args:
+        ontology: Target ontology for instance creation
+        
+    Returns:
+        Dictionary with keys "chemont_instances", "np_instances", "pmn_instances"
+        containing lists of created instances
+        
+    Raises:
+        StructuralClassError: If instance creation fails
+        
+    Example:
+        instances = add_initial_key_terms(ontology)
+        benzopyranoids = instances['chemont_instances'][0]
+        alkaloids = instances['np_instances'][0]
+        glucose = instances['pmn_instances'][0]
+    """
+    _validate_ontology(ontology)
+    
+    try:
+        with _creation_lock:
+            # Get the required classes
+            chemont_class = ontology.search_one(iri="*ChemontClass")
+            np_class = ontology.search_one(iri="*NPClass")
+            pmn_compound = ontology.search_one(iri="*PMNCompound")
+            
+            if not all([chemont_class, np_class, pmn_compound]):
+                raise StructuralClassError(
+                    "Required structural classes not found. Please run define_core_structural_classes() first."
+                )
+            
+            # Define representative Chemont chemical entity instances
+            chemont_terms = [
+                {
+                    "name": "Benzopyranoids",
+                    "label": "Benzopyranoids",
+                    "comment": "Chemical entities containing a benzopyran moiety, including flavonoids and related compounds."
+                },
+                {
+                    "name": "Flavonoids", 
+                    "label": "Flavonoids",
+                    "comment": "A class of polyphenolic secondary metabolites with antioxidant properties."
+                },
+                {
+                    "name": "Phenolic_compounds",
+                    "label": "Phenolic compounds", 
+                    "comment": "Chemical compounds containing one or more hydroxyl groups attached to aromatic rings."
+                },
+                {
+                    "name": "Alkaloids_chemont",
+                    "label": "Alkaloids (Chemont)",
+                    "comment": "Nitrogen-containing basic chemical compounds of plant origin with pharmacological activity."
+                },
+                {
+                    "name": "Organic_acids",
+                    "label": "Organic acids",
+                    "comment": "Carbon-containing compounds with acidic properties, common in plant metabolism."
+                },
+                {
+                    "name": "Lipids_and_lipid_molecules",
+                    "label": "Lipids and lipid-like molecules",
+                    "comment": "Hydrophobic or amphiphilic small molecules including fatty acids, glycerolipids, and sterols."
+                },
+                {
+                    "name": "Carbohydrates",
+                    "label": "Carbohydrates",
+                    "comment": "Polyhydroxy aldehydes or ketones and their derivatives, primary energy storage molecules."
+                },
+                {
+                    "name": "Amino_acids_and_derivatives", 
+                    "label": "Amino acids and derivatives",
+                    "comment": "Building blocks of proteins and their chemical derivatives involved in metabolism."
+                }
+            ]
+            
+            # Define representative NP Classifier natural product instances
+            np_terms = [
+                {
+                    "name": "Alkaloids_np",
+                    "label": "Alkaloids (NP)",
+                    "comment": "Natural products containing basic nitrogen atoms, often with complex ring structures."
+                },
+                {
+                    "name": "Terpenes",
+                    "label": "Terpenes", 
+                    "comment": "Large and diverse class of organic compounds derived from isoprene units."
+                },
+                {
+                    "name": "Polyketides",
+                    "label": "Polyketides",
+                    "comment": "Secondary metabolites produced by polyketide synthases with diverse biological activities."
+                },
+                {
+                    "name": "Phenylpropanoids",
+                    "label": "Phenylpropanoids",
+                    "comment": "Natural products derived from phenylalanine and tyrosine through the shikimate pathway."
+                },
+                {
+                    "name": "Peptides_np",
+                    "label": "Peptides (NP)",
+                    "comment": "Short chains of amino acids with biological activity, often produced by non-ribosomal synthesis."
+                },
+                {
+                    "name": "Saccharides_np", 
+                    "label": "Saccharides (NP)",
+                    "comment": "Natural product carbohydrates including complex polysaccharides and glycosides."
+                },
+                {
+                    "name": "Fatty_acids_np",
+                    "label": "Fatty acids (NP)",
+                    "comment": "Natural product fatty acids with unique structural features and biological activities."
+                },
+                {
+                    "name": "Shikimates",
+                    "label": "Shikimates",
+                    "comment": "Natural products derived from the shikimate pathway, precursors to aromatic amino acids."
+                }
+            ]
+            
+            # Define representative PMN plant metabolic compound instances
+            pmn_terms = [
+                {
+                    "name": "Glucose_pmn",
+                    "label": "Glucose",
+                    "comment": "Primary sugar and energy source in plant metabolism, central to carbohydrate pathways."
+                },
+                {
+                    "name": "Sucrose_pmn",
+                    "label": "Sucrose", 
+                    "comment": "Major transport sugar in plants, composed of glucose and fructose units."
+                },
+                {
+                    "name": "Chlorophyll_a",
+                    "label": "Chlorophyll a",
+                    "comment": "Primary photosynthetic pigment in plants, essential for light harvesting."
+                },
+                {
+                    "name": "Cellulose_pmn",
+                    "label": "Cellulose",
+                    "comment": "Structural polysaccharide forming the primary component of plant cell walls."
+                },
+                {
+                    "name": "Starch_pmn", 
+                    "label": "Starch",
+                    "comment": "Energy storage polysaccharide in plants, composed of amylose and amylopectin."
+                },
+                {
+                    "name": "ATP_pmn",
+                    "label": "Adenosine triphosphate (ATP)",
+                    "comment": "Universal energy currency in plant cells for metabolic processes."
+                },
+                {
+                    "name": "Lignin_pmn",
+                    "label": "Lignin",
+                    "comment": "Complex aromatic polymer providing structural support in plant cell walls."
+                },
+                {
+                    "name": "Anthocyanins_pmn",
+                    "label": "Anthocyanins", 
+                    "comment": "Water-soluble pigments responsible for red, purple, and blue colors in plants."
+                }
+            ]
+            
+            # Create instances within the ontology context
+            with ontology:
+                chemont_instances = []
+                np_instances = []
+                pmn_instances = []
+                
+                # Create Chemont instances
+                for term_data in chemont_terms:
+                    instance = chemont_class(term_data["name"])
+                    instance.label = [term_data["label"]]
+                    instance.comment = [term_data["comment"]]
+                    chemont_instances.append(instance)
+                    logger.debug(f"Created Chemont instance: {term_data['name']}")
+                
+                # Create NP Classifier instances  
+                for term_data in np_terms:
+                    instance = np_class(term_data["name"])
+                    instance.label = [term_data["label"]]
+                    instance.comment = [term_data["comment"]]
+                    np_instances.append(instance)
+                    logger.debug(f"Created NP instance: {term_data['name']}")
+                
+                # Create PMN instances
+                for term_data in pmn_terms:
+                    instance = pmn_compound(term_data["name"])
+                    instance.label = [term_data["label"]]
+                    instance.comment = [term_data["comment"]]
+                    pmn_instances.append(instance)
+                    logger.debug(f"Created PMN instance: {term_data['name']}")
+                
+                result = {
+                    'chemont_instances': chemont_instances,
+                    'np_instances': np_instances, 
+                    'pmn_instances': pmn_instances
+                }
+                
+                total_instances = len(chemont_instances) + len(np_instances) + len(pmn_instances)
+                logger.info(f"Successfully created {total_instances} initial key term instances "
+                           f"({len(chemont_instances)} Chemont, {len(np_instances)} NP, {len(pmn_instances)} PMN)")
+                
+                return result
+                
+    except OwlReadyError as e:
+        raise StructuralClassError(f"Owlready2 error creating initial key terms: {e}")
+    except Exception as e:
+        raise StructuralClassError(f"Failed to create initial key terms: {e}")
+
+
+def validate_initial_key_terms(ontology: Any) -> Dict[str, int]:
+    """Validate that initial key terms/instances have been created successfully.
+    
+    Checks that instances of ChemontClass, NPClass, and PMNCompound have been
+    properly created in the ontology with correct properties.
+    
+    Args:
+        ontology: Ontology to validate
+        
+    Returns:
+        Dictionary with counts of found instances for each class type
+        
+    Example:
+        counts = validate_initial_key_terms(ontology)
+        print(f"Found {counts['chemont_count']} Chemont instances")
+    """
+    try:
+        _validate_ontology(ontology)
+        
+        # Get the required classes
+        chemont_class = ontology.search_one(iri="*ChemontClass")
+        np_class = ontology.search_one(iri="*NPClass")
+        pmn_compound = ontology.search_one(iri="*PMNCompound")
+        
+        if not all([chemont_class, np_class, pmn_compound]):
+            logger.warning("Required structural classes not found")
+            return {"chemont_count": 0, "np_count": 0, "pmn_count": 0, "total_count": 0}
+        
+        # Count instances of each class
+        chemont_instances = list(chemont_class.instances())
+        np_instances = list(np_class.instances())
+        pmn_instances = list(pmn_compound.instances())
+        
+        # Validate that instances have proper labels and comments
+        valid_instances = {"chemont": 0, "np": 0, "pmn": 0}
+        
+        for instance in chemont_instances:
+            if hasattr(instance, 'label') and hasattr(instance, 'comment'):
+                if instance.label and instance.comment:
+                    valid_instances["chemont"] += 1
+        
+        for instance in np_instances:
+            if hasattr(instance, 'label') and hasattr(instance, 'comment'):
+                if instance.label and instance.comment:
+                    valid_instances["np"] += 1
+        
+        for instance in pmn_instances:
+            if hasattr(instance, 'label') and hasattr(instance, 'comment'):
+                if instance.label and instance.comment:
+                    valid_instances["pmn"] += 1
+        
+        result = {
+            "chemont_count": valid_instances["chemont"],
+            "np_count": valid_instances["np"], 
+            "pmn_count": valid_instances["pmn"],
+            "total_count": sum(valid_instances.values())
+        }
+        
+        logger.info(f"Validated key terms: {result['total_count']} total instances "
+                   f"({result['chemont_count']} Chemont, {result['np_count']} NP, {result['pmn_count']} PMN)")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error validating initial key terms: {e}")
+        return {"chemont_count": 0, "np_count": 0, "pmn_count": 0, "total_count": 0}
+
+
 def validate_core_structural_classes(ontology: Any) -> bool:
     """Validate that core structural classes are properly defined.
     

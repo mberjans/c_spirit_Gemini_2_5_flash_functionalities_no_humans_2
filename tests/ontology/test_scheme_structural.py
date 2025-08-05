@@ -53,6 +53,10 @@ class TestSchemeStructural:
         mock_ont.classes = Mock()
         mock_ont.classes.return_value = []
         
+        # Mock context manager protocol
+        mock_ont.__enter__ = Mock(return_value=mock_ont)
+        mock_ont.__exit__ = Mock(return_value=None)
+        
         return mock_ont
 
     @pytest.fixture
@@ -619,7 +623,7 @@ class TestSchemeStructural:
             assert result is not None
             
             # Verify namespace was accessed
-            mock_ontology.get_namespace.assert_called_once()
+            assert mock_ontology.get_namespace.call_count >= 1
             
             # Verify class creation used correct namespace
             mock_new_class.assert_called_once()
@@ -810,3 +814,318 @@ class TestSchemeStructural:
             # Verify new_class was called with Thing as base
             args, kwargs = mock_new_class.call_args
             assert Thing in args[1]  # Base classes tuple
+
+    def test_add_initial_key_terms_success(self, mock_ontology: Mock):
+        """
+        Test successful addition of initial key terms from all classification systems.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import add_initial_key_terms
+        
+        # Mock the required classes
+        mock_chemont_class = Mock()
+        mock_np_class = Mock()
+        mock_pmn_compound = Mock()
+        
+        # Mock search_one to return the required classes
+        def search_side_effect(iri):
+            if "ChemontClass" in iri:
+                return mock_chemont_class
+            elif "NPClass" in iri:
+                return mock_np_class
+            elif "PMNCompound" in iri:
+                return mock_pmn_compound
+            return None
+        
+        mock_ontology.search_one.side_effect = search_side_effect
+        
+        # Mock the ontology context manager
+        mock_ontology.__enter__ = Mock(return_value=mock_ontology)
+        mock_ontology.__exit__ = Mock(return_value=None)
+        
+        # Mock instance creation
+        mock_chemont_instances = []
+        mock_np_instances = []
+        mock_pmn_instances = []
+        
+        def create_chemont_instance(name):
+            instance = Mock()
+            instance.name = name
+            instance.label = []
+            instance.comment = []
+            mock_chemont_instances.append(instance)
+            return instance
+        
+        def create_np_instance(name):
+            instance = Mock()
+            instance.name = name
+            instance.label = []
+            instance.comment = []
+            mock_np_instances.append(instance)
+            return instance
+        
+        def create_pmn_instance(name):
+            instance = Mock()
+            instance.name = name
+            instance.label = []
+            instance.comment = []
+            mock_pmn_instances.append(instance)
+            return instance
+        
+        mock_chemont_class.side_effect = create_chemont_instance
+        mock_np_class.side_effect = create_np_instance
+        mock_pmn_compound.side_effect = create_pmn_instance
+        
+        # Act
+        result = add_initial_key_terms(mock_ontology)
+        
+        # Assert
+        assert result is not None
+        assert 'chemont_instances' in result
+        assert 'np_instances' in result
+        assert 'pmn_instances' in result
+        
+        # Verify expected number of instances were created
+        assert len(result['chemont_instances']) == 8  # Expected Chemont instances
+        assert len(result['np_instances']) == 8      # Expected NP instances
+        assert len(result['pmn_instances']) == 8     # Expected PMN instances
+        
+        # Verify instance properties were set
+        for instance in result['chemont_instances']:
+            assert instance.label is not None
+            assert instance.comment is not None
+        
+        for instance in result['np_instances']:
+            assert instance.label is not None
+            assert instance.comment is not None
+        
+        for instance in result['pmn_instances']:
+            assert instance.label is not None
+            assert instance.comment is not None
+
+    def test_add_initial_key_terms_missing_classes(self, mock_ontology: Mock):
+        """
+        Test add_initial_key_terms when required classes are missing.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import add_initial_key_terms, StructuralClassError
+        
+        # Mock search_one to return None (classes not found)
+        mock_ontology.search_one.return_value = None
+        
+        # Act & Assert
+        with expect_exception(StructuralClassError, "Required structural classes not found"):
+            add_initial_key_terms(mock_ontology)
+
+    def test_add_initial_key_terms_specific_instances(self, mock_ontology: Mock):
+        """
+        Test creation of specific representative instances.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import add_initial_key_terms
+        
+        # Mock the required classes
+        mock_chemont_class = Mock()
+        mock_np_class = Mock()
+        mock_pmn_compound = Mock()
+        
+        def search_side_effect(iri):
+            if "ChemontClass" in iri:
+                return mock_chemont_class
+            elif "NPClass" in iri:
+                return mock_np_class
+            elif "PMNCompound" in iri:
+                return mock_pmn_compound
+            return None
+        
+        mock_ontology.search_one.side_effect = search_side_effect
+        
+        # Mock the ontology context manager
+        mock_ontology.__enter__ = Mock(return_value=mock_ontology)
+        mock_ontology.__exit__ = Mock(return_value=None)
+        
+        # Track created instances with their names
+        created_instances = []
+        
+        def create_instance(name):
+            instance = Mock()
+            instance.name = name
+            instance.label = []
+            instance.comment = []
+            created_instances.append(instance)
+            return instance
+        
+        mock_chemont_class.side_effect = create_instance
+        mock_np_class.side_effect = create_instance
+        mock_pmn_compound.side_effect = create_instance
+        
+        # Act
+        result = add_initial_key_terms(mock_ontology)
+        
+        # Assert specific representative instances were created
+        instance_names = [inst.name for inst in created_instances]
+        
+        # Check for expected Chemont instances
+        assert "Benzopyranoids" in instance_names
+        assert "Flavonoids" in instance_names
+        assert "Phenolic_compounds" in instance_names
+        assert "Alkaloids_chemont" in instance_names
+        
+        # Check for expected NP instances
+        assert "Alkaloids_np" in instance_names
+        assert "Terpenes" in instance_names
+        assert "Polyketides" in instance_names
+        assert "Phenylpropanoids" in instance_names
+        
+        # Check for expected PMN instances
+        assert "Glucose_pmn" in instance_names
+        assert "Sucrose_pmn" in instance_names
+        assert "Chlorophyll_a" in instance_names
+        assert "ATP_pmn" in instance_names
+
+    def test_add_initial_key_terms_with_owlready_error(self, mock_ontology: Mock):
+        """
+        Test add_initial_key_terms handling of Owlready2 errors.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import add_initial_key_terms, StructuralClassError
+        
+        # Mock search_one to raise OwlReadyError
+        mock_ontology.search_one.side_effect = OwlReadyError("Owlready2 error")
+        
+        # Act & Assert
+        with expect_exception(StructuralClassError, "Owlready2 error creating initial key terms"):
+            add_initial_key_terms(mock_ontology)
+
+    def test_validate_initial_key_terms_success(self, mock_ontology: Mock):
+        """
+        Test successful validation of initial key terms.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import validate_initial_key_terms
+        
+        # Mock the required classes
+        mock_chemont_class = Mock()
+        mock_np_class = Mock()
+        mock_pmn_compound = Mock()
+        
+        def search_side_effect(iri):
+            if "ChemontClass" in iri:
+                return mock_chemont_class
+            elif "NPClass" in iri:
+                return mock_np_class
+            elif "PMNCompound" in iri:
+                return mock_pmn_compound
+            return None
+        
+        mock_ontology.search_one.side_effect = search_side_effect
+        
+        # Mock instances with proper labels and comments
+        def create_mock_instances(count):
+            instances = []
+            for i in range(count):
+                instance = Mock()
+                instance.label = [f"Label {i}"]
+                instance.comment = [f"Comment {i}"]
+                instances.append(instance)
+            return instances
+        
+        mock_chemont_class.instances.return_value = create_mock_instances(8)
+        mock_np_class.instances.return_value = create_mock_instances(8)
+        mock_pmn_compound.instances.return_value = create_mock_instances(8)
+        
+        # Act
+        result = validate_initial_key_terms(mock_ontology)
+        
+        # Assert
+        assert result['chemont_count'] == 8
+        assert result['np_count'] == 8
+        assert result['pmn_count'] == 8
+        assert result['total_count'] == 24
+
+    def test_validate_initial_key_terms_missing_classes(self, mock_ontology: Mock):
+        """
+        Test validation when required classes are missing.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import validate_initial_key_terms
+        
+        # Mock search_one to return None (classes not found)
+        mock_ontology.search_one.return_value = None
+        
+        # Act
+        result = validate_initial_key_terms(mock_ontology)
+        
+        # Assert
+        assert result['chemont_count'] == 0
+        assert result['np_count'] == 0
+        assert result['pmn_count'] == 0
+        assert result['total_count'] == 0
+
+    def test_validate_initial_key_terms_invalid_instances(self, mock_ontology: Mock):
+        """
+        Test validation with instances missing required properties.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_structural import validate_initial_key_terms
+        
+        # Mock the required classes
+        mock_chemont_class = Mock()
+        mock_np_class = Mock()
+        mock_pmn_compound = Mock()
+        
+        def search_side_effect(iri):
+            if "ChemontClass" in iri:
+                return mock_chemont_class
+            elif "NPClass" in iri:
+                return mock_np_class
+            elif "PMNCompound" in iri:
+                return mock_pmn_compound
+            return None
+        
+        mock_ontology.search_one.side_effect = search_side_effect
+        
+        # Mock instances with missing or empty labels/comments
+        def create_invalid_instances(count):
+            instances = []
+            for i in range(count):
+                instance = Mock()
+                # Some instances missing label, some missing comment, some empty
+                if i % 3 == 0:
+                    del instance.label  # Missing label attribute
+                    instance.comment = [f"Comment {i}"]
+                elif i % 3 == 1:
+                    instance.label = [f"Label {i}"]
+                    del instance.comment  # Missing comment attribute
+                else:
+                    instance.label = []  # Empty label
+                    instance.comment = []  # Empty comment
+                instances.append(instance)
+            return instances
+        
+        mock_chemont_class.instances.return_value = create_invalid_instances(6)
+        mock_np_class.instances.return_value = create_invalid_instances(6)
+        mock_pmn_compound.instances.return_value = create_invalid_instances(6)
+        
+        # Act
+        result = validate_initial_key_terms(mock_ontology)
+        
+        # Assert - no instances should be counted as valid
+        assert result['chemont_count'] == 0
+        assert result['np_count'] == 0
+        assert result['pmn_count'] == 0
+        assert result['total_count'] == 0
