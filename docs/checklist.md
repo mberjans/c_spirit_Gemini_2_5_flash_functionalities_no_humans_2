@@ -238,7 +238,7 @@ Description: PDF Text & Table Extraction Module: Develop a module (src/data\_acq
 Dependencies: AIM2-ODIE-002  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-016-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_pdf\_extractor.py) for src/data\_acquisition/pdf\_extractor.py:  
+- [x] **AIM2-ODIE-016-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_pdf\_extractor.py) for src/data\_acquisition/pdf\_extractor.py:  
   * Test text extraction from a simple, text-based PDF.  
   * Test table extraction from a PDF containing a clearly defined table.  
   * Test handling of multi-page PDFs for both text and table extraction.  
