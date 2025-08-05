@@ -205,7 +205,7 @@ def create_session_with_retries(
     retry_strategy = Retry(
         total=retries,
         status_forcelist=status_forcelist,
-        method_whitelist=["HEAD", "GET", "OPTIONS"],
+        allowed_methods=["HEAD", "GET", "OPTIONS"],  # Updated parameter name
         backoff_factor=backoff_factor
     )
     
@@ -545,6 +545,11 @@ def download_journal_fulltext(article_url: str, output_path: str,
         parsed_url = urlparse(article_url)
         if not parsed_url.scheme or not parsed_url.netloc:
             raise JournalScraperError(f"Invalid URL format: {article_url}")
+        
+        # Ensure we have http/https scheme
+        if parsed_url.scheme.lower() not in ['http', 'https']:
+            raise JournalScraperError(f"Unsupported URL scheme: {parsed_url.scheme}")
+            
     except Exception as e:
         raise JournalScraperError(f"Error parsing URL: {article_url}", e, article_url)
     
@@ -557,9 +562,14 @@ def download_journal_fulltext(article_url: str, output_path: str,
             raise JournalScraperError(f"Download not allowed by robots.txt: {article_url}", url=article_url)
     
     # Create output directory if it doesn't exist
-    output_dir = os.path.dirname(output_path)
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
+    try:
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+    except PermissionError as e:
+        raise JournalScraperError(f"Permission denied creating output directory: {output_dir}", e)
+    except OSError as e:
+        raise JournalScraperError(f"Error creating output directory: {output_dir}", e)
     
     # Apply rate limiting
     rate_limiter = get_rate_limiter()
@@ -569,9 +579,7 @@ def download_journal_fulltext(article_url: str, output_path: str,
         if use_paperscraper:
             # Try paperscraper first
             logger.debug(f"Attempting download with paperscraper: {article_url}")
-            # TODO: Implement actual paperscraper download based on library documentation
-            # This is a placeholder for paperscraper integration
-            success = False
+            success = _download_with_paperscraper(article_url, output_path)
         else:
             success = False
         
@@ -582,15 +590,176 @@ def download_journal_fulltext(article_url: str, output_path: str,
         
         if success:
             logger.info(f"Successfully downloaded full-text to: {output_path}")
+            # Verify the downloaded file exists and has reasonable size
+            try:
+                file_size = os.path.getsize(output_path)
+                if file_size == 0:
+                    logger.warning(f"Downloaded file is empty: {output_path}")
+                    return False
+                elif file_size < 1024:  # Less than 1KB might indicate an error page
+                    logger.warning(f"Downloaded file is suspiciously small ({file_size} bytes): {output_path}")
+                else:
+                    logger.debug(f"Downloaded file size: {file_size} bytes")
+            except OSError:
+                # File might not exist or be accessible
+                logger.warning(f"Could not verify downloaded file: {output_path}")
+                return False
         else:
             logger.warning(f"Failed to download full-text from: {article_url}")
         
         return success
         
+    except JournalScraperError:
+        # Re-raise our custom exceptions without wrapping
+        raise
     except Exception as e:
-        error_msg = f"Error downloading full-text from: {article_url}"
-        logger.error(error_msg)
+        error_msg = f"Unexpected error downloading full-text from: {article_url}"
+        logger.error(f"{error_msg}: {e}")
         raise JournalScraperError(error_msg, e, article_url)
+
+
+def _download_with_paperscraper(url: str, output_path: str) -> bool:
+    """
+    Download content using paperscraper with DOI extraction and fallback mechanisms.
+    
+    Args:
+        url: URL to download from (can be DOI URL or article URL)
+        output_path: Path to save the downloaded content
+        
+    Returns:
+        bool: True if download successful, False otherwise
+        
+    Raises:
+        JournalScraperError: If critical errors occur during download
+    """
+    try:
+        # Import paperscraper components
+        from paperscraper.pdf import save_pdf
+        import re
+        from pathlib import Path
+        
+        logger.debug(f"Processing URL for paperscraper: {url}")
+        
+        # Extract DOI from URL or validate if it's already a DOI
+        doi = _extract_doi_from_url(url)
+        if not doi:
+            logger.debug(f"Could not extract DOI from URL: {url}")
+            return False
+        
+        logger.debug(f"Extracted DOI: {doi}")
+        
+        # Prepare metadata dictionary for paperscraper
+        paper_metadata = {"doi": doi}
+        
+        # Ensure output directory exists
+        output_path_obj = Path(output_path)
+        output_path_obj.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Use paperscraper to download the paper
+        try:
+            save_pdf(
+                paper_metadata=paper_metadata,
+                filepath=str(output_path_obj.with_suffix('.pdf')),
+                save_metadata=False,  # We don't need metadata for this use case
+                api_keys=None  # Could be enhanced to load API keys from config
+            )
+            
+            # Check if the file was actually created and has content
+            # paperscraper might save as PDF, XML, or other formats
+            possible_files = [
+                output_path_obj.with_suffix('.pdf'),
+                output_path_obj.with_suffix('.xml'),
+                output_path_obj  # Original path
+            ]
+            
+            for output_file in possible_files:
+                if output_file.exists() and output_file.stat().st_size > 0:
+                    logger.debug(f"Successfully downloaded content via paperscraper: {output_file}")
+                    # If paperscraper saved with a different extension, rename to match expected output
+                    if output_file != Path(output_path):
+                        import shutil
+                        shutil.move(str(output_file), output_path)
+                        logger.debug(f"Moved {output_file} to {output_path}")
+                    return True
+            
+            logger.debug(f"Paperscraper download failed - no valid file created")
+            return False
+                
+        except Exception as e:
+            # Log paperscraper-specific errors but don't raise - let fallback handle it
+            error_msg = str(e).lower()
+            if "doi" in error_msg:
+                logger.debug(f"Paperscraper failed - DOI issue: {e}")
+            elif "network" in error_msg or "connection" in error_msg:
+                logger.debug(f"Paperscraper failed - network issue: {e}")
+            elif "access" in error_msg or "permission" in error_msg:
+                logger.debug(f"Paperscraper failed - access denied: {e}")
+            else:
+                logger.debug(f"Paperscraper failed - general error: {e}")
+            return False
+            
+    except ImportError as e:
+        logger.debug(f"Paperscraper not available: {e}")
+        return False
+    except Exception as e:
+        logger.debug(f"Unexpected error in paperscraper download: {e}")
+        return False
+
+
+def _extract_doi_from_url(url: str) -> Optional[str]:
+    """
+    Extract DOI from various URL formats.
+    
+    Args:
+        url: URL that may contain a DOI
+        
+    Returns:
+        str or None: Extracted DOI if found, None otherwise
+    """
+    import re
+    
+    # Common DOI patterns
+    doi_patterns = [
+        # Standard DOI URL: https://doi.org/10.1000/182
+        r'https?://(?:dx\.)?doi\.org/(.+)',
+        # DOI in URL path: https://example.com/doi/10.1000/182
+        r'/doi/(.+?)(?:\?|#|$)',
+        # Direct DOI format: doi:10.1000/182
+        r'doi:(.+?)(?:\?|#|$)',
+        # DOI in query parameters: ?doi=10.1000/182
+        r'[?&]doi=([^&]+)',
+        # Nature-style URLs: Convert Nature article IDs to DOIs
+        # Pattern for s41586-XXX-XXXXX-X format -> 10.1038/s41586-XXX-XXXXX-X
+        r'nature\.com/articles/(s\d+-\d+-\d+-\d+)',
+        # Science-style URLs: https://www.science.org/doi/10.1126/science.abc1234
+        r'science\.org/doi/(.+?)(?:\?|#|$)',
+        # PLoS ONE style: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0123456
+        r'plos\.org/.+?id=(.+?)(?:&|#|$)',
+        # Generic DOI pattern in URL: 10.1000/182
+        r'(10\.\d{4,}/[^\s\?#]+)'
+    ]
+    
+    for pattern in doi_patterns:
+        match = re.search(pattern, url, re.IGNORECASE)
+        if match:
+            doi = match.group(1)
+            # Clean up the DOI
+            doi = doi.strip()
+            # Remove trailing punctuation and URL fragments
+            doi = re.sub(r'[.,;:)\]}>]*$', '', doi)
+            
+            # Handle special cases for Nature article IDs
+            if doi.startswith('s'):
+                # Convert Nature article ID to DOI format
+                # s41586-XXX-XXXXX-X -> 10.1038/s41586-XXX-XXXXX-X
+                if re.match(r'^s\d+-\d+-\d+-\d+$', doi):
+                    doi = f'10.1038/{doi}'
+            
+            # Validate DOI format (basic check)
+            if re.match(r'^10\.\d{4,}/[^\s]+', doi):
+                return doi
+    
+    return None
 
 
 def _download_with_requests(url: str, output_path: str) -> bool:
@@ -612,11 +781,12 @@ def _download_with_requests(url: str, output_path: str) -> bool:
     
     headers = {
         'User-Agent': user_agent_rotator.get_random_user_agent(),
-        'Accept': 'application/pdf,application/xml,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept': 'application/pdf,application/xml,text/xml,text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
+        'Referer': url,  # Some sites require a valid referer
     }
     
     try:
@@ -628,12 +798,39 @@ def _download_with_requests(url: str, output_path: str) -> bool:
         )
         response.raise_for_status()
         
+        # Check content type and adjust output path accordingly
+        content_type = response.headers.get('content-type', '').lower()
+        logger.debug(f"Response content type: {content_type}")
+        
+        # Determine appropriate file extension based on content type
+        if 'application/pdf' in content_type:
+            if not output_path.lower().endswith('.pdf'):
+                output_path = output_path + '.pdf'
+        elif 'application/xml' in content_type or 'text/xml' in content_type:
+            if not output_path.lower().endswith('.xml'):
+                output_path = output_path + '.xml'
+        elif 'text/html' in content_type:
+            if not output_path.lower().endswith('.html'):
+                output_path = output_path + '.html'
+        
+        # Validate that we actually got content (not just an error page)
+        content_length = response.headers.get('content-length')
+        if content_length and int(content_length) < 1024:
+            logger.warning(f"Response content is very small ({content_length} bytes), might be an error page")
+        
         # Write content to file
         with open(output_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
         
+        # Verify the downloaded file
+        file_size = os.path.getsize(output_path)
+        if file_size == 0:
+            logger.error(f"Downloaded file is empty: {output_path}")
+            return False
+        
+        logger.debug(f"Successfully downloaded {file_size} bytes to {output_path}")
         return True
         
     except requests.exceptions.RequestException as e:

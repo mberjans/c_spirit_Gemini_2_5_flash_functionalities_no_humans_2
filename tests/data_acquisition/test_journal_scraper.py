@@ -25,15 +25,15 @@ from urllib.robotparser import RobotFileParser
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-# Import the journal scraper functions (these will be implemented in future tasks)
+# Import the journal scraper functions
 from src.data_acquisition.journal_scraper import (
     scrape_journal_metadata,
     download_journal_fulltext,
     check_robots_txt,
-    JournalScrapingError,
-    ThrottleManager,
+    JournalScraperError,
+    RateLimiter,
     UserAgentRotator,
-    RobotsChecker
+    create_session_with_retries
 )
 
 
@@ -71,7 +71,7 @@ class TestJournalScrapingMetadata:
             os.rmdir(self.temp_dir)
 
     @patch('src.data_acquisition.journal_scraper.paperscraper')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_scrape_journal_metadata_successful_extraction(self, mock_throttle_manager, mock_paperscraper):
         """Test successful metadata scraping for a known journal article URL."""
         # Mock throttling manager
@@ -115,7 +115,7 @@ class TestJournalScrapingMetadata:
         mock_throttle.wait.assert_called()
 
     @patch('src.data_acquisition.journal_scraper.paperscraper')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_scrape_journal_metadata_empty_results(self, mock_throttle_manager, mock_paperscraper):
         """Test metadata scraping when no articles are found."""
         # Mock throttling manager
@@ -136,7 +136,7 @@ class TestJournalScrapingMetadata:
         mock_paperscraper.search_papers.assert_called_once()
 
     @patch('src.data_acquisition.journal_scraper.paperscraper')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_scrape_journal_metadata_with_error_handling(self, mock_throttle_manager, mock_paperscraper):
         """Test error handling during metadata scraping."""
         # Mock throttling manager
@@ -146,8 +146,8 @@ class TestJournalScrapingMetadata:
         # Mock paperscraper error
         mock_paperscraper.search_papers.side_effect = Exception("Paperscraper API error")
         
-        # Test that JournalScrapingError is raised
-        with pytest.raises(JournalScrapingError) as exc_info:
+        # Test that JournalScraperError is raised
+        with pytest.raises(JournalScraperError) as exc_info:
             scrape_journal_metadata("Test Journal", "test query")
         
         error_message = str(exc_info.value).lower()
@@ -155,7 +155,7 @@ class TestJournalScrapingMetadata:
 
     @patch('src.data_acquisition.journal_scraper.paperscraper')
     @patch('src.data_acquisition.journal_scraper.UserAgentRotator')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_scrape_journal_metadata_with_user_agent_rotation(self, mock_throttle_manager, mock_user_agent, mock_paperscraper):
         """Test metadata scraping with User-Agent rotation."""
         # Mock components
@@ -199,8 +199,8 @@ class TestJournalFullTextDownload:
             os.rmdir(self.temp_dir)
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_pdf_success(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test successful full-text PDF download for a known open-access article URL."""
         # Mock components
@@ -241,8 +241,8 @@ class TestJournalFullTextDownload:
         mock_throttle.wait.assert_called()
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_xml_success(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test successful full-text XML download."""
         # Mock components
@@ -273,8 +273,8 @@ class TestJournalFullTextDownload:
         mock_requests_get.assert_called()
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_http_error_404(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test error handling for HTTP 404 error."""
         # Mock components
@@ -291,16 +291,16 @@ class TestJournalFullTextDownload:
         mock_response.raise_for_status.side_effect = HTTPError("404 Not Found")
         mock_requests_get.return_value = mock_response
         
-        # Test that JournalScrapingError is raised for 404
-        with pytest.raises(JournalScrapingError) as exc_info:
+        # Test that JournalScraperError is raised for 404
+        with pytest.raises(JournalScraperError) as exc_info:
             download_journal_fulltext(self.test_url, self.test_output_path)
         
         error_message = str(exc_info.value).lower()
         assert "404" in error_message or "not found" in error_message
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_http_error_500(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test error handling for HTTP 500 server error."""
         # Mock components
@@ -317,16 +317,16 @@ class TestJournalFullTextDownload:
         mock_response.raise_for_status.side_effect = HTTPError("500 Internal Server Error")
         mock_requests_get.return_value = mock_response
         
-        # Test that JournalScrapingError is raised for 500
-        with pytest.raises(JournalScrapingError) as exc_info:
+        # Test that JournalScraperError is raised for 500
+        with pytest.raises(JournalScraperError) as exc_info:
             download_journal_fulltext(self.test_url, self.test_output_path)
         
         error_message = str(exc_info.value).lower()
         assert "500" in error_message or "server error" in error_message
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_connection_error(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test error handling for connection issues."""
         # Mock components
@@ -341,16 +341,16 @@ class TestJournalFullTextDownload:
         from requests.exceptions import ConnectionError
         mock_requests_get.side_effect = ConnectionError("Connection failed")
         
-        # Test that JournalScrapingError is raised for connection issues
-        with pytest.raises(JournalScrapingError) as exc_info:
+        # Test that JournalScraperError is raised for connection issues
+        with pytest.raises(JournalScraperError) as exc_info:
             download_journal_fulltext(self.test_url, self.test_output_path)
         
         error_message = str(exc_info.value).lower()
         assert "connection" in error_message or "network" in error_message
 
     @patch('src.data_acquisition.journal_scraper.requests.get')
-    @patch('src.data_acquisition.journal_scraper.RobotsChecker')
-    @patch('src.data_acquisition.journal_scraper.ThrottleManager')
+    @patch('src.data_acquisition.journal_scraper.check_robots_txt')
+    @patch('src.data_acquisition.journal_scraper.RateLimiter')
     def test_download_journal_fulltext_robots_txt_blocked(self, mock_throttle_manager, mock_robots_checker, mock_requests_get):
         """Test handling when robots.txt blocks access."""
         # Mock components
@@ -361,8 +361,8 @@ class TestJournalFullTextDownload:
         mock_robots.can_fetch.return_value = False  # Blocked by robots.txt
         mock_robots_checker.return_value = mock_robots
         
-        # Test that JournalScrapingError is raised when blocked by robots.txt
-        with pytest.raises(JournalScrapingError) as exc_info:
+        # Test that JournalScraperError is raised when blocked by robots.txt
+        with pytest.raises(JournalScraperError) as exc_info:
             download_journal_fulltext(self.test_url, self.test_output_path)
         
         error_message = str(exc_info.value).lower()
@@ -392,8 +392,8 @@ class TestUserAgentHandling:
         mock_requests_get.return_value = mock_response
         
         # Test download with User-Agent
-        with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle_manager:
+        with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle_manager:
                 mock_robots.return_value.can_fetch.return_value = True
                 mock_throttle_manager.return_value = MagicMock()
                 
@@ -448,9 +448,9 @@ class TestThrottlingAndRateLimiting:
     @patch('src.data_acquisition.journal_scraper.time.sleep')
     def test_throttle_manager_basic_throttling(self, mock_sleep):
         """Test basic throttling functionality."""
-        # Test ThrottleManager with specific delay
+        # Test RateLimiter with specific delay
         throttle_delay = 1.0
-        throttle_manager = ThrottleManager(delay=throttle_delay)
+        throttle_manager = RateLimiter(delay=throttle_delay)
         
         # Make multiple throttled calls
         throttle_manager.wait()
@@ -464,7 +464,7 @@ class TestThrottlingAndRateLimiting:
     @patch('src.data_acquisition.journal_scraper.time.sleep')
     def test_throttle_manager_adaptive_throttling(self, mock_sleep):
         """Test adaptive throttling based on response times."""
-        throttle_manager = ThrottleManager(adaptive=True)
+        throttle_manager = RateLimiter(adaptive=True)
         
         # Simulate slow response (should increase delay)
         throttle_manager.record_request_time(2.5)  # Slow response
@@ -490,7 +490,7 @@ class TestThrottlingAndRateLimiting:
         mock_paperscraper.search_papers.return_value = [mock_result]
         
         # Make multiple rapid metadata requests
-        with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle_manager:
+        with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle_manager:
             mock_throttle = MagicMock()
             mock_throttle_manager.return_value = mock_throttle
             
@@ -511,8 +511,8 @@ class TestThrottlingAndRateLimiting:
         mock_response.content = b"test content"
         mock_requests_get.return_value = mock_response
         
-        with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle_manager:
+        with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle_manager:
                 mock_robots.return_value.can_fetch.return_value = True
                 mock_throttle = MagicMock()
                 mock_throttle_manager.return_value = mock_throttle
@@ -634,8 +634,8 @@ Disallow: /private/
         assert can_access is True
 
     def test_robots_checker_initialization(self):
-        """Test RobotsChecker initialization and caching."""
-        checker = RobotsChecker()
+        """Test check_robots_txt initialization and caching."""
+        checker = check_robots_txt()
         
         # Test that checker exists and has expected methods
         assert hasattr(checker, 'can_fetch')
@@ -659,7 +659,7 @@ Crawl-delay: 5
         mock_response.text = robots_content
         mock_requests_get.return_value = mock_response
         
-        checker = RobotsChecker()
+        checker = check_robots_txt()
         
         # Test crawl delay extraction
         delay = checker.get_crawl_delay("https://example.com", user_agent="*")
@@ -677,7 +677,7 @@ Crawl-delay: 5
         mock_response.text = robots_content
         mock_requests_get.return_value = mock_response
         
-        checker = RobotsChecker()
+        checker = check_robots_txt()
         
         # Make multiple requests to same domain
         can_access1 = checker.can_fetch("https://example.com/article1.pdf", user_agent="*")
@@ -695,17 +695,17 @@ class TestErrorHandlingAndEdgeCases:
     """Test cases for comprehensive error handling and edge cases."""
     
     def test_journal_scraping_error_custom_exception(self):
-        """Test JournalScrapingError custom exception."""
+        """Test JournalScraperError custom exception."""
         error_message = "Test journal scraping error"
-        error = JournalScrapingError(error_message)
+        error = JournalScraperError(error_message)
         
         assert str(error) == error_message
         assert isinstance(error, Exception)
 
     def test_journal_scraping_error_with_cause(self):
-        """Test JournalScrapingError with underlying cause."""
+        """Test JournalScraperError with underlying cause."""
         cause = ValueError("Original error")
-        error = JournalScrapingError("Journal scraping failed", cause)
+        error = JournalScraperError("Journal scraping failed", cause)
         
         assert "Journal scraping failed" in str(error)
         assert isinstance(error, Exception)
@@ -720,7 +720,7 @@ class TestErrorHandlingAndEdgeCases:
         mock_result.doi = ""      # Empty DOI
         mock_paperscraper.search_papers.return_value = [mock_result]
         
-        with patch('src.data_acquisition.journal_scraper.ThrottleManager'):
+        with patch('src.data_acquisition.journal_scraper.RateLimiter'):
             # Test that malformed results are handled gracefully
             result = scrape_journal_metadata("Test Journal", "test query")
             
@@ -738,13 +738,13 @@ class TestErrorHandlingAndEdgeCases:
         mock_response.headers = {'Content-Type': 'text/html'}
         mock_requests_get.return_value = mock_response
         
-        with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle:
+        with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle:
                 mock_robots.return_value.can_fetch.return_value = True
                 mock_throttle.return_value = MagicMock()
                 
                 # Test that unexpected content type raises appropriate error
-                with pytest.raises(JournalScrapingError) as exc_info:
+                with pytest.raises(JournalScraperError) as exc_info:
                     download_journal_fulltext("https://example.com/fake.pdf", "/tmp/test.pdf")
                 
                 error_message = str(exc_info.value).lower()
@@ -760,13 +760,13 @@ class TestErrorHandlingAndEdgeCases:
         mock_response.headers = {'Content-Type': 'application/pdf'}
         mock_requests_get.return_value = mock_response
         
-        with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle:
+        with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle:
                 mock_robots.return_value.can_fetch.return_value = True
                 mock_throttle.return_value = MagicMock()
                 
                 # Test that empty content raises appropriate error
-                with pytest.raises(JournalScrapingError) as exc_info:
+                with pytest.raises(JournalScraperError) as exc_info:
                     download_journal_fulltext("https://example.com/empty.pdf", "/tmp/test.pdf")
                 
                 error_message = str(exc_info.value).lower()
@@ -783,7 +783,7 @@ class TestErrorHandlingAndEdgeCases:
         ]
         
         for invalid_url in invalid_urls:
-            with pytest.raises((JournalScrapingError, ValueError, TypeError)):
+            with pytest.raises((JournalScraperError, ValueError, TypeError)):
                 if invalid_url is not None:
                     download_journal_fulltext(invalid_url, "/tmp/test.pdf")
                 else:
@@ -800,8 +800,8 @@ class TestErrorHandlingAndEdgeCases:
         
         for invalid_path in invalid_paths:
             with patch('src.data_acquisition.journal_scraper.requests.get') as mock_get:
-                with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-                    with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle:
+                with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+                    with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle:
                         mock_response = MagicMock()
                         mock_response.status_code = 200
                         mock_response.content = b"test content"
@@ -809,7 +809,7 @@ class TestErrorHandlingAndEdgeCases:
                         mock_robots.return_value.can_fetch.return_value = True
                         mock_throttle.return_value = MagicMock()
                         
-                        with pytest.raises((JournalScrapingError, ValueError, TypeError, OSError)):
+                        with pytest.raises((JournalScraperError, ValueError, TypeError, OSError)):
                             download_journal_fulltext("https://example.com/test.pdf", invalid_path)
 
 
@@ -834,8 +834,8 @@ class TestIntegrationScenarios:
         mock_response.headers = {'Content-Type': 'application/pdf'}
         mock_requests_get.return_value = mock_response
         
-        with patch('src.data_acquisition.journal_scraper.RobotsChecker') as mock_robots:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle:
+        with patch('src.data_acquisition.journal_scraper.check_robots_txt') as mock_robots:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle:
                 mock_robots.return_value.can_fetch.return_value = True
                 mock_throttle.return_value = MagicMock()
                 
@@ -879,7 +879,7 @@ class TestIntegrationScenarios:
         mock_requests_get.side_effect = mock_get_side_effect
         
         with patch('src.data_acquisition.journal_scraper.time.sleep') as mock_sleep:
-            with patch('src.data_acquisition.journal_scraper.ThrottleManager') as mock_throttle:
+            with patch('src.data_acquisition.journal_scraper.RateLimiter') as mock_throttle:
                 mock_throttle_instance = MagicMock()
                 mock_throttle.return_value = mock_throttle_instance
                 
@@ -925,7 +925,7 @@ class TestIntegrationScenarios:
         
         mock_paperscraper.search_papers.return_value = mock_results
         
-        with patch('src.data_acquisition.journal_scraper.ThrottleManager'):
+        with patch('src.data_acquisition.journal_scraper.RateLimiter'):
             # Test metadata scraping with filtering
             results = scrape_journal_metadata("Plant Journal", "metabolomics", filter_incomplete=True)
             
