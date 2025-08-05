@@ -114,7 +114,7 @@ Description: Ontology Export Functionality: Develop a function (src/ontology/exp
 Dependencies: AIM2-ODIE-005  
 Independent: No
 
-- [ ] **AIM2-ODIE-008-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_exporter.py) for src/ontology/exporter.py to cover:  
+- [x] **AIM2-ODIE-008-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_exporter.py) for src/ontology/exporter.py to cover:  
   * Successful export of a loaded ontology to a specified temporary file path.  
   * Verification that the exported file is not empty and contains expected OWL/RDF/XML tags.  
   * Attempting to load the exported file back into Owlready2 to confirm its validity and integrity.  
