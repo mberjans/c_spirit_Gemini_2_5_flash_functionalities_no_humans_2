@@ -21,6 +21,7 @@ Dependencies:
 import typer
 import sys
 import os
+import json
 from pathlib import Path
 from typing import Optional, List
 from rich.console import Console
@@ -34,6 +35,18 @@ try:
     from src.ontology.exporter import export_ontology, OntologyExportError
 except ImportError as e:
     print(f"Error importing ontology modules: {e}")
+    sys.exit(1)
+
+# Import PDF extraction modules
+try:
+    from src.data_acquisition.pdf_extractor import (
+        extract_text_from_pdf, 
+        extract_tables_from_pdf, 
+        get_pdf_metadata, 
+        PDFExtractionError
+    )
+except ImportError as e:
+    print(f"Error importing PDF extraction modules: {e}")
     sys.exit(1)
 
 # Initialize Typer app and Rich console
@@ -464,24 +477,103 @@ def pdf_extract_command(
         if verbose:
             console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
         
-        # Placeholder implementation
-        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
-        console.print(f"[green]Would extract content from: {input_file}[/green]")
-        console.print(f"[green]Would save extracted content to: {output}[/green]")
+        # Extract text content
+        console.print("[blue]Extracting text content from PDF...[/blue]")
+        try:
+            extracted_text = extract_text_from_pdf(input_file, method="pymupdf", use_fallback=True)
+            
+            # Create base filename from input file
+            input_path = Path(input_file)
+            base_filename = input_path.stem
+            
+            # Save extracted text
+            text_file = output_path / f"{base_filename}_text.txt"
+            text_file.write_text(extracted_text, encoding='utf-8')
+            
+            if verbose:
+                console.print(f"[green]✓ Text extracted ({len(extracted_text)} characters) and saved to: {text_file}[/green]")
+            else:
+                console.print(f"[green]✓ Text extracted and saved to: {text_file.name}[/green]")
+            
+        except PDFExtractionError as e:
+            console.print(f"[red]Failed to extract text: {e}[/red]")
+            raise typer.Exit(1)
         
-        if extract_images:
-            console.print("[green]Would extract images from PDF[/green]")
+        # Extract metadata
+        console.print("[blue]Extracting PDF metadata...[/blue]")
+        try:
+            metadata = get_pdf_metadata(input_file)
+            
+            # Save metadata as JSON
+            metadata_file = output_path / f"{base_filename}_metadata.json"
+            metadata_file.write_text(json.dumps(metadata, indent=2, default=str), encoding='utf-8')
+            
+            if verbose:
+                console.print(f"[green]✓ Metadata extracted ({len(metadata)} fields) and saved to: {metadata_file}[/green]")
+                # Display key metadata fields
+                if metadata:
+                    console.print("[dim]Key metadata:[/dim]")
+                    for key, value in list(metadata.items())[:5]:  # Show first 5 fields
+                        console.print(f"[dim]  {key}: {value}[/dim]")
+            else:
+                console.print(f"[green]✓ Metadata extracted and saved to: {metadata_file.name}[/green]")
+                
+        except PDFExtractionError as e:
+            console.print(f"[yellow]Warning: Failed to extract metadata: {e}[/yellow]")
+        
+        # Extract tables if requested
         if extract_tables:
-            console.print("[green]Would extract tables from PDF[/green]")
+            console.print("[blue]Extracting tables from PDF...[/blue]")
+            try:
+                tables = extract_tables_from_pdf(input_file)
+                
+                if tables:
+                    # Save tables as JSON
+                    tables_file = output_path / f"{base_filename}_tables.json"
+                    
+                    # Convert tables to serializable format
+                    serializable_tables = []
+                    for i, table in enumerate(tables):
+                        table_data = {
+                            "table_id": i + 1,
+                            "rows": len(table) if table else 0,
+                            "columns": len(table[0]) if table and table[0] else 0,
+                            "data": table
+                        }
+                        serializable_tables.append(table_data)
+                    
+                    tables_file.write_text(json.dumps(serializable_tables, indent=2), encoding='utf-8')
+                    
+                    if verbose:
+                        console.print(f"[green]✓ {len(tables)} tables extracted and saved to: {tables_file}[/green]")
+                        # Show table statistics
+                        for i, table_info in enumerate(serializable_tables):
+                            console.print(f"[dim]  Table {i+1}: {table_info['rows']} rows × {table_info['columns']} columns[/dim]")
+                    else:
+                        console.print(f"[green]✓ {len(tables)} tables extracted and saved to: {tables_file.name}[/green]")
+                else:
+                    console.print("[yellow]No tables found in PDF[/yellow]")
+                    
+            except PDFExtractionError as e:
+                console.print(f"[yellow]Warning: Failed to extract tables: {e}[/yellow]")
         
-        # TODO: Call actual PDF extraction function from src.data_acquisition.pdf_extractor
-        # from src.data_acquisition.pdf_extractor import extract_pdf_content
-        # results = extract_pdf_content(input_file, output_dir=output, extract_images=extract_images, extract_tables=extract_tables)
+        # Handle image extraction request
+        if extract_images:
+            console.print("[yellow]Note: Image extraction is not yet implemented[/yellow]")
+            console.print("[dim]Future enhancement: Will extract embedded images from PDF[/dim]")
         
-        console.print(f"[green]✓ PDF extraction completed (placeholder)[/green]")
+        # Summary
+        console.print(f"[green]✓ PDF extraction completed successfully![/green]")
+        console.print(f"[blue]Output directory: {output_path.absolute()}[/blue]")
         
+    except PDFExtractionError as e:
+        console.print(f"[red]PDF extraction error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error during PDF extraction: {e}[/red]")
+        console.print(f"[red]Unexpected error during PDF extraction: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())

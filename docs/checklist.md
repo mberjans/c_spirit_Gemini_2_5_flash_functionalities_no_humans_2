@@ -351,7 +351,7 @@ Independent: No
   * Test invalid arguments and ensure proper error messages are displayed.  
 - [x] **AIM2-ODIE-022-T2:** Extend src/cli.py with a corpus subcommand using the chosen CLI framework.  
 - [x] **AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\_acquisition/pubmed.py and handling output saving.  
-- [ ] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\_acquisition/pdf\_extractor.py and handling output saving.  
+- [x] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\_acquisition/pdf\_extractor.py and handling output saving.  
 - [ ] **AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\_acquisition/journal\_scraper.py and handling output saving.  
 - [ ] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.  
 - [ ] **AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
