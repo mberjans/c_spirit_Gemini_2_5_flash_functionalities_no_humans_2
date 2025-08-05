@@ -175,7 +175,7 @@ Independent: No
   * Definition of DataProperty classes if applicable (e.g., has\_molecular\_weight).  
   * Definition of inverse\_property for relevant relationships (e.g., is\_accumulated\_in as inverse of accumulates\_in) and verification of Owlready2's automatic handling.  
   * Creation of example instances with these relationships and verification of property values.  
-- [ ] **AIM2-ODIE-012-T2:** Create src/ontology/relationships.py.  
+- [x] **AIM2-ODIE-012-T2:** Create src/ontology/relationships.py.  
 - [ ] **AIM2-ODIE-012-T3:** Define ObjectProperty classes for "made\_via", "accumulates\_in", "affects" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \-010, \-011.  
 - [ ] **AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.  
 - [ ] **AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\_made\_via as inverse of made\_via).  
