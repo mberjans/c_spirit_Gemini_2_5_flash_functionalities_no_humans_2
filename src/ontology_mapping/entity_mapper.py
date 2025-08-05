@@ -9,18 +9,31 @@ Key Features:
 - Multiple mapping methods (TFIDF, Levenshtein, Jaro-Winkler, Jaccard, Fuzzy)
 - Minimum score filtering for high-confidence mappings
 - Support for different term types (class, property, individual)
+- Dual input support: string IRIs and Owlready2 ontology objects
 - Comprehensive input validation and error handling
 - Integration with standard ontologies (ChEBI, GO, NCBI Taxonomy, etc.)
+- Automatic IRI extraction from Owlready2 objects
 
 Usage:
     from src.ontology_mapping.entity_mapper import map_entities_to_ontology
     
     entities = ["glucose", "arabidopsis", "photosynthesis"]
-    ontology_iri = "http://purl.obolibrary.org/obo/chebi.owl"
     
+    # Using string IRI (backward compatible)
+    target_ontology = "http://purl.obolibrary.org/obo/chebi.owl"
     results = map_entities_to_ontology(
         entities=entities,
-        ontology_iri=ontology_iri,
+        target_ontology=target_ontology,
+        mapping_method='tfidf',
+        min_score=0.8
+    )
+    
+    # Using Owlready2 ontology object (new functionality)
+    import owlready2
+    onto = owlready2.get_ontology("http://purl.obolibrary.org/obo/chebi.owl").load()
+    results = map_entities_to_ontology(
+        entities=entities,
+        target_ontology=onto,
         mapping_method='tfidf',
         min_score=0.8
     )
@@ -28,7 +41,7 @@ Usage:
 
 import pandas as pd
 import re
-from typing import List, Optional
+from typing import List, Optional, Union, Any
 from urllib.parse import urlparse
 
 try:
@@ -53,6 +66,14 @@ except ImportError:
     
     text2term = MockText2Term()
 
+# Conditional import of owlready2 to avoid hard dependency
+try:
+    import owlready2
+    OWLREADY2_AVAILABLE = True
+except ImportError:
+    owlready2 = None
+    OWLREADY2_AVAILABLE = False
+
 
 # Custom Exception Classes
 class EntityMapperError(Exception):
@@ -68,6 +89,82 @@ class OntologyNotFoundError(EntityMapperError):
 class MappingError(EntityMapperError):
     """Exception raised when the mapping process fails."""
     pass
+
+
+class InvalidOwlready2ObjectError(EntityMapperError):
+    """Exception raised when an invalid Owlready2 object is provided."""
+    pass
+
+
+# Helper Functions for Owlready2 Integration
+def _is_owlready2_ontology(obj: Any) -> bool:
+    """
+    Check if an object is an Owlready2 ontology.
+    
+    Args:
+        obj: Object to check
+        
+    Returns:
+        bool: True if object is an Owlready2 ontology, False otherwise
+    """
+    if not OWLREADY2_AVAILABLE:
+        return False
+    
+    # Check if object is an instance of owlready2.Ontology
+    try:
+        return isinstance(obj, owlready2.Ontology)
+    except Exception:
+        return False
+
+
+def _extract_iri_from_owlready2_ontology(ontology: Any) -> str:
+    """
+    Extract IRI from an Owlready2 ontology object.
+    
+    Args:
+        ontology: Owlready2 ontology object
+        
+    Returns:
+        str: IRI of the ontology
+        
+    Raises:
+        InvalidOwlready2ObjectError: If ontology object is invalid or has no IRI
+    """
+    if not OWLREADY2_AVAILABLE:
+        raise InvalidOwlready2ObjectError(
+            "Owlready2 is not available. Install it with: pip install owlready2"
+        )
+    
+    if not _is_owlready2_ontology(ontology):
+        raise InvalidOwlready2ObjectError(
+            "Object is not a valid Owlready2 ontology. Expected owlready2.Ontology instance."
+        )
+    
+    try:
+        # Get the ontology IRI
+        iri = ontology.base_iri
+        
+        if not iri:
+            raise InvalidOwlready2ObjectError(
+                "Owlready2 ontology does not have a valid base IRI. "
+                "Ensure the ontology is properly loaded and has an IRI."
+            )
+        
+        # Remove trailing slash if present for consistency
+        if iri.endswith('/'):
+            iri = iri[:-1]
+        
+        return iri
+        
+    except AttributeError:
+        raise InvalidOwlready2ObjectError(
+            "Unable to extract IRI from Owlready2 ontology. "
+            "The ontology object may be corrupted or improperly loaded."
+        )
+    except Exception as e:
+        raise InvalidOwlready2ObjectError(
+            f"Error extracting IRI from Owlready2 ontology: {str(e)}"
+        )
 
 
 # Validation Functions
@@ -150,6 +247,43 @@ def _validate_ontology_iri(ontology_iri: str) -> None:
             )
     except Exception as e:
         raise ValueError(f"Invalid ontology IRI format: {str(e)}")
+
+
+def _validate_target_ontology(target_ontology: Union[str, Any]) -> str:
+    """
+    Validate and process target ontology parameter.
+    
+    This function accepts both string IRIs and Owlready2 ontology objects,
+    and returns a validated IRI string for use with text2term.
+    
+    Args:
+        target_ontology: Either a string IRI or an Owlready2 ontology object
+        
+    Returns:
+        str: Validated ontology IRI
+        
+    Raises:
+        ValueError: If the target ontology parameter is invalid
+        InvalidOwlready2ObjectError: If Owlready2 object is invalid
+    """
+    if target_ontology is None:
+        raise ValueError("Invalid ontology IRI: cannot be None")
+    
+    # Handle string IRI input (backward compatibility)
+    if isinstance(target_ontology, str):
+        _validate_ontology_iri(target_ontology)
+        return target_ontology
+    
+    # Handle Owlready2 ontology object input
+    elif _is_owlready2_ontology(target_ontology):
+        return _extract_iri_from_owlready2_ontology(target_ontology)
+    
+    # Invalid input type
+    else:
+        raise ValueError(
+            f"Invalid ontology IRI: must be a string IRI or Owlready2 ontology object, got {type(target_ontology)}. "
+            "If using Owlready2, ensure it's installed with: pip install owlready2"
+        )
 
 
 def _validate_min_score(min_score: float) -> None:
@@ -284,7 +418,7 @@ def _get_text2term_mapper(mapping_method: str):
 # Main Function
 def map_entities_to_ontology(
     entities: List[str],
-    ontology_iri: str,
+    target_ontology: Union[str, Any],
     mapping_method: str = 'tfidf',
     min_score: float = 0.3,
     term_type: str = 'class'
@@ -296,9 +430,15 @@ def map_entities_to_ontology(
     ontology using the text2term library. It supports various mapping methods and
     filtering options for high-quality results.
     
+    The target ontology can be specified in two ways:
+    1. As a string IRI/URL (backward compatible)
+    2. As an Owlready2 ontology object (new functionality for better integration)
+    
     Args:
         entities: List of entity strings to map to ontology terms
-        ontology_iri: IRI/URL of the target ontology
+        target_ontology: Either a string IRI/URL of the target ontology or an 
+                        Owlready2 ontology object. If using an Owlready2 object,
+                        the IRI will be automatically extracted.
         mapping_method: Method to use for mapping ('tfidf', 'levenshtein', 
                        'jaro_winkler', 'jaccard', 'fuzzy'). Defaults to 'tfidf'.
         min_score: Minimum similarity score threshold (0.0-1.0). Defaults to 0.3.
@@ -315,15 +455,28 @@ def map_entities_to_ontology(
     
     Raises:
         ValueError: If input parameters are invalid
+        InvalidOwlready2ObjectError: If Owlready2 object is invalid
         OntologyNotFoundError: If the specified ontology cannot be found
         MappingError: If the mapping process fails
         
-    Example:
+    Examples:
+        Using string IRI (backward compatible):
         >>> entities = ["glucose", "arabidopsis", "photosynthesis"]
-        >>> ontology_iri = "http://purl.obolibrary.org/obo/chebi.owl"
+        >>> target_ontology = "http://purl.obolibrary.org/obo/chebi.owl"
         >>> results = map_entities_to_ontology(
         ...     entities=entities,
-        ...     ontology_iri=ontology_iri,
+        ...     target_ontology=target_ontology,
+        ...     mapping_method='tfidf',
+        ...     min_score=0.8
+        ... )
+        >>> print(results)
+        
+        Using Owlready2 ontology object:
+        >>> import owlready2
+        >>> onto = owlready2.get_ontology("http://purl.obolibrary.org/obo/chebi.owl").load()
+        >>> results = map_entities_to_ontology(
+        ...     entities=entities,
+        ...     target_ontology=onto,
         ...     mapping_method='tfidf',
         ...     min_score=0.8
         ... )
@@ -331,7 +484,7 @@ def map_entities_to_ontology(
     """
     # Input validation
     _validate_entities(entities)
-    _validate_ontology_iri(ontology_iri)
+    ontology_iri = _validate_target_ontology(target_ontology)
     _validate_mapping_method(mapping_method)
     _validate_min_score(min_score)
     _validate_term_type(term_type)
