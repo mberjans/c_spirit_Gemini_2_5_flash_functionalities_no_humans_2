@@ -79,14 +79,14 @@ Description: Ontology Trimming & Filtering Core Logic: Implement core logic (src
 Dependencies: AIM2-ODIE-005  
 Independent: No
 
-- [ ] **AIM2-ODIE-006-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_trimmer.py) for src/ontology/trimmer.py to cover:  
+- [x] **AIM2-ODIE-006-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_trimmer.py) for src/ontology/trimmer.py to cover:  
   * Filtering classes by keyword in their name or label using ontology.search().  
   * Filtering individuals based on specific property values.  
   * Filtering subclasses of a given base class using is\_a or subclass\_of in search().  
   * Filtering based on a combination of criteria (e.g., class name AND property value).  
   * Ensuring the original ontology object is not modified if a "copy" operation is implied by the filtering.  
-- [ ] **AIM2-ODIE-006-T2:** Create src/ontology/trimmer.py.  
-- [ ] **AIM2-ODIE-006-T3:** Implement filter\_classes\_by\_keyword(ontology, keyword: str) function.  
+- [x] **AIM2-ODIE-006-T2:** Create src/ontology/trimmer.py.  
+- [x] **AIM2-ODIE-006-T3:** Implement filter\_classes\_by\_keyword(ontology, keyword: str) function.  
 - [ ] **AIM2-ODIE-006-T4:** Implement filter\_individuals\_by\_property(ontology, property\_name: str, value: Any) function.  
 - [ ] **AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.  
 - [ ] **AIM2-ODIE-006-T6:** Implement a general apply\_filters(ontology, filters: dict) function that combines multiple filtering criteria.  
