@@ -121,7 +121,7 @@ Independent: No
   * Error handling for invalid file paths or write permissions.  
 - [x] **AIM2-ODIE-008-T2:** Create src/ontology/exporter.py.  
 - [x] **AIM2-ODIE-008-T3:** Implement export\_ontology(ontology, file\_path: str, format: str \= 'rdfxml') function using ontology.save(file=file\_path, format=format).  
-- [ ] **AIM2-ODIE-008-T4:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-008-T4:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-009  
 Description: Refined Ontology Scheme Definition (Structural): Programmatically define and integrate terms for "Structural Annotation" (Chemont classification, NP Classifier, Plant Metabolic Network) into the core ontology using Owlready2.  
