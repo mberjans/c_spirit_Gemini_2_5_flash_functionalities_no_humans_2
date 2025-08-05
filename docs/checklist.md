@@ -398,7 +398,7 @@ Description: Relationship-to-Ontology Mapping Module: Implement mapping of extra
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-005, AIM2-ODIE-021, AIM2-ODIE-024  
 Independent: No
 
-- [ ] **AIM2-ODIE-025-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\_mapping/test\_relation\_mapper.py) for src/ontology\_mapping/relation\_mapper.py:  
+- [x] **AIM2-ODIE-025-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\_mapping/test\_relation\_mapper.py) for src/ontology\_mapping/relation\_mapper.py:  
   * Test map\_relationships\_to\_ontology with a list of extracted relationship triples (e.g., (subject\_text, relation\_text, object\_text)) and the loaded ontology.  
   * Test mapping of relation\_text to existing Owlready2.ObjectProperty instances.  
   * Test handling of relationships that do not have a direct match in the ontology.  
