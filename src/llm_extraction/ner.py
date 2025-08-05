@@ -146,17 +146,24 @@ def _format_prompt(
     # Format schema as a readable string
     schema_str = "\n".join([f"- {key}: {desc}" for key, desc in schema.items()])
     
-    # Format examples if provided
+    # Format examples for few-shot templates
     examples_str = ""
     if examples:
-        examples_list = []
-        for example in examples:
-            example_text = example["text"]
-            example_entities = ", ".join([
-                f"{e['text']} ({e['label']})" for e in example["entities"]
-            ])
-            examples_list.append(f"Text: {example_text}\nEntities: {example_entities}")
-        examples_str = "\n\nExamples:\n" + "\n\n".join(examples_list)
+        # Check if this is a few-shot template (contains detailed example formatting)
+        if "EXAMPLES:" in template or "LEARNING EXAMPLES:" in template:
+            # Use the advanced formatting for few-shot templates
+            from .prompt_templates import format_examples_for_prompt
+            examples_str = format_examples_for_prompt(examples)
+        else:
+            # Use simple formatting for zero-shot templates
+            examples_list = []
+            for example in examples:
+                example_text = example["text"]
+                example_entities = ", ".join([
+                    f"{e['text']} ({e['label']})" for e in example["entities"]
+                ])
+                examples_list.append(f"Text: {example_text}\nEntities: {example_entities}")
+            examples_str = "\n\nExamples:\n" + "\n\n".join(examples_list)
     
     # Replace placeholders in template
     formatted_prompt = template.replace("{text}", text)
@@ -364,3 +371,184 @@ def _validate_response_format(entities: List[Dict[str, Any]]) -> None:
         
         if not (0.0 <= entity["confidence"] <= 1.0):
             raise LLMAPIError(f"Invalid field range: 'confidence' must be between 0.0 and 1.0 in entity {i}")
+
+
+# Helper functions for few-shot NER
+
+def extract_entities_few_shot(
+    text: str,
+    entity_schema: Dict[str, str],
+    llm_model_name: str,
+    template_type: str = "basic",
+    num_examples: int = 3,
+    example_strategy: str = "balanced",
+    domain_context: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Extract entities using few-shot learning with automatically generated examples.
+    
+    Args:
+        text: Input text to extract entities from
+        entity_schema: Dictionary mapping entity types to descriptions
+        llm_model_name: Name of the LLM model to use
+        template_type: Type of few-shot template ("basic", "detailed", "precision", "recall", "scientific")
+        num_examples: Number of examples to include
+        example_strategy: Example selection strategy ("balanced", "random", "high_confidence", "diverse")
+        domain_context: Optional domain context for example selection
+        
+    Returns:
+        List of extracted entities
+        
+    Raises:
+        ValueError: For invalid input parameters
+        InvalidSchemaError: For invalid entity schema
+        LLMAPIError: For LLM API-related errors
+    """
+    from .prompt_templates import (
+        get_few_shot_template, 
+        get_context_aware_examples,
+        select_examples
+    )
+    
+    # Get appropriate few-shot template
+    template = get_few_shot_template(template_type)
+    
+    # Generate or select examples
+    if domain_context:
+        from .prompt_templates import get_examples_by_domain
+        examples = get_examples_by_domain(domain_context, num_examples)
+    else:
+        # Use context-aware example selection
+        examples = get_context_aware_examples(text, entity_schema, num_examples)
+        
+        # If no context-aware examples found, use schema-based selection
+        if not examples:
+            schema_types = list(entity_schema.keys())
+            examples = select_examples(
+                schema_types, 
+                strategy=example_strategy, 
+                max_examples=num_examples
+            )
+    
+    return extract_entities(text, entity_schema, llm_model_name, template, examples)
+
+
+def extract_entities_with_custom_examples(
+    text: str,
+    entity_schema: Dict[str, str],
+    llm_model_name: str,
+    examples: List[Dict[str, Any]],
+    template_type: str = "basic"
+) -> List[Dict[str, Any]]:
+    """
+    Extract entities using few-shot learning with custom examples.
+    
+    Args:
+        text: Input text to extract entities from
+        entity_schema: Dictionary mapping entity types to descriptions
+        llm_model_name: Name of the LLM model to use
+        examples: Custom examples to use for few-shot learning
+        template_type: Type of few-shot template to use
+        
+    Returns:
+        List of extracted entities
+    """
+    from .prompt_templates import get_few_shot_template
+    
+    template = get_few_shot_template(template_type)
+    return extract_entities(text, entity_schema, llm_model_name, template, examples)
+
+
+def extract_entities_domain_specific(
+    text: str,
+    entity_schema: Dict[str, str],
+    llm_model_name: str,
+    domain: str,
+    use_few_shot: bool = True,
+    num_examples: int = 4
+) -> List[Dict[str, Any]]:
+    """
+    Extract entities using domain-specific templates and examples.
+    
+    Args:
+        text: Input text to extract entities from
+        entity_schema: Dictionary mapping entity types to descriptions
+        llm_model_name: Name of the LLM model to use
+        domain: Domain name (metabolomics, genetics, plant_biology, etc.)
+        use_few_shot: Whether to use few-shot learning
+        num_examples: Number of examples to include (if using few-shot)
+        
+    Returns:
+        List of extracted entities
+    """
+    from .prompt_templates import (
+        get_domain_specific_template,
+        get_few_shot_domain_template,
+        get_examples_by_domain
+    )
+    
+    if use_few_shot:
+        try:
+            template = get_few_shot_domain_template(domain)
+            examples = get_examples_by_domain(domain, num_examples)
+            return extract_entities(text, entity_schema, llm_model_name, template, examples)
+        except Exception:
+            # Fallback to zero-shot domain template
+            template = get_domain_specific_template(domain)
+            return extract_entities(text, entity_schema, llm_model_name, template)
+    else:
+        template = get_domain_specific_template(domain)
+        return extract_entities(text, entity_schema, llm_model_name, template)
+
+
+def extract_entities_adaptive(
+    text: str,
+    entity_schema: Dict[str, str],
+    llm_model_name: str,
+    precision_recall_preference: str = "balanced",
+    auto_select_examples: bool = True,
+    max_examples: int = 6
+) -> List[Dict[str, Any]]:
+    """
+    Extract entities using adaptive template and example selection.
+    
+    Args:
+        text: Input text to extract entities from
+        entity_schema: Dictionary mapping entity types to descriptions
+        llm_model_name: Name of the LLM model to use
+        precision_recall_preference: "precision", "recall", or "balanced"
+        auto_select_examples: Whether to automatically select examples
+        max_examples: Maximum number of examples to use
+        
+    Returns:
+        List of extracted entities
+    """
+    from .prompt_templates import (
+        get_template_for_use_case,
+        get_context_aware_examples,
+        get_few_shot_template
+    )
+    
+    # Determine text characteristics
+    text_length = len(text)
+    estimated_entities = text.count(' ') // 10  # Rough estimate
+    
+    # Select appropriate template based on characteristics
+    if auto_select_examples and text_length > 200:
+        # Use few-shot for longer texts
+        if precision_recall_preference == "precision":
+            template = get_few_shot_template("precision")
+        elif precision_recall_preference == "recall":
+            template = get_few_shot_template("recall")
+        else:
+            template = get_few_shot_template("detailed")
+        
+        examples = get_context_aware_examples(text, entity_schema, max_examples)
+        return extract_entities(text, entity_schema, llm_model_name, template, examples)
+    else:
+        # Use zero-shot for shorter texts
+        template = get_template_for_use_case(
+            "basic",
+            precision_recall_balance=precision_recall_preference
+        )
+        return extract_entities(text, entity_schema, llm_model_name, template)
