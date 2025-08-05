@@ -22,6 +22,7 @@ import logging
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+import sys
 
 try:
     import fitz  # PyMuPDF
@@ -40,18 +41,21 @@ logger = logging.getLogger(__name__)
 class PDFExtractionError(Exception):
     """Custom exception for PDF extraction-related errors."""
     
-    def __init__(self, message: str, cause: Optional[Exception] = None):
+    def __init__(self, message: str, cause: Optional[Exception] = None, library: Optional[str] = None):
         """
         Initialize PDFExtractionError.
         
         Args:
             message: Error message
             cause: Optional underlying exception that caused this error
+            library: Optional library name that caused the error (pymupdf, pdfplumber)
         """
         super().__init__(message)
         self.cause = cause
+        self.library = library
         if cause:
-            self.message = f"{message}. Caused by: {str(cause)}"
+            library_info = f" [{library}]" if library else ""
+            self.message = f"{message}{library_info}. Caused by: {str(cause)}"
         else:
             self.message = message
     
@@ -120,9 +124,10 @@ def get_pdf_metadata(file_path: str) -> Dict[str, Any]:
         return metadata
         
     except Exception as e:
-        error_msg = f"Failed to extract PDF metadata from {file_path}: {e}"
+        # Handle PyMuPDF-specific errors
+        error_msg = _handle_pymupdf_error(e, file_path, "metadata extraction")
         logger.error(error_msg)
-        raise PDFExtractionError(error_msg, e)
+        raise PDFExtractionError(error_msg, e, "pymupdf")
 
 
 def is_pdf_password_protected(file_path: str) -> bool:
@@ -149,9 +154,10 @@ def is_pdf_password_protected(file_path: str) -> bool:
         return is_protected
         
     except Exception as e:
-        error_msg = f"Failed to check password protection for {file_path}: {e}"
+        # Handle PyMuPDF-specific errors
+        error_msg = _handle_pymupdf_error(e, file_path, "password protection check")
         logger.error(error_msg)
-        raise PDFExtractionError(error_msg, e)
+        raise PDFExtractionError(error_msg, e, "pymupdf")
 
 
 def extract_text_pymupdf(file_path: str, start_page: Optional[int] = None, 
@@ -172,8 +178,13 @@ def extract_text_pymupdf(file_path: str, start_page: Optional[int] = None,
     """
     logger.info(f"Extracting text from PDF using PyMuPDF: {file_path}")
     
+    doc = None
     try:
         doc = fitz.open(file_path)
+        
+        # Check for memory issues with large PDFs
+        if doc.page_count > 1000:
+            logger.warning(f"Large PDF detected ({doc.page_count} pages) - potential memory issues")
         
         # Determine page range
         total_pages = doc.page_count
@@ -192,18 +203,24 @@ def extract_text_pymupdf(file_path: str, start_page: Optional[int] = None,
             pages = list(doc)  # Convert to list to handle mocking properly
             for page_num in range(start, end + 1):
                 if page_num < len(pages):
-                    page = pages[page_num]
-                    page_text = page.get_text()
-                    if page_text:  # Include empty pages in range extraction
-                        text_parts.append(page_text)
+                    try:
+                        page = pages[page_num]
+                        page_text = page.get_text()
+                        if page_text:  # Include empty pages in range extraction
+                            text_parts.append(page_text)
+                    except Exception as page_error:
+                        logger.warning(f"Failed to extract text from page {page_num + 1}: {page_error}")
+                        continue
         else:
             # No page range - iterate through all pages
-            for page in doc:
-                page_text = page.get_text()
-                if page_text:  # Include all pages when no range specified
-                    text_parts.append(page_text)
-        
-        doc.close()
+            for page_num, page in enumerate(doc):
+                try:
+                    page_text = page.get_text()
+                    if page_text:  # Include all pages when no range specified
+                        text_parts.append(page_text)
+                except Exception as page_error:
+                    logger.warning(f"Failed to extract text from page {page_num + 1}: {page_error}")
+                    continue
         
         # Join pages with newlines
         extracted_text = '\n'.join(text_parts)
@@ -212,9 +229,17 @@ def extract_text_pymupdf(file_path: str, start_page: Optional[int] = None,
         return extracted_text
         
     except Exception as e:
-        error_msg = f"Failed to extract text using PyMuPDF from {file_path}: {e}"
+        # Handle PyMuPDF-specific errors
+        error_msg = _handle_pymupdf_error(e, file_path, "text extraction")
         logger.error(error_msg)
-        raise PDFExtractionError(error_msg, e)
+        raise PDFExtractionError(error_msg, e, "pymupdf")
+    finally:
+        # Ensure document is closed even if error occurs
+        if doc is not None:
+            try:
+                doc.close()
+            except Exception as close_error:
+                logger.warning(f"Failed to close PDF document: {close_error}")
 
 
 def extract_text_pdfplumber(file_path: str) -> str:
@@ -236,10 +261,18 @@ def extract_text_pdfplumber(file_path: str) -> str:
         text_parts = []
         
         with pdfplumber.open(file_path) as pdf:
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text and page_text.strip():  # Only add non-empty pages
-                    text_parts.append(page_text)
+            # Check for memory issues with large PDFs
+            if len(pdf.pages) > 1000:
+                logger.warning(f"Large PDF detected ({len(pdf.pages)} pages) - potential memory issues")
+            
+            for page_num, page in enumerate(pdf.pages):
+                try:
+                    page_text = page.extract_text()
+                    if page_text and page_text.strip():  # Only add non-empty pages
+                        text_parts.append(page_text)
+                except Exception as page_error:
+                    logger.warning(f"Failed to extract text from page {page_num + 1}: {page_error}")
+                    continue
         
         # Join pages with newlines
         extracted_text = '\n'.join(text_parts)
@@ -248,9 +281,10 @@ def extract_text_pdfplumber(file_path: str) -> str:
         return extracted_text
         
     except Exception as e:
-        error_msg = f"Failed to extract text using pdfplumber from {file_path}: {e}"
+        # Handle pdfplumber-specific errors
+        error_msg = _handle_pdfplumber_error(e, file_path, "text extraction")
         logger.error(error_msg)
-        raise PDFExtractionError(error_msg, e)
+        raise PDFExtractionError(error_msg, e, "pdfplumber")
 
 
 def extract_text_from_pdf(file_path: str, method: str = "pymupdf", 
@@ -326,6 +360,10 @@ def extract_tables_pdfplumber(file_path: str,
         all_tables = []
         
         with pdfplumber.open(file_path) as pdf:
+            # Check for memory issues with large PDFs
+            if len(pdf.pages) > 1000:
+                logger.warning(f"Large PDF detected ({len(pdf.pages)} pages) - potential memory issues")
+            
             for page_num, page in enumerate(pdf.pages):
                 try:
                     # Extract tables with optional settings
@@ -346,9 +384,10 @@ def extract_tables_pdfplumber(file_path: str,
         return all_tables
         
     except Exception as e:
-        error_msg = f"Failed to extract tables using pdfplumber from {file_path}: {e}"
+        # Handle pdfplumber-specific errors
+        error_msg = _handle_pdfplumber_error(e, file_path, "table extraction")
         logger.error(error_msg)
-        raise PDFExtractionError(error_msg, e)
+        raise PDFExtractionError(error_msg, e, "pdfplumber")
 
 
 def extract_tables_from_pdf(file_path: str) -> List[List[List[str]]]:
@@ -373,6 +412,129 @@ def extract_tables_from_pdf(file_path: str) -> List[List[List[str]]]:
     validate_pdf_file(file_path)
     
     return extract_tables_pdfplumber(file_path)
+
+
+def _handle_pymupdf_error(error: Exception, file_path: str, operation: str) -> str:
+    """
+    Handle PyMuPDF-specific errors and provide informative error messages.
+    
+    Args:
+        error: The original exception
+        file_path: Path to the PDF file
+        operation: Description of the operation that failed
+        
+    Returns:
+        str: Informative error message
+    """
+    error_str = str(error).lower()
+    error_type = type(error).__name__
+    
+    # Check for specific PyMuPDF errors
+    if "filedataerror" in error_type.lower() or "file data error" in error_str:
+        return f"PyMuPDF: Corrupted or invalid PDF file structure during {operation} - {file_path}"
+    
+    elif "filenotfounderror" in error_type.lower() or "file not found" in error_str:
+        return f"PyMuPDF: PDF file not found during {operation} - {file_path}"
+    
+    elif "runtimeerror" in error_type.lower():
+        if "password" in error_str or "encrypted" in error_str:
+            return f"PyMuPDF: PDF is password-protected or encrypted during {operation} - {file_path}"
+        elif "damaged" in error_str or "corrupt" in error_str:
+            return f"PyMuPDF: PDF file is damaged or corrupted during {operation} - {file_path}"
+        elif "memory" in error_str or "malloc" in error_str:
+            return f"PyMuPDF: Memory allocation failed (PDF too large or insufficient memory) during {operation} - {file_path}"
+        else:
+            return f"PyMuPDF: Runtime error during {operation} - {file_path}: {error}"
+    
+    elif "memoryerror" in error_type.lower():
+        return f"PyMuPDF: Out of memory error (PDF too large) during {operation} - {file_path}"
+    
+    elif "valueerror" in error_type.lower():
+        if "invalid" in error_str or "malformed" in error_str:
+            return f"PyMuPDF: Invalid or malformed PDF structure during {operation} - {file_path}"
+        else:
+            return f"PyMuPDF: Invalid parameter or PDF format during {operation} - {file_path}: {error}"
+    
+    elif "unicodedecodeerror" in error_type.lower() or "unicodeerror" in error_type.lower():
+        return f"PyMuPDF: Text encoding error (corrupted character data) during {operation} - {file_path}"
+    
+    elif "ioerror" in error_type.lower() or "oserror" in error_type.lower():
+        return f"PyMuPDF: File I/O error (permissions, disk space, or network issue) during {operation} - {file_path}"
+    
+    elif "attributeerror" in error_type.lower():
+        return f"PyMuPDF: PDF object structure error (missing attributes) during {operation} - {file_path}"
+    
+    else:
+        # Generic PyMuPDF error
+        return f"PyMuPDF: Unexpected error during {operation} - {file_path}: {error}"
+
+
+def _handle_pdfplumber_error(error: Exception, file_path: str, operation: str) -> str:
+    """
+    Handle pdfplumber-specific errors and provide informative error messages.
+    
+    Args:
+        error: The original exception
+        file_path: Path to the PDF file
+        operation: Description of the operation that failed
+        
+    Returns:
+        str: Informative error message
+    """
+    error_str = str(error).lower()
+    error_type = type(error).__name__
+    
+    # Check for specific pdfplumber errors
+    if "pdfplumbererror" in error_type.lower():
+        return f"pdfplumber: PDF parsing error during {operation} - {file_path}: {error}"
+    
+    elif "pdfsynerror" in error_type.lower() or "pdfsyntaxerror" in error_type.lower():
+        return f"pdfplumber: PDF syntax error (malformed PDF structure) during {operation} - {file_path}"
+    
+    elif "pdftyperror" in error_type.lower():
+        return f"pdfplumber: PDF object type error (corrupted object structure) during {operation} - {file_path}"
+    
+    elif "pdfvalueerror" in error_type.lower():
+        return f"pdfplumber: Invalid PDF value or parameter during {operation} - {file_path}: {error}"
+    
+    elif "pdfexception" in error_type.lower():
+        return f"pdfplumber: General PDF processing error during {operation} - {file_path}: {error}"
+    
+    elif "memoryerror" in error_type.lower():
+        return f"pdfplumber: Out of memory error (PDF too large) during {operation} - {file_path}"
+    
+    elif "valueerror" in error_type.lower():
+        if "password" in error_str or "encrypted" in error_str:
+            return f"pdfplumber: PDF is password-protected or encrypted during {operation} - {file_path}"
+        elif "invalid" in error_str or "malformed" in error_str:
+            return f"pdfplumber: Invalid or malformed PDF content during {operation} - {file_path}"
+        else:
+            return f"pdfplumber: Invalid parameter or PDF format during {operation} - {file_path}: {error}"
+    
+    elif "keyerror" in error_type.lower():
+        return f"pdfplumber: Missing PDF object or attribute during {operation} - {file_path}: {error}"
+    
+    elif "attributeerror" in error_type.lower():
+        return f"pdfplumber: PDF object structure error (missing methods/attributes) during {operation} - {file_path}"
+    
+    elif "unicodedecodeerror" in error_type.lower() or "unicodeerror" in error_type.lower():
+        return f"pdfplumber: Text encoding error (corrupted character data) during {operation} - {file_path}"
+    
+    elif "ioerror" in error_type.lower() or "oserror" in error_type.lower():
+        return f"pdfplumber: File I/O error (permissions, disk space, or network issue) during {operation} - {file_path}"
+    
+    elif "runtimeerror" in error_type.lower():
+        if "cryptographic" in error_str or "decrypt" in error_str:
+            return f"pdfplumber: Cryptographic/decryption error (password-protected PDF) during {operation} - {file_path}"
+        else:
+            return f"pdfplumber: Runtime error during {operation} - {file_path}: {error}"
+    
+    elif "recursionerror" in error_type.lower():
+        return f"pdfplumber: Recursive PDF structure error (circular references) during {operation} - {file_path}"
+    
+    else:
+        # Generic pdfplumber error
+        return f"pdfplumber: Unexpected error during {operation} - {file_path}: {error}"
 
 
 # Module initialization
