@@ -419,8 +419,8 @@ Independent: Yes
   * Test edge cases like empty strings or lists.  
 - [x] **AIM2-ODIE-026-T2:** Create src/data\_quality/normalizer.py.  
 - [x] **AIM2-ODIE-026-T3:** Implement normalize\_name(name: str) function using string methods and potentially regex.  
-- [ ] **AIM2-ODIE-026-T4:** Implement find\_fuzzy\_matches(query: str, candidates: list\[str\], threshold: int \= 80\) function using FuzzyWuzzy.process.extract.  
-- [ ] **AIM2-ODIE-026-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-026-T4:** Implement find\_fuzzy\_matches(query: str, candidates: list\[str\], threshold: int \= 80\) function using FuzzyWuzzy.process.extract.  
+- [x] **AIM2-ODIE-026-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-027  
 Description: Fact Deduplication & Entity Resolution Module: Implement deduplication of redundant facts and entity resolution using dedupe or recordlinkage to consolidate unique entities.  
