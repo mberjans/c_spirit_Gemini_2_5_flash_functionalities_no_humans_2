@@ -87,7 +87,7 @@ Independent: No
   * Ensuring the original ontology object is not modified if a "copy" operation is implied by the filtering.  
 - [x] **AIM2-ODIE-006-T2:** Create src/ontology/trimmer.py.  
 - [x] **AIM2-ODIE-006-T3:** Implement filter\_classes\_by\_keyword(ontology, keyword: str) function.  
-- [ ] **AIM2-ODIE-006-T4:** Implement filter\_individuals\_by\_property(ontology, property\_name: str, value: Any) function.  
+- [x] **AIM2-ODIE-006-T4:** Implement filter\_individuals\_by\_property(ontology, property\_name: str, value: Any) function.  
 - [ ] **AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.  
 - [ ] **AIM2-ODIE-006-T6:** Implement a general apply\_filters(ontology, filters: dict) function that combines multiple filtering criteria.  
 - [ ] **AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
