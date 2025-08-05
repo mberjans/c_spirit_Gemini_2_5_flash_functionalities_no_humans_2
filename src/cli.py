@@ -122,7 +122,7 @@ process_app = typer.Typer(
     
     Available commands:
     • clean - Clean and normalize raw text data removing noise and artifacts
-    • chunk - Split text into manageable segments for processing
+    • chunk - Split text into manageable segments for processing and analysis
     
     Use 'process [command] --help' for detailed information about each command."""
 )
@@ -1124,6 +1124,799 @@ def journal_scrape_command(
         raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Unexpected error during journal scraping: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@process_app.command("chunk")
+def process_chunk_command(
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to the input text file to chunk and segment. File must be readable and contain text content suitable for processing."
+    ),
+    output: str = typer.Option(
+        "./chunked_text", 
+        "--output", "-o", 
+        help="Output directory where chunk files and metadata will be saved. Creates directory structure if it doesn't exist."
+    ),
+    method: str = typer.Option(
+        "fixed", 
+        "--method", "-m", 
+        help="Chunking method to use: 'fixed' (fixed-size chunks), 'sentences' (sentence-based), or 'recursive' (semantic chunking)."
+    ),
+    chunk_size: int = typer.Option(
+        1000, 
+        "--chunk-size", "-s", 
+        help="Maximum size of each chunk in characters (for 'fixed' and 'recursive' methods). Recommended: 500-2000 for most applications."
+    ),
+    chunk_overlap: int = typer.Option(
+        100, 
+        "--chunk-overlap", 
+        help="Number of characters to overlap between consecutive chunks (for 'fixed' and 'recursive' methods). Helps maintain context."
+    ),
+    tokenizer: str = typer.Option(
+        "nltk", 
+        "--tokenizer", 
+        help="Tokenizer for sentence-based chunking: 'nltk' (default) or 'spacy'. Only applies to 'sentences' method."
+    ),
+    separators: Optional[str] = typer.Option(
+        None, 
+        "--separators", 
+        help="Custom separators for recursive chunking (comma-separated). Example: '\\n\\n,\\n,.,!,?'. Only applies to 'recursive' method."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed progress information including chunk statistics, processing steps, and file operations."
+    )
+):
+    """
+    Split text into manageable chunks for processing and analysis.
+    
+    This command segments large text files into smaller, manageable chunks suitable
+    for LLM processing, analysis, and information extraction. Multiple chunking
+    strategies are available to handle different text types and use cases.
+    
+    \b
+    CHUNKING METHODS:
+    • fixed - Fixed-size character chunks with optional overlap for consistent processing
+    • sentences - Sentence-based chunks preserving natural language boundaries  
+    • recursive - Semantic chunking using hierarchical separators for context preservation
+    
+    \b
+    METHOD DETAILS:
+    
+    Fixed-Size Chunking:
+    • Creates chunks of exactly specified character size with optional overlap
+    • Attempts to avoid splitting words when possible by finding word boundaries
+    • Best for: Consistent processing requirements, memory-constrained applications
+    • Parameters: --chunk-size, --chunk-overlap
+    
+    Sentence-Based Chunking:
+    • Splits text at sentence boundaries using NLTK or spaCy tokenizers
+    • Preserves complete sentences and handles scientific abbreviations
+    • Best for: Natural language processing, maintaining linguistic coherence
+    • Parameters: --tokenizer (nltk/spacy)
+    
+    Recursive Character Chunking:
+    • Uses hierarchical separators to find optimal split points
+    • Maintains semantic coherence by respecting document structure
+    • Best for: Complex documents, maintaining context and meaning
+    • Parameters: --chunk-size, --chunk-overlap, --separators
+    
+    \b
+    OUTPUT FILES:
+    • chunk_001.txt, chunk_002.txt, ... - Individual chunk files numbered sequentially
+    • chunking_metadata.json - Complete chunking session metadata and statistics
+    • chunk_summary.txt - Human-readable summary of chunking results
+    
+    \b
+    CHUNK OVERLAP BENEFITS:
+    • Maintains context across chunk boundaries
+    • Helps with entity recognition spanning chunks
+    • Reduces information loss at chunk edges
+    • Recommended: 10-20% of chunk size
+    
+    \b
+    CHUNKING PARAMETERS:
+    • Small chunks (200-500 chars): Better for fine-grained analysis, more files
+    • Medium chunks (500-1500 chars): Balanced approach for most applications
+    • Large chunks (1500-3000 chars): Better context retention, fewer files
+    • Overlap: Typically 10-20% of chunk size for good context preservation
+    
+    \b
+    REQUIREMENTS:
+    • Input file must be readable text format
+    • NLTK library for sentence tokenization (auto-downloaded if needed)
+    • spaCy library for advanced sentence tokenization (optional)
+    • LangChain library for recursive chunking (optional, fallback available)
+    • Sufficient disk space for output chunks
+    
+    \b
+    USAGE EXAMPLES:
+    # Basic fixed-size chunking with default settings
+    process chunk research_paper.txt --output ./chunks --verbose
+    
+    # Sentence-based chunking for natural language processing
+    process chunk article.txt --method sentences --tokenizer spacy --output ./sentences
+    
+    # Recursive chunking with custom parameters
+    process chunk document.txt --method recursive --chunk-size 1500 --chunk-overlap 200 --output ./semantic_chunks
+    
+    # Fixed chunking with custom size and no overlap
+    process chunk large_text.txt --method fixed --chunk-size 800 --chunk-overlap 0 --output ./fixed_chunks
+    
+    # Recursive chunking with custom separators
+    process chunk structured_doc.txt --method recursive --separators "\\n\\n,\\n,.,!,?" --output ./custom_chunks
+    
+    \b
+    PERFORMANCE CONSIDERATIONS:
+    • Large files may take time to process - use --verbose to monitor progress
+    • Many small chunks create more files but allow parallel processing
+    • Fewer large chunks reduce I/O overhead but may exceed processing limits
+    • Consider downstream processing requirements when choosing chunk size
+    
+    \b
+    TEXT TYPE RECOMMENDATIONS:
+    • Scientific papers: sentence or recursive method for preserving structure
+    • News articles: sentence method for maintaining readability
+    • Technical documentation: recursive method with custom separators
+    • General text: fixed method for consistent processing requirements
+    • Multi-language content: sentence method with appropriate tokenizer
+    
+    \b
+    TROUBLESHOOTING:
+    • If chunking fails, check input file encoding and readability
+    • For sentence chunking errors, try switching tokenizer (nltk/spacy)
+    • Large overlap values may cause processing slowdown
+    • Use --verbose to identify specific chunking issues
+    • Ensure sufficient disk space for output chunks
+    • Some methods require additional libraries - install as prompted
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting text chunking process for: {input_file}[/blue]")
+            console.print("Chunking parameters:")
+            console.print(f"  - Method: {method}")
+            console.print(f"  - Output directory: {output}")
+            if method in ["fixed", "recursive"]:
+                console.print(f"  - Chunk size: {chunk_size} characters")
+                console.print(f"  - Chunk overlap: {chunk_overlap} characters")
+            if method == "sentences":
+                console.print(f"  - Tokenizer: {tokenizer}")
+            if method == "recursive" and separators:
+                console.print(f"  - Custom separators: {separators}")
+        
+        # Validate method
+        if method not in ["fixed", "sentences", "recursive"]:
+            console.print(f"[red]Error: Invalid chunking method '{method}'. Must be 'fixed', 'sentences', or 'recursive'.[/red]")
+            console.print("Use --help to see available methods and their descriptions.")
+            raise typer.Exit(1)
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Validate parameters for specific methods
+        if method in ["fixed", "recursive"]:
+            if chunk_size <= 0:
+                console.print(f"[red]Error: Chunk size must be positive (got {chunk_size})[/red]")
+                raise typer.Exit(1)
+            
+            if chunk_overlap < 0:
+                console.print(f"[red]Error: Chunk overlap cannot be negative (got {chunk_overlap})[/red]")
+                raise typer.Exit(1)
+            
+            if chunk_overlap >= chunk_size:
+                console.print(f"[red]Error: Chunk overlap ({chunk_overlap}) cannot be larger than chunk size ({chunk_size})[/red]")
+                raise typer.Exit(1)
+        
+        if method == "sentences" and tokenizer not in ["nltk", "spacy"]:
+            console.print(f"[red]Error: Invalid tokenizer '{tokenizer}'. Must be 'nltk' or 'spacy'.[/red]")
+            raise typer.Exit(1)
+        
+        # Create output directory
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        if verbose:
+            console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
+        
+        # Read input file
+        console.print("[blue]Reading input file...[/blue]")
+        try:
+            with open(input_file, 'r', encoding='utf-8') as f:
+                text_content = f.read()
+        except UnicodeDecodeError:
+            # Try alternative encodings
+            for encoding in ['latin-1', 'cp1252', 'iso-8859-1']:
+                try:
+                    with open(input_file, 'r', encoding=encoding) as f:
+                        text_content = f.read()
+                    if verbose:
+                        console.print(f"[yellow]Successfully read file using {encoding} encoding[/yellow]")
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                console.print("[red]Error: Could not decode input file. Please ensure it's a valid text file.[/red]")
+                raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error reading input file: {e}[/red]")
+            raise typer.Exit(1)
+        
+        if not text_content.strip():
+            console.print("[yellow]Warning: Input file is empty or contains only whitespace[/yellow]")
+            return
+        
+        original_length = len(text_content)
+        if verbose:
+            console.print(f"[green]✓ Read {original_length:,} characters from input file[/green]")
+        
+        # Perform chunking based on selected method
+        console.print(f"[blue]Chunking text using '{method}' method...[/blue]")
+        
+        try:
+            if method == "fixed":
+                chunks = chunk_fixed_size(text_content, chunk_size, chunk_overlap)
+            elif method == "sentences":
+                chunks = chunk_by_sentences(text_content, tokenizer)
+            elif method == "recursive":
+                # Parse custom separators if provided
+                custom_separators = None
+                if separators:
+                    # Split by comma and replace escape sequences
+                    custom_separators = [sep.replace('\\n', '\n').replace('\\t', '\t') 
+                                       for sep in separators.split(',')]
+                    if verbose:
+                        console.print(f"[blue]Using custom separators: {custom_separators}[/blue]")
+                
+                chunks = chunk_recursive_char(text_content, chunk_size, chunk_overlap, custom_separators)
+                
+        except ChunkingError as e:
+            console.print(f"[red]Chunking error: {e}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Unexpected error during chunking: {e}[/red]")
+            if verbose:
+                import traceback
+                console.print(traceback.format_exc())
+            raise typer.Exit(1)
+        
+        if not chunks:
+            console.print("[yellow]No chunks were created (empty result)[/yellow]")
+            return
+        
+        console.print(f"[green]✓ Successfully created {len(chunks)} chunks[/green]")
+        
+        # Save chunks to individual files
+        console.print("[blue]Saving chunks to files...[/blue]")
+        
+        chunk_files = []
+        total_chunk_chars = 0
+        
+        for i, chunk in enumerate(chunks, 1):
+            chunk_filename = f"chunk_{i:03d}.txt"
+            chunk_file_path = output_path / chunk_filename
+            
+            try:
+                with open(chunk_file_path, 'w', encoding='utf-8') as f:
+                    f.write(chunk)
+                
+                chunk_files.append(chunk_filename)
+                total_chunk_chars += len(chunk)
+                
+                if verbose and i <= 5:  # Show first 5 files being created
+                    console.print(f"[dim]  Created {chunk_filename} ({len(chunk)} characters)[/dim]")
+                elif verbose and i == 6 and len(chunks) > 5:
+                    console.print(f"[dim]  ... and {len(chunks) - 5} more files[/dim]")
+                
+            except Exception as e:
+                console.print(f"[red]Error writing chunk {i}: {e}[/red]")
+                raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[green]✓ Saved {len(chunk_files)} chunk files[/green]")
+        
+        # Create metadata file
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Calculate chunk statistics
+        chunk_lengths = [len(chunk) for chunk in chunks]
+        avg_chunk_length = sum(chunk_lengths) / len(chunk_lengths) if chunk_lengths else 0
+        min_chunk_length = min(chunk_lengths) if chunk_lengths else 0
+        max_chunk_length = max(chunk_lengths) if chunk_lengths else 0
+        
+        metadata = {
+            "timestamp": timestamp,
+            "input_file": str(Path(input_file).absolute()),
+            "output_directory": str(output_path.absolute()),
+            "chunking_method": method,
+            "parameters": {
+                "chunk_size": chunk_size if method in ["fixed", "recursive"] else None,
+                "chunk_overlap": chunk_overlap if method in ["fixed", "recursive"] else None,
+                "tokenizer": tokenizer if method == "sentences" else None,
+                "separators": separators if method == "recursive" else None
+            },
+            "statistics": {
+                "original_text_length": original_length,
+                "total_chunks": len(chunks),
+                "total_chunk_characters": total_chunk_chars,
+                "average_chunk_length": round(avg_chunk_length, 2),
+                "min_chunk_length": min_chunk_length,
+                "max_chunk_length": max_chunk_length,
+                "compression_ratio": round(total_chunk_chars / original_length, 4) if original_length > 0 else 0
+            },
+            "chunk_files": chunk_files
+        }
+        
+        # Save metadata as JSON
+        metadata_file = output_path / "chunking_metadata.json"
+        try:
+            with open(metadata_file, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, default=str)
+            if verbose:
+                console.print(f"[green]✓ Metadata saved to: {metadata_file.name}[/green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not save metadata: {e}[/yellow]")
+        
+        # Create human-readable summary
+        summary_content = f"""Text Chunking Summary
+====================
+Date: {timestamp}
+Input: {Path(input_file).name}
+Method: {method.title()} Chunking
+
+Parameters:
+"""
+        
+        if method in ["fixed", "recursive"]:
+            summary_content += f"- Chunk Size: {chunk_size:,} characters\n"
+            summary_content += f"- Chunk Overlap: {chunk_overlap:,} characters\n"
+        if method == "sentences":
+            summary_content += f"- Tokenizer: {tokenizer}\n"
+        if method == "recursive" and separators:
+            summary_content += f"- Custom Separators: {separators}\n"
+        
+        summary_content += f"""
+Results:
+- Original Text: {original_length:,} characters
+- Total Chunks: {len(chunks):,}
+- Average Chunk Size: {avg_chunk_length:.0f} characters
+- Size Range: {min_chunk_length:,} - {max_chunk_length:,} characters
+- Output Files: {len(chunk_files)} chunk files + metadata
+
+Files Created:
+"""
+        
+        for filename in chunk_files[:10]:  # Show first 10 files
+            summary_content += f"- {filename}\n"
+        
+        if len(chunk_files) > 10:
+            summary_content += f"- ... and {len(chunk_files) - 10} more files\n"
+        
+        summary_content += f"- chunking_metadata.json\n"
+        
+        # Save summary
+        summary_file = output_path / "chunk_summary.txt"
+        try:
+            with open(summary_file, 'w', encoding='utf-8') as f:
+                f.write(summary_content)
+            if verbose:
+                console.print(f"[green]✓ Summary saved to: {summary_file.name}[/green]")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not save summary: {e}[/yellow]")
+        
+        # Display results table
+        if verbose:
+            table = Table(title="Chunking Results")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="magenta")
+            
+            table.add_row("Original text size", f"{original_length:,} characters")
+            table.add_row("Total chunks", f"{len(chunks):,}")
+            table.add_row("Average chunk size", f"{avg_chunk_length:.0f} characters")
+            table.add_row("Size range", f"{min_chunk_length:,} - {max_chunk_length:,} characters")
+            table.add_row("Files created", f"{len(chunk_files) + 2}")  # +2 for metadata and summary
+            table.add_row("Method", method.title())
+            
+            if method in ["fixed", "recursive"]:
+                overlap_percent = (chunk_overlap / chunk_size * 100) if chunk_size > 0 else 0
+                table.add_row("Overlap", f"{chunk_overlap} chars ({overlap_percent:.1f}%)")
+            
+            console.print(table)
+        
+        # Final summary
+        console.print(f"[green]✓ Text chunking completed successfully![/green]")
+        console.print(f"[green]  Input: {Path(input_file).name} ({original_length:,} characters)[/green]")
+        console.print(f"[green]  Output: {len(chunks)} chunks in {output_path.name}/[/green]")
+        console.print(f"[blue]  Average chunk size: {avg_chunk_length:.0f} characters[/blue]")
+        console.print(f"[blue]  Total files created: {len(chunk_files) + 2}[/blue]")
+        
+    except ChunkingError as e:
+        console.print(f"[red]Chunking error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error during text chunking: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@process_app.command("clean")
+def process_clean_command(
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to the input text file to clean and process. File must be readable and contain text content."
+    ),
+    output: Optional[str] = typer.Option(
+        None, 
+        "--output", "-o", 
+        help="Output file path for cleaned text. If not specified, adds '_cleaned' suffix to input filename."
+    ),
+    normalize: bool = typer.Option(
+        False, 
+        "--normalize", 
+        help="Apply text normalization: convert to lowercase, remove HTML tags, clean whitespace."
+    ),
+    tokenize: str = typer.Option(
+        None, 
+        "--tokenize", 
+        help="Tokenize text into 'words' or 'sentences'. Output will be one token per line."
+    ),
+    remove_dupes: bool = typer.Option(
+        False, 
+        "--remove-duplicates", 
+        help="Remove exact and fuzzy duplicate lines from the text."
+    ),
+    filter_stops: bool = typer.Option(
+        False, 
+        "--filter-stopwords", 
+        help="Remove common English stopwords from tokenized text."
+    ),
+    standardize_encoding: bool = typer.Option(
+        False, 
+        "--standardize-encoding", 
+        help="Standardize text encoding to UTF-8 with automatic encoding detection."
+    ),
+    fuzzy_threshold: int = typer.Option(
+        90, 
+        "--fuzzy-threshold", 
+        help="Similarity threshold (0-100) for fuzzy duplicate detection. Higher values are more strict."
+    ),
+    custom_stopwords: Optional[str] = typer.Option(
+        None, 
+        "--custom-stopwords", 
+        help="Path to file containing custom stopwords (one per line) to use instead of default English stopwords."
+    ),
+    filter_punct: bool = typer.Option(
+        False, 
+        "--filter-punct", 
+        help="Filter out punctuation tokens when tokenizing (only applies to word tokenization)."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed progress information including processing steps, statistics, and file operations."
+    )
+):
+    """
+    Clean and preprocess text data using various normalization and filtering techniques.
+    
+    This command provides comprehensive text cleaning capabilities for preparing raw text
+    data for analysis, machine learning, and information extraction tasks. Multiple
+    cleaning operations can be combined in a single processing pipeline.
+    
+    \b
+    CLEANING OPERATIONS:
+    • Text normalization - Convert to lowercase, remove HTML, clean whitespace
+    • Tokenization - Split text into words or sentences with punctuation filtering
+    • Duplicate removal - Remove exact and fuzzy duplicates with configurable similarity
+    • Stopword filtering - Remove common English words using NLTK or custom lists
+    • Encoding standardization - Convert to UTF-8 with automatic detection
+    
+    \b
+    PROCESSING PIPELINE:
+    Operations are applied in this order when multiple options are selected:
+    1. Encoding standardization (if --standardize-encoding)
+    2. Text normalization (if --normalize)
+    3. Tokenization (if --tokenize specified)
+    4. Stopword filtering (if --filter-stopwords and tokenized)
+    5. Duplicate removal (if --remove-duplicates)
+    
+    \b
+    OUTPUT FORMATS:
+    • Default: Cleaned text preserving original structure
+    • Tokenized: One token per line when using --tokenize
+    • Deduplicated: Unique lines only when using --remove-duplicates
+    
+    \b
+    TOKENIZATION MODES:
+    • words - Split into individual words and punctuation
+    • sentences - Split into complete sentences
+    • Use --filter-punct to remove punctuation from word tokens
+    
+    \b
+    DUPLICATE REMOVAL:
+    • Exact duplicates: Removed based on string equality
+    • Fuzzy duplicates: Removed using configurable similarity threshold
+    • Case sensitivity: Configurable for comparison operations
+    
+    \b
+    REQUIREMENTS:
+    • Input file must be readable text format
+    • NLTK library for tokenization and stopwords (auto-downloaded)
+    • spaCy library for advanced tokenization (optional, NLTK fallback)
+    • BeautifulSoup for HTML tag removal
+    • chardet for encoding detection
+    
+    \b
+    USAGE EXAMPLES:
+    # Basic normalization and cleanup
+    process clean raw_text.txt --normalize --output clean_text.txt --verbose
+    
+    # Tokenize into words and remove stopwords
+    process clean document.txt --tokenize words --filter-stopwords --filter-punct --output tokens.txt
+    
+    # Full cleaning pipeline with duplicate removal
+    process clean corpus.txt --normalize --tokenize sentences --remove-duplicates --fuzzy-threshold 85 --output processed.txt
+    
+    # Custom stopwords and encoding standardization
+    process clean multilingual.txt --standardize-encoding --filter-stopwords --custom-stopwords my_stopwords.txt
+    
+    # Sentence segmentation for analysis
+    process clean research_paper.txt --normalize --tokenize sentences --output sentences.txt --verbose
+    
+    \b
+    ADVANCED OPTIONS:
+    • --fuzzy-threshold: Control similarity for duplicate detection (default: 90)
+    • --custom-stopwords: Use domain-specific stopword lists
+    • --filter-punct: Clean up tokenized output by removing punctuation
+    • Multiple operations can be combined for comprehensive cleaning
+    
+    \b
+    FILE HANDLING:
+    • Input: Any readable text file in various encodings
+    • Output: UTF-8 encoded text file with cleaned content
+    • Automatic output naming with '_cleaned' suffix if not specified
+    • Preserves directory structure when using relative paths
+    
+    \b
+    TROUBLESHOOTING:
+    • For encoding issues, try --standardize-encoding first
+    • Large files may take time - use --verbose to monitor progress
+    • If tokenization fails, NLTK fallback will be used automatically
+    • Custom stopwords file should contain one word per line
+    • Check input file permissions if processing fails
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Starting text cleaning process for: {input_file}[/blue]")
+            console.print("Processing options:")
+            console.print(f"  - Normalize text: {normalize}")
+            console.print(f"  - Tokenize: {tokenize if tokenize else 'No'}")
+            console.print(f"  - Remove duplicates: {remove_dupes}")
+            console.print(f"  - Filter stopwords: {filter_stops}")
+            console.print(f"  - Standardize encoding: {standardize_encoding}")
+            if remove_dupes:
+                console.print(f"  - Fuzzy threshold: {fuzzy_threshold}")
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Determine output file path
+        if output is None:
+            input_path = Path(input_file)
+            output = str(input_path.parent / f"{input_path.stem}_cleaned{input_path.suffix}")
+        
+        if verbose:
+            console.print(f"[blue]Output file: {output}[/blue]")
+        
+        # Read input file
+        console.print("[blue]Reading input file...[/blue]")
+        try:
+            # Try reading as UTF-8 first
+            with open(input_file, 'r', encoding='utf-8') as f:
+                text_content = f.read()
+        except UnicodeDecodeError:
+            # If UTF-8 fails, read as bytes for encoding standardization
+            with open(input_file, 'rb') as f:
+                raw_bytes = f.read()
+            
+            if standardize_encoding:
+                if verbose:
+                    console.print("[blue]Detecting and standardizing encoding...[/blue]")
+                text_content = standardize_encoding(raw_bytes, auto_detect=True)
+            else:
+                # Try common encodings
+                for encoding in ['latin-1', 'cp1252', 'iso-8859-1']:
+                    try:
+                        text_content = raw_bytes.decode(encoding)
+                        if verbose:
+                            console.print(f"[yellow]Successfully decoded using {encoding} encoding[/yellow]")
+                        break
+                    except UnicodeDecodeError:
+                        continue
+                else:
+                    console.print("[red]Error: Could not decode file. Try using --standardize-encoding option.[/red]")
+                    raise typer.Exit(1)
+        
+        original_length = len(text_content)
+        if verbose:
+            console.print(f"[green]✓ Read {original_length:,} characters from input file[/green]")
+        
+        # Load custom stopwords if provided
+        custom_stopwords_list = None
+        if custom_stopwords:
+            if not os.path.exists(custom_stopwords):
+                console.print(f"[red]Error: Custom stopwords file not found: {custom_stopwords}[/red]")
+                raise typer.Exit(1)
+            
+            try:
+                with open(custom_stopwords, 'r', encoding='utf-8') as f:
+                    custom_stopwords_list = [line.strip() for line in f if line.strip()]
+                if verbose:
+                    console.print(f"[green]✓ Loaded {len(custom_stopwords_list)} custom stopwords[/green]")
+            except Exception as e:
+                console.print(f"[red]Error reading custom stopwords file: {e}[/red]")
+                raise typer.Exit(1)
+        
+        # Apply processing pipeline in order
+        processed_content = text_content
+        
+        # Step 1: Encoding standardization (already done during file reading if requested)
+        
+        # Step 2: Text normalization
+        if normalize:
+            console.print("[blue]Normalizing text...[/blue]")
+            try:
+                processed_content = normalize_text(processed_content)
+                if verbose:
+                    console.print(f"[green]✓ Text normalized ({len(processed_content):,} characters)[/green]")
+            except TextCleaningError as e:
+                console.print(f"[red]Error during normalization: {e}[/red]")
+                raise typer.Exit(1)
+        
+        # Step 3: Tokenization
+        tokens = None
+        if tokenize:
+            if tokenize not in ["words", "sentences"]:
+                console.print(f"[red]Error: Invalid tokenization mode '{tokenize}'. Must be 'words' or 'sentences'.[/red]")
+                raise typer.Exit(1)
+            
+            console.print(f"[blue]Tokenizing text into {tokenize}...[/blue]")
+            try:
+                tokens = tokenize_text(processed_content, mode=tokenize, filter_punct=filter_punct)
+                if verbose:
+                    console.print(f"[green]✓ Tokenized into {len(tokens):,} {tokenize}[/green]")
+                    if tokenize == "words" and filter_punct:
+                        console.print("[dim]  Punctuation tokens filtered out[/dim]")
+            except TextCleaningError as e:
+                console.print(f"[red]Error during tokenization: {e}[/red]")
+                raise typer.Exit(1)
+        
+        # Step 4: Stopword filtering (only applies to tokenized content)
+        if filter_stops and tokens:
+            console.print("[blue]Filtering stopwords...[/blue]")
+            try:
+                original_token_count = len(tokens)
+                tokens = filter_stopwords(tokens, custom_stopwords_list=custom_stopwords_list)
+                filtered_count = original_token_count - len(tokens)
+                if verbose:
+                    console.print(f"[green]✓ Filtered {filtered_count:,} stopwords ({len(tokens):,} tokens remaining)[/green]")
+            except TextCleaningError as e:
+                console.print(f"[red]Error during stopword filtering: {e}[/red]")
+                raise typer.Exit(1)
+        elif filter_stops and not tokens:
+            console.print("[yellow]Warning: --filter-stopwords requires tokenization. Use --tokenize option.[/yellow]")
+        
+        # Step 5: Duplicate removal
+        if remove_dupes:
+            console.print("[blue]Removing duplicates...[/blue]")
+            try:
+                if tokens:
+                    # Remove duplicates from tokens
+                    original_count = len(tokens)
+                    tokens = remove_duplicates(tokens, fuzzy_threshold=fuzzy_threshold, case_sensitive=not normalize)
+                    removed_count = original_count - len(tokens)
+                    if verbose:
+                        console.print(f"[green]✓ Removed {removed_count:,} duplicates ({len(tokens):,} unique tokens remaining)[/green]")
+                else:
+                    # Remove duplicates from lines
+                    lines = processed_content.split('\n')
+                    original_count = len(lines)
+                    lines = remove_duplicates(lines, fuzzy_threshold=fuzzy_threshold, case_sensitive=not normalize)
+                    processed_content = '\n'.join(lines)
+                    removed_count = original_count - len(lines)
+                    if verbose:
+                        console.print(f"[green]✓ Removed {removed_count:,} duplicate lines ({len(lines):,} unique lines remaining)[/green]")
+            except TextCleaningError as e:
+                console.print(f"[red]Error during duplicate removal: {e}[/red]")
+                raise typer.Exit(1)
+        
+        # Prepare final output content
+        if tokens:
+            # If we have tokens, output one per line
+            final_content = '\n'.join(tokens)
+        else:
+            final_content = processed_content
+        
+        # Write output file
+        console.print(f"[blue]Writing cleaned content to: {output}[/blue]")
+        try:
+            # Ensure output directory exists
+            output_path = Path(output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write UTF-8 encoded output
+            with open(output, 'w', encoding='utf-8') as f:
+                f.write(final_content)
+            
+            final_length = len(final_content)
+            if verbose:
+                console.print(f"[green]✓ Wrote {final_length:,} characters to output file[/green]")
+                
+                # Show processing statistics
+                table = Table(title="Text Cleaning Results")
+                table.add_column("Metric", style="cyan")
+                table.add_column("Value", style="magenta")
+                
+                table.add_row("Original size", f"{original_length:,} characters")
+                table.add_row("Final size", f"{final_length:,} characters")
+                
+                if tokens:
+                    table.add_row("Tokens", f"{len(tokens):,}")
+                    table.add_row("Output format", f"One {tokenize[:-1]} per line")
+                
+                size_change = ((final_length - original_length) / original_length * 100) if original_length > 0 else 0
+                change_color = "green" if size_change < 0 else "yellow" if size_change > 0 else "white"
+                table.add_row("Size change", f"[{change_color}]{size_change:+.1f}%[/{change_color}]")
+                
+                console.print(table)
+            
+        except Exception as e:
+            console.print(f"[red]Error writing output file: {e}[/red]")
+            raise typer.Exit(1)
+        
+        # Summary
+        console.print(f"[green]✓ Text cleaning completed successfully![/green]")
+        console.print(f"[green]  Input: {input_file}[/green]")
+        console.print(f"[green]  Output: {output}[/green]")
+        
+        # Show what operations were applied
+        applied_operations = []
+        if standardize_encoding:
+            applied_operations.append("encoding standardization")
+        if normalize:
+            applied_operations.append("text normalization")
+        if tokenize:
+            applied_operations.append(f"{tokenize} tokenization")
+        if filter_stops and tokens:
+            applied_operations.append("stopword filtering")
+        if remove_dupes:
+            applied_operations.append("duplicate removal")
+        
+        if applied_operations:
+            console.print(f"[blue]Applied operations: {', '.join(applied_operations)}[/blue]")
+        
+    except TextCleaningError as e:
+        console.print(f"[red]Text cleaning error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error during text cleaning: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())
