@@ -97,7 +97,7 @@ Description: Ontology Entity Deletion Functionality: Implement functions (src/on
 Dependencies: AIM2-ODIE-005  
 Independent: No
 
-- [ ] **AIM2-ODIE-007-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_editor.py) for src/ontology/editor.py to cover:  
+- [x] **AIM2-ODIE-007-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_editor.py) for src/ontology/editor.py to cover:  
   * Deletion of a specific class and verification of its absence using ontology.search\_one().  
   * Deletion of a specific individual and verification of its absence.  
   * Deletion of a property and verification of its absence.  
