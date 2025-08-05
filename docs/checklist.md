@@ -119,8 +119,8 @@ Independent: No
   * Verification that the exported file is not empty and contains expected OWL/RDF/XML tags.  
   * Attempting to load the exported file back into Owlready2 to confirm its validity and integrity.  
   * Error handling for invalid file paths or write permissions.  
-- [ ] **AIM2-ODIE-008-T2:** Create src/ontology/exporter.py.  
-- [ ] **AIM2-ODIE-008-T3:** Implement export\_ontology(ontology, file\_path: str, format: str \= 'rdfxml') function using ontology.save(file=file\_path, format=format).  
+- [x] **AIM2-ODIE-008-T2:** Create src/ontology/exporter.py.  
+- [x] **AIM2-ODIE-008-T3:** Implement export\_ontology(ontology, file\_path: str, format: str \= 'rdfxml') function using ontology.save(file=file\_path, format=format).  
 - [ ] **AIM2-ODIE-008-T4:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-009  
