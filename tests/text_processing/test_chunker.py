@@ -70,18 +70,16 @@ class TestChunkFixedSize:
             assert overlap_found, "No overlap found between chunks"
     
     def test_chunk_fixed_size_token_counting(self):
-        """Test that chunk sizes are correctly measured in tokens/characters."""
+        """Test that chunk sizes are correctly measured in characters."""
         text = "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10"
         
         # Test character-based chunking
         chunks = chunk_fixed_size(text, chunk_size=20, chunk_overlap=0)
         assert all(len(chunk) <= 20 for chunk in chunks)
         
-        # Test word-based chunking if implemented
-        chunks_words = chunk_fixed_size(text, chunk_size=5, chunk_overlap=0, unit='words')
-        for chunk in chunks_words:
-            word_count = len(chunk.split())
-            assert word_count <= 5
+        # Test with different chunk size to verify character counting
+        chunks_small = chunk_fixed_size(text, chunk_size=15, chunk_overlap=0)
+        assert all(len(chunk) <= 15 for chunk in chunks_small)
     
     def test_chunk_fixed_size_no_mid_word_splitting(self):
         """Test that chunks don't split words inappropriately."""

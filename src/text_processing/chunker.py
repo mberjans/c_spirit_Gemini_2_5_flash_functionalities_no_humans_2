@@ -36,19 +36,17 @@ class ChunkingError(Exception):
     pass
 
 
-def chunk_fixed_size(text: str, chunk_size: int, chunk_overlap: int, unit: str = 'characters') -> List[str]:
+def chunk_fixed_size(text: str, chunk_size: int, chunk_overlap: int) -> List[str]:
     """
     Split text into fixed-size chunks with optional overlap.
     
     This function creates chunks of specified size with optional overlap between chunks.
-    It supports both character-based and word-based chunking and avoids splitting
-    words inappropriately when possible.
+    It uses character-based chunking and avoids splitting words inappropriately when possible.
     
     Args:
         text: Input text string to chunk
-        chunk_size: Maximum size of each chunk (in characters or words)
-        chunk_overlap: Number of characters/words to overlap between chunks
-        unit: Unit for measuring chunk size - 'characters' or 'words'
+        chunk_size: Maximum size of each chunk in characters
+        chunk_overlap: Number of characters to overlap between chunks
         
     Returns:
         List[str]: List of text chunks
@@ -59,8 +57,6 @@ def chunk_fixed_size(text: str, chunk_size: int, chunk_overlap: int, unit: str =
     Examples:
         >>> chunk_fixed_size("Plant metabolomics research", chunk_size=10, chunk_overlap=0)
         ['Plant meta', 'bolomics r', 'esearch']
-        >>> chunk_fixed_size("Plant metabolomics research", chunk_size=2, chunk_overlap=0, unit='words')
-        ['Plant metabolomics', 'research']
     """
     if text is None:
         raise ChunkingError("Input text cannot be None")
@@ -77,16 +73,11 @@ def chunk_fixed_size(text: str, chunk_size: int, chunk_overlap: int, unit: str =
     if chunk_overlap >= chunk_size:
         raise ChunkingError("Chunk overlap cannot be larger than chunk size")
     
-    if unit not in ['characters', 'words']:
-        raise ChunkingError("Unit must be 'characters' or 'words'")
-    
     if not text.strip():
         return []
     
-    if unit == 'words':
-        return _chunk_by_words(text, chunk_size, chunk_overlap)
-    else:
-        return _chunk_by_characters(text, chunk_size, chunk_overlap)
+    # Always use character-based chunking as per task specification
+    return _chunk_by_characters(text, chunk_size, chunk_overlap)
 
 
 def _chunk_by_characters(text: str, chunk_size: int, chunk_overlap: int) -> List[str]:
@@ -111,7 +102,7 @@ def _chunk_by_characters(text: str, chunk_size: int, chunk_overlap: int) -> List
         chunk = text[start:end]
         
         # Try to avoid splitting words - look for word boundary
-        if end < len(text) and not text[end].isspace() and not text[end-1].isspace():
+        if end < len(text) and not text[end].isspace():
             # Look backwards for a space within the chunk
             space_pos = chunk.rfind(' ')
             if space_pos > 0:  # Found a space, use it as split point
@@ -124,14 +115,9 @@ def _chunk_by_characters(text: str, chunk_size: int, chunk_overlap: int) -> List
         
         # Calculate next start position with overlap
         if chunk_overlap > 0:
-            # For overlap, go back from current end position
-            start = max(start + 1, end - chunk_overlap)
+            start = end - chunk_overlap
         else:
             start = end
-        
-        # Ensure we make progress
-        if start >= len(text):
-            break
     
     return chunks
 
