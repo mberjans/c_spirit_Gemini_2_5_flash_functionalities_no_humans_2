@@ -226,12 +226,12 @@ Independent: Yes
   * Test rate limiting implementation (e.g., verifying delays between calls).  
   * Test error handling for network issues, invalid queries, or empty results.  
   * Ensure Entrez.email is set.  
-- [ ] **AIM2-ODIE-015-T2:** Create src/data\_acquisition/pubmed.py.  
-- [ ] **AIM2-ODIE-015-T3:** Implement search\_pubmed(query: str, max\_results: int \= 100\) function using Bio.Entrez.esearch.  
-- [ ] **AIM2-ODIE-015-T4:** Implement fetch\_pubmed\_xml(id\_list: list\[str\]) function using Bio.Entrez.efetch.  
-- [ ] **AIM2-ODIE-015-T5:** Implement rate limiting (e.g., using time.sleep or a custom decorator) to comply with NCBI E-utilities guidelines (max 3 requests/sec without API key, 10 requests/sec with).  
-- [ ] **AIM2-ODIE-015-T6:** Add robust error handling for Biopython.Entrez exceptions and API responses.  
-- [ ] **AIM2-ODIE-015-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-015-T2:** Create src/data\_acquisition/pubmed.py.  
+- [x] **AIM2-ODIE-015-T3:** Implement search\_pubmed(query: str, max\_results: int \= 100\) function using Bio.Entrez.esearch.  
+- [x] **AIM2-ODIE-015-T4:** Implement fetch\_pubmed\_xml(id\_list: list\[str\]) function using Bio.Entrez.efetch.  
+- [x] **AIM2-ODIE-015-T5:** Implement rate limiting (e.g., using time.sleep or a custom decorator) to comply with NCBI E-utilities guidelines (max 3 requests/sec without API key, 10 requests/sec with).  
+- [x] **AIM2-ODIE-015-T6:** Add robust error handling for Biopython.Entrez exceptions and API responses.  
+- [x] **AIM2-ODIE-015-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-016  
 Description: PDF Text & Table Extraction Module: Develop a module (src/data\_acquisition/pdf\_extractor.py) using PyMuPDF and pdfplumber (or Camelot/Tabula-py) to extract text and tables from PDF documents.  
