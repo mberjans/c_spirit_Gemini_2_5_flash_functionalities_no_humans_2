@@ -216,9 +216,42 @@ def load_ontology_from_url(url: str) -> Any:
         raise OntologyLoadError(f"Unexpected error loading ontology from URL: {e}") from e
 
 
+def load_ontology(source: str) -> Any:
+    """
+    Load an ontology from either a file path or URL.
+    
+    This is a convenience function that automatically determines whether
+    the source is a file path or URL and calls the appropriate loading function.
+    
+    Args:
+        source: File path or URL to the ontology
+        
+    Returns:
+        The loaded ontology object from Owlready2
+        
+    Raises:
+        OntologyLoadError: If loading fails for any reason
+        
+    Example:
+        >>> ontology = load_ontology("/path/to/ontology.owl")
+        >>> ontology = load_ontology("http://example.com/ontology.owl")
+    """
+    if not source or not source.strip():
+        raise OntologyLoadError("Invalid source: source cannot be empty")
+    
+    source = source.strip()
+    
+    # Check if source looks like a URL
+    if source.startswith(('http://', 'https://')):
+        return load_ontology_from_url(source)
+    else:
+        return load_ontology_from_file(source)
+
+
 # Export public interface
 __all__ = [
     "OntologyLoadError",
     "load_ontology_from_file",
     "load_ontology_from_url",
+    "load_ontology",
 ]

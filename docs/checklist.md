@@ -206,12 +206,12 @@ Independent: No
   * Test ontology trim \<file\_path\> \--keyword \<keyword\> command with filtering criteria on a dummy ontology.  
   * Test ontology export \<input\_file\> \<output\_file\> command to a temporary file and verify output.  
   * Test invalid arguments (e.g., non-existent file, incorrect format) and ensure proper error messages are displayed.  
-- [ ] **AIM2-ODIE-014-T2:** Choose a CLI framework (e.g., Typer or Click) and set up the main CLI entry point (src/cli.py).  
-- [ ] **AIM2-ODIE-014-T3:** Implement ontology load subcommand, calling functions from src/ontology/loader.py.  
-- [ ] **AIM2-ODIE-014-T4:** Implement ontology trim subcommand, calling functions from src/ontology/trimmer.py with appropriate arguments for filtering criteria.  
-- [ ] **AIM2-ODIE-014-T5:** Implement ontology export subcommand, calling functions from src/ontology/exporter.py.  
-- [ ] **AIM2-ODIE-014-T6:** Add comprehensive help messages for all commands and arguments using the chosen CLI framework's features.  
-- [ ] **AIM2-ODIE-014-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
+- [x] **AIM2-ODIE-014-T2:** Choose a CLI framework (e.g., Typer or Click) and set up the main CLI entry point (src/cli.py).  
+- [x] **AIM2-ODIE-014-T3:** Implement ontology load subcommand, calling functions from src/ontology/loader.py.  
+- [x] **AIM2-ODIE-014-T4:** Implement ontology trim subcommand, calling functions from src/ontology/trimmer.py with appropriate arguments for filtering criteria.  
+- [x] **AIM2-ODIE-014-T5:** Implement ontology export subcommand, calling functions from src/ontology/exporter.py.  
+- [x] **AIM2-ODIE-014-T6:** Add comprehensive help messages for all commands and arguments using the chosen CLI framework's features.  
+- [x] **AIM2-ODIE-014-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
 
 ### **3\. Literature Information Extraction using LLMs**
 
