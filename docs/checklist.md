@@ -156,7 +156,7 @@ Description: Refined Ontology Scheme Definition (Functional): Programmatically d
 Dependencies: AIM2-ODIE-005, AIM2-ODIE-007  
 Independent: No
 
-- [ ] **AIM2-ODIE-011-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_functional.py) for src/ontology/scheme\_functional.py to cover:  
+- [x] **AIM2-ODIE-011-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_functional.py) for src/ontology/scheme\_functional.py to cover:  
   * Creation of new Owlready2 classes representing GO, Trait Ontology, and ChemFont categories.  
   * Verification that these classes are correctly added and accessible in the ontology.  
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., DroughtTolerance is a subclass of PlantTrait).  
