@@ -247,8 +247,8 @@ Independent: Yes
 - [x] **AIM2-ODIE-016-T2:** Create src/data\_acquisition/pdf\_extractor.py.  
 - [x] **AIM2-ODIE-016-T3:** Implement extract\_text\_from\_pdf(file\_path: str) function using PyMuPDF (fitz.open().get\_text()) or pdfplumber (pdf.pages\[i\].extract\_text()).  
 - [x] **AIM2-ODIE-016-T4:** Implement extract\_tables\_from\_pdf(file\_path: str) function using pdfplumber (page.extract\_tables()) or Camelot/Tabula-py.  
-- [ ] **AIM2-ODIE-016-T5:** Add error handling for PDF parsing issues specific to the chosen libraries.  
-- [ ] **AIM2-ODIE-016-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-016-T5:** Add error handling for PDF parsing issues specific to the chosen libraries.  
+- [x] **AIM2-ODIE-016-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-017  
 Description: Scientific Journal Web Scraper (Metadata/Full Text): Develop a module (src/data\_acquisition/journal\_scraper.py) using paperscraper to scrape metadata and full-text (PDF/XML) from specified scientific journals, handling bot protection (User-Agent, throttling) and robots.txt.  
