@@ -285,36 +285,57 @@ def check_robots_txt(url: str, user_agent: str = "*") -> bool:
 
 def scrape_journal_metadata(journal_name: str, query: str, max_results: int = 100) -> Dict[str, Any]:
     """
-    Scrape metadata from scientific journals using paperscraper.
+    Scrape metadata from scientific journals using paperscraper and PubMed API.
     
     This function searches for articles in specified journals and returns
-    metadata including titles, authors, abstracts, DOIs, and publication dates.
-    Rate limiting and robots.txt compliance are automatically applied.
+    comprehensive metadata including titles, authors, abstracts, DOIs, and 
+    publication dates. Utilizes paperscraper's PubMed integration with automatic
+    rate limiting and robust error handling.
     
     Args:
-        journal_name: Name of the journal to search (e.g., "Nature", "Science")
-        query: Search query string
-        max_results: Maximum number of results to return (default: 100)
+        journal_name: Name of the journal to search (e.g., "Nature", "Science", 
+                     "Plant Physiology"). Both single-word and multi-word journal 
+                     names are supported.
+        query: Search query string (e.g., "plant metabolites", "protein folding")
+        max_results: Maximum number of results to return (default: 100, max: 9998)
         
     Returns:
         Dict[str, Any]: Dictionary containing scraped metadata with structure:
             {
-                "journal": str,
-                "query": str,
-                "total_results": int,
-                "articles": List[Dict[str, Any]]
+                "journal": str,           # Original journal name
+                "query": str,            # Original search query
+                "total_results": int,    # Number of articles found
+                "articles": List[Dict[str, Any]]  # Article metadata
             }
+            
+        Each article contains:
+            - title: Article title
+            - authors: List of author names
+            - abstract: Article abstract (if available)
+            - journal: Journal name from PubMed
+            - publication_date: Publication date
+            - doi: Digital Object Identifier
+            - url: DOI URL for accessing the article
+            - source: "PubMed" (data source identifier)
+            - query_matched: Original query that matched this article
         
     Raises:
         JournalScraperError: If metadata scraping fails for any reason:
-            - Network connection errors
-            - Invalid journal name or query
-            - Rate limiting failures
-            - Robots.txt violations
+            - Network connection errors or PubMed API failures
+            - Invalid journal name or query parameters
+            - Rate limiting from PubMed API
+            - paperscraper library not available
             
     Example:
+        >>> # Search for plant metabolomics papers in Nature
         >>> metadata = scrape_journal_metadata("Nature", "plant metabolites", 50)
         >>> print(f"Found {metadata['total_results']} articles")
+        >>> for article in metadata['articles'][:3]:
+        ...     print(f"- {article['title']} ({article['publication_date']})")
+        
+        >>> # Search in multi-word journal name
+        >>> metadata = scrape_journal_metadata("Plant Physiology", "auxin transport")
+        >>> print(f"Found {len(metadata['articles'])} articles in Plant Physiology")
     """
     logger.info(f"Scraping metadata from journal '{journal_name}' with query: '{query}' (max_results: {max_results})")
     
@@ -342,21 +363,124 @@ def scrape_journal_metadata(journal_name: str, query: str, max_results: int = 10
     rate_limiter.acquire()
     
     try:
-        # Initialize paperscraper with journal-specific configuration
-        # Note: This is a placeholder implementation - actual paperscraper usage
-        # will depend on the specific library API
-        logger.debug(f"Initializing paperscraper for journal: {journal_name}")
+        # Import paperscraper at runtime to handle potential import issues
+        # paperscraper provides access to PubMed, arXiv, bioRxiv, medRxiv, and chemRxiv
+        # We use the PubMed backend for journal-specific searches
+        try:
+            import paperscraper.pubmed as pubmed
+            import pandas as pd
+        except ImportError as import_error:
+            raise JournalScraperError(
+                "paperscraper is not available. Please install it with: pip install paperscraper",
+                import_error
+            )
         
-        # Placeholder for paperscraper integration
-        # TODO: Implement actual paperscraper calls based on library documentation
+        logger.debug(f"Searching paperscraper/PubMed for journal: {journal_name}")
+        
+        # Construct PubMed query with journal filter
+        # Format: 'query terms AND "Journal Name"[Journal]'
+        if journal_name.lower() in ['nature', 'science', 'cell']:
+            # Handle common single-word journals
+            pubmed_query = f'{query} AND {journal_name}[Journal]'
+        else:
+            # Handle multi-word journal names (need quotes)
+            pubmed_query = f'{query} AND "{journal_name}"[Journal]'
+        
+        logger.debug(f"PubMed query: {pubmed_query}")
+        
+        # Define fields to retrieve
+        fields = ['title', 'authors', 'abstract', 'journal', 'date', 'doi']
+        
+        # Perform the search using paperscraper with error handling
+        try:
+            df = pubmed.get_pubmed_papers(
+                query=pubmed_query,
+                fields=fields,
+                max_results=max_results
+            )
+        except Exception as pubmed_error:
+            # Handle specific paperscraper/PubMed API errors
+            error_types = [
+                "network", "connection", "timeout", "ssl", "certificate"
+            ]
+            error_msg_lower = str(pubmed_error).lower()
+            
+            if any(error_type in error_msg_lower for error_type in error_types):
+                raise JournalScraperError(
+                    f"Network error while accessing PubMed API: {str(pubmed_error)}",
+                    pubmed_error
+                )
+            elif "query" in error_msg_lower or "search" in error_msg_lower:
+                raise JournalScraperError(
+                    f"Invalid search query for PubMed: '{pubmed_query}'. Error: {str(pubmed_error)}",
+                    pubmed_error
+                )
+            elif "rate" in error_msg_lower or "limit" in error_msg_lower or "throttle" in error_msg_lower:
+                logger.warning(f"PubMed API rate limiting detected, applying additional delay")
+                time.sleep(5)  # Additional delay for rate limiting
+                raise JournalScraperError(
+                    f"PubMed API rate limiting detected: {str(pubmed_error)}",
+                    pubmed_error
+                )
+            else:
+                raise JournalScraperError(
+                    f"PubMed API error: {str(pubmed_error)}",
+                    pubmed_error
+                )
+        
+        # Convert DataFrame to list of dictionaries
+        articles = []
+        if not df.empty:
+            logger.debug(f"Processing {len(df)} articles from PubMed response")
+            for idx, row in df.iterrows():
+                # Handle potential missing or malformed data
+                authors = row.get("authors", [])
+                if isinstance(authors, str):
+                    # Sometimes authors come as a single string, convert to list
+                    authors = [authors] if authors else []
+                elif not isinstance(authors, list):
+                    authors = []
+                
+                # Clean and validate DOI
+                doi = row.get("doi", "").strip()
+                doi_url = ""
+                if doi:
+                    # Remove common DOI prefixes if they exist
+                    if doi.startswith("doi:"):
+                        doi = doi[4:]
+                    if doi.startswith("https://doi.org/"):
+                        doi_url = doi
+                        doi = doi.replace("https://doi.org/", "")
+                    else:
+                        doi_url = f"https://doi.org/{doi}"
+                
+                # Clean title and abstract
+                title = str(row.get("title", "")).strip()
+                abstract = str(row.get("abstract", "")).strip()
+                
+                article = {
+                    "title": title,
+                    "authors": authors,
+                    "abstract": abstract,
+                    "journal": str(row.get("journal", "")).strip(),
+                    "publication_date": str(row.get("date", "")).strip(),
+                    "doi": doi,
+                    "url": doi_url,
+                    "source": "PubMed",  # Add source identifier
+                    "query_matched": query  # Track which query this result matched
+                }
+                articles.append(article)
+        else:
+            logger.info(f"No articles found for query: '{pubmed_query}'")
+        
         results = {
             "journal": journal_name,
             "query": query,
-            "total_results": 0,
-            "articles": []
+            "total_results": len(articles),
+            "articles": articles
         }
         
-        logger.info(f"Successfully scraped metadata: {results['total_results']} articles found")
+        logger.info(f"Successfully scraped metadata: {results['total_results']} articles found from {journal_name}")
         return results
         
     except Exception as e:
