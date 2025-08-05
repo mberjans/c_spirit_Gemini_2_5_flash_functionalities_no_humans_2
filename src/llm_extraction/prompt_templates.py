@@ -1,10 +1,11 @@
 """
-Zero-shot and few-shot prompt templates for plant metabolomics Named Entity Recognition (NER).
+Zero-shot and few-shot prompt templates for plant metabolomics NER and relationship extraction.
 
-This module provides comprehensive prompt templates designed for extracting entities
-from scientific literature in plant metabolomics research. The templates work with
-the existing extract_entities() function and support all 117 entity types across
-the 6 main categories.
+This module provides comprehensive prompt templates designed for extracting entities and
+relationships from scientific literature in plant metabolomics research. The templates 
+support Named Entity Recognition (NER) for 117 entity types across 6 main categories,
+and sophisticated relationship extraction with hierarchical differentiation and 
+contextual understanding.
 
 The templates are optimized for:
 - Clear, unambiguous instructions for LLMs
@@ -13,9 +14,11 @@ The templates are optimized for:
 - Robust handling of overlapping entities and edge cases
 - Integration with existing schema formatting
 - Few-shot learning with synthetic examples
+- Hierarchical relationship differentiation (specific vs broad)
+- Contextual relationship understanding (conditional, temporal, spatial)
 - Dynamic example generation and selection
 
-Template Categories:
+NER Template Categories:
 - Basic zero-shot templates for general use
 - Detailed zero-shot templates with explicit instructions
 - Domain-specific templates for different research contexts
@@ -24,7 +27,16 @@ Template Categories:
 - Few-shot templates with synthetic examples
 - Adaptive templates with context-aware example selection
 
+Relationship Extraction Template Categories:
+- Basic relationship extraction templates
+- Hierarchical templates for specificity differentiation
+- Contextual templates for conditional relationship understanding
+- Multi-type templates for comprehensive relationship coverage
+- Few-shot templates with domain-specific relationship examples
+- Template management functions for optimal template selection
+
 Functions:
+    # NER Functions
     get_basic_zero_shot_template: Get basic zero-shot template
     get_detailed_zero_shot_template: Get detailed template with explicit instructions
     get_precision_focused_template: Get template optimized for precision
@@ -42,11 +54,22 @@ Functions:
     validate_template: Validate template format and placeholders
     get_template_by_name: Get template by name with validation
     list_available_templates: List all available template names
+    
+    # Relationship Extraction Functions
+    get_relationship_template: Get relationship extraction template by type
+    get_relationship_template_metadata: Get metadata for relationship templates
+    generate_relationship_examples: Generate synthetic relationship examples
+    format_relationship_schema_for_template: Format schema for template use
+    get_compatible_relationships_for_entities: Get compatible relationships for entity types
+    select_optimal_relationship_template: Select best template based on text characteristics
+    validate_relationship_template_inputs: Validate inputs for relationship extraction
+    list_available_relationship_templates: List all relationship templates
 
 Classes:
     TemplateError: Base exception for template-related errors
     InvalidTemplateError: Exception for invalid template format
     TemplateNotFoundError: Exception for missing templates
+    TemplateType: Enumeration of available template types
 """
 
 import re
@@ -93,6 +116,17 @@ class TemplateType(Enum):
     FEW_SHOT_METABOLOMICS = "few_shot_metabolomics"
     FEW_SHOT_GENETICS = "few_shot_genetics"
     FEW_SHOT_PLANT_BIOLOGY = "few_shot_plant_biology"
+    # Relationship extraction template types
+    RELATIONSHIP_BASIC = "relationship_basic"
+    RELATIONSHIP_DETAILED = "relationship_detailed"
+    RELATIONSHIP_SCIENTIFIC = "relationship_scientific"
+    RELATIONSHIP_METABOLOMICS = "relationship_metabolomics"
+    RELATIONSHIP_HIERARCHICAL = "relationship_hierarchical"
+    RELATIONSHIP_CONTEXTUAL = "relationship_contextual"
+    RELATIONSHIP_MULTI_TYPE = "relationship_multi_type"
+    RELATIONSHIP_FEW_SHOT_METABOLOMICS = "relationship_few_shot_metabolomics"
+    RELATIONSHIP_FEW_SHOT_HIERARCHICAL = "relationship_few_shot_hierarchical"
+    RELATIONSHIP_FEW_SHOT_CONTEXTUAL = "relationship_few_shot_contextual"
 
 
 # Comprehensive synthetic examples database for all 117 entity types
@@ -3143,6 +3177,472 @@ JSON Output Format:
 }}"""
 
 
+# Advanced relationship extraction templates with hierarchical differentiation
+
+RELATIONSHIP_HIERARCHICAL_TEMPLATE = """Extract relationships between entities with hierarchical differentiation between broad and specific relationship types.
+
+Text: {text}
+
+Entities:
+{entities}
+
+Relationship Hierarchy Schema:
+{schema}
+
+HIERARCHICAL DIFFERENTIATION GUIDELINES:
+This is critical - always choose the MOST SPECIFIC relationship type that applies:
+
+1. BROAD vs SPECIFIC Relationships:
+   - Use BROAD relationships (like "involved_in", "affects", "associated_with") only when more specific types don't apply
+   - Always prefer SPECIFIC relationships (like "upregulates", "synthesized_by", "accumulates_in") when there's evidence
+   
+2. Hierarchy Examples:
+   - Instead of "involved_in" → use "catalyzes", "synthesized_by", "regulated_by"
+   - Instead of "affects" → use "upregulates", "downregulates", "increases_under", "decreases_under"
+   - Instead of "found_in" → use "accumulates_in", "expressed_in", "localized_in"
+   - Instead of "related_to" → use "derived_from", "converted_to", "precursor_of"
+
+3. Context-Dependent Selection:
+   - "Gene X affects metabolite Y" → Use "upregulates" or "downregulates" if direction is clear
+   - "Metabolite found in tissue" → Use "accumulates_in" if concentration/storage is implied
+   - "Enzyme produces compound" → Use "synthesized_by" (compound synthesized_by enzyme)
+   - "Stress increases compound" → Use "increases_under" for environmental effects
+
+4. Evidence Requirements by Specificity:
+   - SPECIFIC relationships (0.8+ confidence): Need clear textual evidence
+   - BROAD relationships (0.6+ confidence): Use only when specific types don't fit
+
+{examples}
+
+OUTPUT FORMAT:
+Return JSON with relationships ranked by specificity (most specific first):
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity1", "label": "LABEL1"}},
+            "relation_type": "specific_relationship_type",
+            "object_entity": {{"text": "entity2", "label": "LABEL2"}},
+            "confidence": 0.92,
+            "specificity_level": "high",
+            "alternative_broader_types": ["broader_type1", "broader_type2"],
+            "context": "supporting context",
+            "evidence": "text span supporting relationship",
+            "reasoning": "why this specific type was chosen over broader ones"
+        }}
+    ]
+}}"""
+
+
+RELATIONSHIP_CONTEXTUAL_TEMPLATE = """Extract relationships with sophisticated contextual understanding and conditional relationship selection.
+
+Text: {text}
+
+Entities:
+{entities}
+
+Relationship Schema:
+{schema}
+
+CONTEXTUAL UNDERSTANDING PROTOCOL:
+
+1. CONDITIONAL RELATIONSHIPS:
+   - Consider environmental conditions (stress, treatment, developmental stage)
+   - Account for tissue/organ specificity
+   - Recognize temporal dependencies (before/after, during/after treatment)
+
+2. CONTEXT-DEPENDENT RELATIONSHIP SELECTION:
+   - Same entity pairs may have different relationships in different contexts
+   - Environmental modifiers: "increases_under_stress", "decreases_under_drought"
+   - Temporal modifiers: "expressed_during_flowering", "accumulated_after_treatment"
+   - Spatial modifiers: "localized_in_root", "transported_to_leaf"
+
+3. MULTI-LAYERED RELATIONSHIP ANALYSIS:
+   - Direct relationships: "A synthesized_by B"
+   - Conditional relationships: "A increases_under C when B is present"
+   - Regulatory relationships: "A upregulates B in response to C"
+
+4. EVIDENCE CONTEXTUALIZATION:
+   - Quote exact conditions mentioned in text
+   - Include temporal markers ("after 24h", "during stress", "in flowering stage")
+   - Capture quantitative context ("2-fold increase", "significantly reduced")
+
+{examples}
+
+CONDITIONAL RELATIONSHIP EXAMPLES:
+- "Under drought stress, proline accumulates in leaf tissues" → proline "accumulates_in" leaf AND proline "increases_under" drought
+- "ABA upregulates stress genes during water deficit" → ABA "upregulates" genes AND ABA "active_during" water_deficit
+- "Anthocyanins are synthesized by CHS in response to UV light" → anthocyanins "synthesized_by" CHS AND CHS "activated_by" UV_light
+
+JSON OUTPUT:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity1", "label": "LABEL1"}},
+            "relation_type": "contextual_relationship",
+            "object_entity": {{"text": "entity2", "label": "LABEL2"}},
+            "confidence": 0.89,
+            "context_conditions": ["condition1", "condition2"],
+            "temporal_context": "temporal_info",
+            "spatial_context": "spatial_info",
+            "quantitative_context": "quantitative_info",
+            "evidence": "supporting text with context",
+            "conditional_modifiers": ["modifier1", "modifier2"]
+        }}
+    ]
+}}"""
+
+
+RELATIONSHIP_MULTI_TYPE_TEMPLATE = """Extract multiple relationship types simultaneously with comprehensive coverage and cross-validation.
+
+Text: {text}
+
+Entities:
+{entities}
+
+Complete Relationship Schema:
+{schema}
+
+MULTI-TYPE EXTRACTION PROTOCOL:
+
+1. COMPREHENSIVE COVERAGE:
+   - Extract ALL valid relationships, not just the most obvious ones
+   - Consider direct, indirect, and conditional relationships
+   - Look for pathway-level connections and regulatory networks
+
+2. RELATIONSHIP CATEGORIES TO CONSIDER:
+   a) BIOSYNTHETIC: synthesis, conversion, derivation pathways
+   b) REGULATORY: up/downregulation, activation, inhibition
+   c) LOCALIZATION: spatial distribution, accumulation, transport
+   d) FUNCTIONAL: catalysis, binding, interaction
+   e) ENVIRONMENTAL: stress responses, condition-dependent changes
+   f) ANALYTICAL: detection, measurement, quantification methods
+
+3. CROSS-VALIDATION CHECKS:
+   - Ensure relationship consistency (no contradictory relationships)
+   - Validate entity-relationship compatibility using domain knowledge
+   - Check for missing inverse relationships when applicable
+
+4. CONFIDENCE CALIBRATION:
+   - Primary relationships (directly stated): 0.85-1.0
+   - Secondary relationships (strongly implied): 0.70-0.85  
+   - Supporting relationships (contextually inferred): 0.55-0.70
+
+{examples}
+
+MULTI-TYPE EXTRACTION EXAMPLE:
+Text: "Chalcone synthase catalyzes the first step of flavonoid biosynthesis, converting coumaroyl-CoA to naringenin chalcone, which accumulates in flower petals under UV stress."
+
+Expected relationships:
+1. chalcone_synthase "catalyzes" flavonoid_biosynthesis
+2. coumaroyl-CoA "converted_to" naringenin_chalcone  
+3. chalcone_synthase "synthesizes" naringenin_chalcone
+4. naringenin_chalcone "accumulates_in" flower_petals
+5. naringenin_chalcone "increases_under" UV_stress
+6. flavonoid_biosynthesis "starts_with" chalcone_synthase
+
+JSON OUTPUT:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity1", "label": "LABEL1"}},
+            "relation_type": "relationship_type",
+            "object_entity": {{"text": "entity2", "label": "LABEL2"}},
+            "confidence": 0.92,
+            "category": "biosynthetic|regulatory|localization|functional|environmental|analytical",
+            "evidence": "supporting text",
+            "cross_references": ["related_relationship_ids"]
+        }}
+    ],
+    "relationship_summary": {{
+        "total_relationships": 6,
+        "categories": {{"biosynthetic": 3, "localization": 2, "environmental": 1}},
+        "confidence_distribution": {{"high": 4, "medium": 2, "low": 0}}
+    }}
+}}"""
+
+
+# Few-shot relationship extraction templates with domain-specific examples
+
+RELATIONSHIP_FEW_SHOT_METABOLOMICS_TEMPLATE = """Extract relationships from plant metabolomics text using few-shot learning with domain-specific examples.
+
+LEARNING EXAMPLES:
+
+Example 1:
+Text: "Anthocyanins are synthesized by anthocyanidin synthase and accumulate in grape berry skin during ripening."
+Entities: [("anthocyanins", "METABOLITE"), ("anthocyanidin synthase", "ENZYME"), ("grape berry skin", "PLANT_TISSUE"), ("ripening", "DEVELOPMENTAL_STAGE")]
+Relationships: [
+    {{
+        "subject_entity": {{"text": "anthocyanins", "label": "METABOLITE"}},
+        "relation_type": "synthesized_by",
+        "object_entity": {{"text": "anthocyanidin synthase", "label": "ENZYME"}},
+        "confidence": 0.95,
+        "evidence": "anthocyanins are synthesized by anthocyanidin synthase"
+    }},
+    {{
+        "subject_entity": {{"text": "anthocyanins", "label": "METABOLITE"}},
+        "relation_type": "accumulates_in",
+        "object_entity": {{"text": "grape berry skin", "label": "PLANT_TISSUE"}},
+        "confidence": 0.92,
+        "evidence": "accumulate in grape berry skin"
+    }},
+    {{
+        "subject_entity": {{"text": "anthocyanins", "label": "METABOLITE"}},
+        "relation_type": "increases_during",
+        "object_entity": {{"text": "ripening", "label": "DEVELOPMENTAL_STAGE"}},
+        "confidence": 0.88,
+        "evidence": "accumulate...during ripening"
+    }}
+]
+
+Example 2:
+Text: "Under drought stress, proline levels increased 3-fold in root tissues, while being regulated by P5CS enzyme."
+Entities: [("proline", "AMINO_ACID"), ("drought stress", "STRESS_CONDITION"), ("root tissues", "PLANT_TISSUE"), ("P5CS", "ENZYME")]
+Relationships: [
+    {{
+        "subject_entity": {{"text": "proline", "label": "AMINO_ACID"}},
+        "relation_type": "increases_under",
+        "object_entity": {{"text": "drought stress", "label": "STRESS_CONDITION"}},
+        "confidence": 0.94,
+        "evidence": "Under drought stress, proline levels increased 3-fold"
+    }},
+    {{
+        "subject_entity": {{"text": "proline", "label": "AMINO_ACID"}},
+        "relation_type": "accumulates_in",
+        "object_entity": {{"text": "root tissues", "label": "PLANT_TISSUE"}},
+        "confidence": 0.91,
+        "evidence": "proline levels increased 3-fold in root tissues"
+    }},
+    {{
+        "subject_entity": {{"text": "proline", "label": "AMINO_ACID"}},
+        "relation_type": "regulated_by",
+        "object_entity": {{"text": "P5CS", "label": "ENZYME"}},
+        "confidence": 0.89,
+        "evidence": "being regulated by P5CS enzyme"
+    }}
+]
+
+Example 3:
+Text: "Quercetin, derived from kaempferol, exhibits antioxidant activity and is detected by HPLC analysis."
+Entities: [("quercetin", "FLAVONOID"), ("kaempferol", "FLAVONOID"), ("antioxidant activity", "BIOLOGICAL_ACTIVITY"), ("HPLC", "ANALYTICAL_METHOD")]
+Relationships: [
+    {{
+        "subject_entity": {{"text": "quercetin", "label": "FLAVONOID"}},
+        "relation_type": "derived_from",
+        "object_entity": {{"text": "kaempferol", "label": "FLAVONOID"}},
+        "confidence": 0.93,
+        "evidence": "Quercetin, derived from kaempferol"
+    }},
+    {{
+        "subject_entity": {{"text": "quercetin", "label": "FLAVONOID"}},
+        "relation_type": "exhibits",
+        "object_entity": {{"text": "antioxidant activity", "label": "BIOLOGICAL_ACTIVITY"}},
+        "confidence": 0.96,
+        "evidence": "exhibits antioxidant activity"
+    }},
+    {{
+        "subject_entity": {{"text": "quercetin", "label": "FLAVONOID"}},
+        "relation_type": "detected_by",
+        "object_entity": {{"text": "HPLC", "label": "ANALYTICAL_METHOD"}},
+        "confidence": 0.92,
+        "evidence": "is detected by HPLC analysis"
+    }}
+]
+
+NOW EXTRACT RELATIONSHIPS FROM THE FOLLOWING TEXT:
+
+Text: {text}
+
+Entities:
+{entities}
+
+Relationship Schema:
+{schema}
+
+Apply the patterns learned from the examples above. Focus on:
+1. Specific relationship types over broad ones
+2. Multiple relationships per entity when appropriate  
+3. Confidence based on evidence strength
+4. Domain-specific biological relationships
+
+{examples}
+
+JSON Output:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity_text", "label": "ENTITY_LABEL"}},
+            "relation_type": "specific_relationship",
+            "object_entity": {{"text": "target_text", "label": "TARGET_LABEL"}},
+            "confidence": 0.92,
+            "evidence": "supporting text evidence"
+        }}
+    ]
+}}"""
+
+
+RELATIONSHIP_FEW_SHOT_HIERARCHICAL_TEMPLATE = """Extract relationships with hierarchical differentiation using few-shot examples that demonstrate broad vs specific relationship selection.
+
+HIERARCHICAL DIFFERENTIATION EXAMPLES:
+
+Example 1 - SPECIFIC over BROAD:
+Text: "CYP75A upregulates anthocyanin biosynthesis genes in response to cold stress."
+❌ BROAD: CYP75A "affects" anthocyanin_biosynthesis (too general)
+✅ SPECIFIC: CYP75A "upregulates" anthocyanin_biosynthesis (preferred - more precise)
+
+Example 2 - ACCUMULATION vs PRESENCE:
+Text: "High concentrations of resveratrol were found in grape skins after UV treatment."
+❌ BROAD: resveratrol "found_in" grape_skins (too general)
+✅ SPECIFIC: resveratrol "accumulates_in" grape_skins (preferred - implies concentration)
+
+Example 3 - ENZYMATIC SPECIFICITY:
+Text: "Phenylalanine ammonia-lyase catalyzes the first step of phenylpropanoid metabolism."
+❌ BROAD: PAL "involved_in" phenylpropanoid_metabolism (too general)  
+✅ SPECIFIC: PAL "catalyzes" phenylpropanoid_metabolism (preferred - shows enzyme function)
+
+Example 4 - REGULATORY PRECISION:
+Text: "ABA treatment significantly increased proline synthesis in stressed plants."
+❌ BROAD: ABA "affects" proline_synthesis (too general)
+✅ SPECIFIC: ABA "upregulates" proline_synthesis (preferred - shows direction)
+
+Example 5 - ENVIRONMENTAL RELATIONSHIPS:
+Text: "Drought conditions led to elevated trehalose levels in root tissues."
+❌ BROAD: trehalose "associated_with" drought (too vague)
+✅ SPECIFIC: trehalose "increases_under" drought (preferred - shows environmental response)
+
+HIERARCHICAL DECISION TREE:
+1. Is there enzymatic activity mentioned? → Use "catalyzes", "synthesized_by"
+2. Is there directional regulation? → Use "upregulates", "downregulates"  
+3. Is there accumulation/concentration? → Use "accumulates_in", not "found_in"
+4. Is there environmental response? → Use "increases_under", "decreases_under"
+5. Is there derivation/conversion? → Use "derived_from", "converted_to"
+6. Only use broad terms ("affects", "involved_in") when specific ones don't apply
+
+NOW EXTRACT RELATIONSHIPS:
+
+Text: {text}
+
+Entities:
+{entities}
+
+Relationship Schema:
+{schema}
+
+For each potential relationship, ask:
+- Is there a more specific relationship type that applies?
+- What is the strongest evidence for this specific relationship?
+- Can I justify choosing this over a broader alternative?
+
+{examples}
+
+JSON Output:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity", "label": "LABEL"}},
+            "relation_type": "most_specific_applicable_type",
+            "object_entity": {{"text": "target", "label": "TARGET_LABEL"}},
+            "confidence": 0.88,
+            "specificity_justification": "chose 'synthesized_by' over 'produced_by' because enzymatic synthesis is explicitly mentioned",
+            "alternative_broader_types": ["produced_by", "made_by", "involved_in"],
+            "evidence": "exact text supporting the specific relationship"
+        }}
+    ]
+}}"""
+
+
+RELATIONSHIP_FEW_SHOT_CONTEXTUAL_TEMPLATE = """Extract relationships with sophisticated contextual understanding using examples that show context-dependent relationship selection.
+
+CONTEXTUAL RELATIONSHIP EXAMPLES:
+
+Example 1 - CONDITIONAL CONTEXT:
+Text: "Salicylic acid activates pathogenesis-related genes only under pathogen attack conditions."
+Context Analysis: The relationship is conditional on pathogen presence
+Relationships:
+- salicylic_acid "activates" pathogenesis_related_genes (base relationship)  
+- salicylic_acid "active_under" pathogen_attack (conditional context)
+- pathogenesis_related_genes "expressed_during" pathogen_attack (temporal context)
+
+Example 2 - TISSUE-SPECIFIC CONTEXT:
+Text: "Lignin biosynthesis genes are highly expressed in stem tissues but downregulated in leaf tissues during development."
+Context Analysis: Same genes have opposite expression patterns in different tissues
+Relationships:
+- lignin_biosynthesis_genes "highly_expressed_in" stem_tissues
+- lignin_biosynthesis_genes "downregulated_in" leaf_tissues  
+- lignin_biosynthesis_genes "active_during" development
+
+Example 3 - TEMPORAL CONTEXT:
+Text: "ABA levels peaked at 6 hours post-stress and then gradually decreased, correlating with stress gene expression."
+Context Analysis: Temporal pattern with correlation
+Relationships:
+- ABA "peaks_at" 6_hours_post_stress
+- ABA "decreases_after" 6_hours
+- ABA "correlates_with" stress_gene_expression
+- stress_gene_expression "follows_pattern" ABA_levels
+
+Example 4 - QUANTITATIVE CONTEXT:
+Text: "Moderate drought (30% soil moisture) increased proline 2-fold, while severe drought (10% soil moisture) increased it 5-fold."
+Context Analysis: Dose-dependent relationship with quantitative thresholds
+Relationships:
+- proline "increases_under" moderate_drought (context: "2-fold at 30% soil moisture")
+- proline "highly_increases_under" severe_drought (context: "5-fold at 10% soil moisture")  
+- moderate_drought "precedes" severe_drought (intensity relationship)
+
+Example 5 - MULTI-FACTOR CONTEXT:
+Text: "Cold-induced anthocyanin accumulation requires both low temperature and high light intensity in Arabidopsis leaves."
+Context Analysis: Multiple required conditions
+Relationships:
+- anthocyanin "accumulates_under" cold_temperature (requires high_light)
+- anthocyanin "requires" low_temperature (for cold_induction)
+- anthocyanin "requires" high_light_intensity (for cold_induction)
+- cold_induction "occurs_in" Arabidopsis_leaves (spatial context)
+
+CONTEXTUAL EXTRACTION PROTOCOL:
+1. Identify all contextual modifiers (time, space, conditions, quantities)
+2. Determine if relationships are conditional, tissue-specific, or temporal
+3. Extract both direct relationships and contextual relationships
+4. Capture quantitative and qualitative context details
+
+NOW EXTRACT RELATIONSHIPS:
+
+Text: {text}
+
+Entities:
+{entities}
+
+Relationship Schema:
+{schema}
+
+Look for:
+- Environmental conditions and their effects
+- Tissue/organ/developmental stage specificity  
+- Temporal sequences and dependencies
+- Quantitative relationships and thresholds
+- Multi-factor requirements and interactions
+
+{examples}
+
+JSON Output:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity", "label": "LABEL"}},
+            "relation_type": "context_aware_relationship",
+            "object_entity": {{"text": "target", "label": "TARGET_LABEL"}},
+            "confidence": 0.91,
+            "context_type": "temporal|spatial|conditional|quantitative|multi_factor",
+            "context_details": {{
+                "conditions": ["condition1", "condition2"],
+                "temporal_info": "timing information",
+                "spatial_info": "location/tissue information",
+                "quantitative_info": "measurements/fold changes",
+                "dependencies": ["required_factor1", "required_factor2"]
+            }},
+            "evidence": "text with full context"
+        }}
+    ]
+}}"""
+
+
 def get_relationship_template(template_type: str = "basic") -> str:
     """
     Get relationship extraction template by type.
@@ -3161,10 +3661,23 @@ def get_relationship_template(template_type: str = "basic") -> str:
         "detailed": RELATIONSHIP_DETAILED_TEMPLATE,
         "scientific": RELATIONSHIP_SCIENTIFIC_TEMPLATE,
         "metabolomics": RELATIONSHIP_METABOLOMICS_TEMPLATE,
+        "hierarchical": RELATIONSHIP_HIERARCHICAL_TEMPLATE,
+        "contextual": RELATIONSHIP_CONTEXTUAL_TEMPLATE,
+        "multi_type": RELATIONSHIP_MULTI_TYPE_TEMPLATE,
+        "few_shot_metabolomics": RELATIONSHIP_FEW_SHOT_METABOLOMICS_TEMPLATE,
+        "few_shot_hierarchical": RELATIONSHIP_FEW_SHOT_HIERARCHICAL_TEMPLATE,
+        "few_shot_contextual": RELATIONSHIP_FEW_SHOT_CONTEXTUAL_TEMPLATE,
+        # Legacy aliases
         "relationship_basic": RELATIONSHIP_BASIC_TEMPLATE,
         "relationship_detailed": RELATIONSHIP_DETAILED_TEMPLATE,
         "relationship_scientific": RELATIONSHIP_SCIENTIFIC_TEMPLATE,
-        "relationship_metabolomics": RELATIONSHIP_METABOLOMICS_TEMPLATE
+        "relationship_metabolomics": RELATIONSHIP_METABOLOMICS_TEMPLATE,
+        "relationship_hierarchical": RELATIONSHIP_HIERARCHICAL_TEMPLATE,
+        "relationship_contextual": RELATIONSHIP_CONTEXTUAL_TEMPLATE,
+        "relationship_multi_type": RELATIONSHIP_MULTI_TYPE_TEMPLATE,
+        "relationship_few_shot_metabolomics": RELATIONSHIP_FEW_SHOT_METABOLOMICS_TEMPLATE,
+        "relationship_few_shot_hierarchical": RELATIONSHIP_FEW_SHOT_HIERARCHICAL_TEMPLATE,
+        "relationship_few_shot_contextual": RELATIONSHIP_FEW_SHOT_CONTEXTUAL_TEMPLATE
     }
     
     if template_type not in templates:
@@ -3207,7 +3720,438 @@ def get_relationship_template_metadata(template_type: str) -> Dict[str, Any]:
             "use_cases": ["metabolomics papers", "plant biology"],
             "strengths": ["domain-specific", "pathway-aware"],
             "limitations": ["specialized domain only"]
+        },
+        "hierarchical": {
+            "description": "Hierarchical relationship extraction with specificity differentiation",
+            "use_cases": ["complex biological texts", "pathway analysis"],
+            "strengths": ["specific over broad relationships", "clear decision tree"],
+            "limitations": ["requires domain knowledge"]
+        },
+        "contextual": {
+            "description": "Context-aware relationship extraction with conditional understanding",
+            "use_cases": ["complex experimental texts", "multi-condition studies"],
+            "strengths": ["captures context dependencies", "temporal/spatial awareness"],
+            "limitations": ["may extract more complex structures"]
+        },
+        "multi_type": {
+            "description": "Comprehensive multi-type relationship extraction",
+            "use_cases": ["pathway reconstruction", "comprehensive analysis"],
+            "strengths": ["complete coverage", "cross-validation"],
+            "limitations": ["may be slower", "more complex output"]
+        },
+        "few_shot_metabolomics": {
+            "description": "Few-shot metabolomics relationship extraction with examples",
+            "use_cases": ["metabolomics literature", "biosynthetic pathways"],
+            "strengths": ["learns from examples", "domain-specific patterns"],
+            "limitations": ["requires compatible text types"]
+        },
+        "few_shot_hierarchical": {
+            "description": "Few-shot hierarchical relationship extraction with specificity examples",
+            "use_cases": ["complex biological relationships", "regulatory networks"],
+            "strengths": ["learns specificity patterns", "clear examples"],
+            "limitations": ["specific to biological domains"]
+        },
+        "few_shot_contextual": {
+            "description": "Few-shot contextual relationship extraction with conditional examples",
+            "use_cases": ["experimental studies", "condition-dependent relationships"],
+            "strengths": ["context-aware learning", "multi-factor analysis"],
+            "limitations": ["complex output structure"]
         }
     }
     
     return metadata.get(template_type, {})
+
+
+# Template management and utility functions for relationship extraction
+
+def generate_relationship_examples(relationship_type: str, entity_types: List[str], count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Generate synthetic examples for relationship extraction templates.
+    
+    Args:
+        relationship_type: Type of relationship to generate examples for
+        entity_types: List of entity types involved in relationships  
+        count: Number of examples to generate
+        
+    Returns:
+        List of example relationship dictionaries
+    """
+    # Domain-specific example patterns for different relationship types
+    relationship_examples = {
+        "synthesized_by": [
+            {
+                "text": "Anthocyanins are synthesized by anthocyanidin synthase in grape berries",
+                "subject": ("anthocyanins", "METABOLITE"),
+                "object": ("anthocyanidin synthase", "ENZYME"),
+                "evidence": "anthocyanins are synthesized by anthocyanidin synthase"
+            },
+            {
+                "text": "Resveratrol is produced by stilbene synthase under UV stress",
+                "subject": ("resveratrol", "PHENOLIC_COMPOUND"),  
+                "object": ("stilbene synthase", "ENZYME"),
+                "evidence": "resveratrol is produced by stilbene synthase"
+            },
+            {
+                "text": "Caffeine synthesis is catalyzed by N-methyltransferase in coffee plants",
+                "subject": ("caffeine", "ALKALOID"),
+                "object": ("N-methyltransferase", "ENZYME"), 
+                "evidence": "caffeine synthesis is catalyzed by N-methyltransferase"
+            }
+        ],
+        "accumulates_in": [
+            {
+                "text": "Proline accumulates in root tissues during drought stress",
+                "subject": ("proline", "AMINO_ACID"),
+                "object": ("root tissues", "PLANT_TISSUE"),
+                "evidence": "proline accumulates in root tissues"
+            },
+            {
+                "text": "Starch granules concentrate in tuber parenchyma cells",
+                "subject": ("starch granules", "CARBOHYDRATE"),
+                "object": ("tuber parenchyma cells", "CELL_TYPE"),
+                "evidence": "starch granules concentrate in tuber parenchyma cells"
+            },
+            {
+                "text": "Essential oils are stored in secretory cavities of citrus peel",
+                "subject": ("essential oils", "TERPENOID"),
+                "object": ("secretory cavities", "CELLULAR_COMPONENT"),
+                "evidence": "essential oils are stored in secretory cavities"
+            }
+        ],
+        "upregulates": [
+            {
+                "text": "ABA upregulates stress-responsive genes during water deficit",
+                "subject": ("ABA", "HORMONE"),
+                "object": ("stress-responsive genes", "GENE"),
+                "evidence": "ABA upregulates stress-responsive genes"
+            },
+            {
+                "text": "Cold treatment enhances anthocyanin biosynthesis pathway",
+                "subject": ("cold treatment", "STRESS_CONDITION"),
+                "object": ("anthocyanin biosynthesis", "PATHWAY"),
+                "evidence": "cold treatment enhances anthocyanin biosynthesis pathway"
+            },
+            {
+                "text": "MYB transcription factors activate flavonoid gene expression",
+                "subject": ("MYB transcription factors", "TRANSCRIPTION_FACTOR"),
+                "object": ("flavonoid genes", "GENE"),
+                "evidence": "MYB transcription factors activate flavonoid gene expression"
+            }
+        ],
+        "derived_from": [
+            {
+                "text": "Quercetin is derived from the precursor naringenin via enzyme action",
+                "subject": ("quercetin", "FLAVONOID"),
+                "object": ("naringenin", "FLAVONOID"),
+                "evidence": "quercetin is derived from the precursor naringenin"
+            },
+            {  
+                "text": "Lignin monomers originate from phenylalanine through phenylpropanoid pathway",
+                "subject": ("lignin monomers", "PHENOLIC_COMPOUND"),
+                "object": ("phenylalanine", "AMINO_ACID"),
+                "evidence": "lignin monomers originate from phenylalanine"
+            },
+            {
+                "text": "Terpenoids are biosynthesized from isoprene units in specialized pathways",
+                "subject": ("terpenoids", "TERPENOID"),
+                "object": ("isoprene units", "COMPOUND"),
+                "evidence": "terpenoids are biosynthesized from isoprene units"
+            }
+        ],
+        "increases_under": [
+            {
+                "text": "Proline levels increase significantly under drought stress conditions", 
+                "subject": ("proline", "AMINO_ACID"),
+                "object": ("drought stress", "STRESS_CONDITION"),
+                "evidence": "proline levels increase significantly under drought stress"
+            },
+            {
+                "text": "Anthocyanin content rises during cold acclimation in leaves",
+                "subject": ("anthocyanin", "METABOLITE"), 
+                "object": ("cold acclimation", "STRESS_CONDITION"),
+                "evidence": "anthocyanin content rises during cold acclimation"
+            },
+            {
+                "text": "Sugar accumulation peaks under water deficit in storage organs",
+                "subject": ("sugar", "CARBOHYDRATE"),
+                "object": ("water deficit", "STRESS_CONDITION"), 
+                "evidence": "sugar accumulation peaks under water deficit"
+            }
+        ]
+    }
+    
+    # Get examples for the specific relationship type
+    examples = relationship_examples.get(relationship_type, [])
+    
+    # Return requested number of examples (cycling if needed)
+    result = []
+    for i in range(min(count, len(examples))):
+        example = examples[i]
+        result.append({
+            "subject_entity": {"text": example["subject"][0], "label": example["subject"][1]},
+            "relation_type": relationship_type,
+            "object_entity": {"text": example["object"][0], "label": example["object"][1]},
+            "confidence": 0.90 + (i * 0.02),  # Slight variation in confidence
+            "evidence": example["evidence"],
+            "example_text": example["text"]
+        })
+    
+    return result
+
+
+def format_relationship_schema_for_template(schema_dict: Dict[str, Any]) -> str:
+    """
+    Format relationship schema dictionary for use in templates.
+    
+    Args:
+        schema_dict: Dictionary containing relationship schema definitions
+        
+    Returns:
+        Formatted string representation of schema for template use
+    """
+    formatted_lines = []
+    
+    for relation_type, pattern in schema_dict.items():
+        if hasattr(pattern, 'description'):
+            # Handle RelationshipPattern objects
+            description = pattern.description
+            domain = list(pattern.domain) if pattern.domain else []
+            range_types = list(pattern.range) if pattern.range else []
+            examples = pattern.examples if pattern.examples else []
+        else:
+            # Handle dictionary format
+            description = pattern.get('description', '')
+            domain = pattern.get('domain', [])
+            range_types = pattern.get('range', [])
+            examples = pattern.get('examples', [])
+        
+        # Format the relationship entry
+        formatted_lines.append(f"- {relation_type}: {description}")
+        
+        if domain:
+            formatted_lines.append(f"  Domain: {', '.join(domain[:5])}{'...' if len(domain) > 5 else ''}")
+        
+        if range_types:
+            formatted_lines.append(f"  Range: {', '.join(range_types[:5])}{'...' if len(range_types) > 5 else ''}")
+            
+        if examples:
+            example_str = ', '.join([f'"{ex[0]} → {ex[1]}"' for ex in examples[:2]])
+            formatted_lines.append(f"  Examples: {example_str}")
+        
+        formatted_lines.append("")  # Empty line between relationships
+    
+    return "\n".join(formatted_lines)
+
+
+def get_compatible_relationships_for_entities(entity_types: List[str], schema_dict: Dict[str, Any]) -> List[str]:
+    """
+    Get list of relationship types compatible with given entity types.
+    
+    Args:
+        entity_types: List of entity type labels
+        schema_dict: Relationship schema dictionary
+        
+    Returns:
+        List of compatible relationship types
+    """
+    compatible_relations = []
+    entity_set = set(entity_types)
+    
+    for relation_type, pattern in schema_dict.items():
+        if hasattr(pattern, 'domain') and hasattr(pattern, 'range'):
+            # Handle RelationshipPattern objects
+            domain = pattern.domain
+            range_types = pattern.range
+        else:
+            # Handle dictionary format
+            domain = set(pattern.get('domain', []))
+            range_types = set(pattern.get('range', []))
+        
+        # Check if any entity types match domain or range
+        if domain.intersection(entity_set) and range_types.intersection(entity_set):
+            compatible_relations.append(relation_type)
+    
+    return compatible_relations
+
+
+def select_optimal_relationship_template(text_characteristics: Dict[str, Any]) -> str:
+    """
+    Select the most appropriate relationship template based on text characteristics.
+    
+    Args:
+        text_characteristics: Dictionary with text analysis results including:
+            - complexity: low/medium/high
+            - domain: metabolomics/genetics/general
+            - context_dependency: boolean
+            - relationship_density: low/medium/high
+            - temporal_markers: boolean
+            - conditional_statements: boolean
+            
+    Returns:
+        Recommended template type name
+    """
+    complexity = text_characteristics.get('complexity', 'medium')
+    domain = text_characteristics.get('domain', 'general')
+    context_dependent = text_characteristics.get('context_dependency', False)
+    temporal_markers = text_characteristics.get('temporal_markers', False)
+    conditional_statements = text_characteristics.get('conditional_statements', False)
+    relationship_density = text_characteristics.get('relationship_density', 'medium')
+    
+    # Decision logic for template selection
+    if context_dependent or temporal_markers or conditional_statements:
+        if domain == 'metabolomics':
+            return 'few_shot_contextual'
+        else:
+            return 'contextual'
+    
+    elif relationship_density == 'high' or complexity == 'high':
+        return 'multi_type'
+    
+    elif domain == 'metabolomics':
+        if complexity == 'high':
+            return 'few_shot_metabolomics'
+        else:
+            return 'metabolomics'
+    
+    elif complexity == 'high':
+        return 'hierarchical'
+    
+    elif complexity == 'low':
+        return 'basic'
+    
+    else:
+        return 'detailed'
+
+
+def validate_relationship_template_inputs(template: str, text: str, entities: List[Dict], schema: Dict) -> Dict[str, Any]:
+    """
+    Validate inputs for relationship extraction templates.
+    
+    Args:
+        template: Template string with placeholders
+        text: Input text to analyze
+        entities: List of entity dictionaries
+        schema: Relationship schema dictionary
+        
+    Returns:
+        Dictionary with validation results and recommendations
+    """
+    validation_results = {
+        'valid': True,
+        'warnings': [],
+        'errors': [],
+        'recommendations': []
+    }
+    
+    # Check text length
+    if len(text.strip()) < 10:
+        validation_results['errors'].append("Text too short for meaningful relationship extraction")
+        validation_results['valid'] = False
+    elif len(text) > 5000:
+        validation_results['warnings'].append("Text is very long, consider splitting into smaller chunks")
+    
+    # Check entities
+    if not entities:
+        validation_results['errors'].append("No entities provided for relationship extraction")
+        validation_results['valid'] = False
+    elif len(entities) < 2:
+        validation_results['warnings'].append("Only one entity found, relationships require at least two entities")
+    
+    # Validate entity format
+    for i, entity in enumerate(entities):
+        if not isinstance(entity, dict) or 'text' not in entity or 'label' not in entity:
+            validation_results['errors'].append(f"Entity {i} missing required 'text' or 'label' fields")
+            validation_results['valid'] = False
+    
+    # Check schema
+    if not schema:
+        validation_results['warnings'].append("No relationship schema provided, using default relationships")
+    
+    # Check template placeholders
+    required_placeholders = ['{text}', '{entities}', '{schema}']
+    for placeholder in required_placeholders:
+        if placeholder not in template:
+            validation_results['errors'].append(f"Template missing required placeholder: {placeholder}")
+            validation_results['valid'] = False
+    
+    # Performance recommendations
+    if len(entities) > 20:
+        validation_results['recommendations'].append("Large number of entities may impact performance, consider entity filtering")
+    
+    if len(schema) > 50:
+        validation_results['recommendations'].append("Large schema may impact performance, consider schema filtering")
+    
+    return validation_results
+
+
+def list_available_relationship_templates() -> List[Dict[str, str]]:
+    """
+    List all available relationship extraction templates with descriptions.
+    
+    Returns:
+        List of dictionaries with template information
+    """
+    templates = [
+        {
+            "name": "basic",
+            "type": "zero-shot",
+            "description": "Basic relationship extraction with simple instructions",
+            "use_case": "General texts, simple relationships"
+        },
+        {
+            "name": "detailed", 
+            "type": "zero-shot",
+            "description": "Detailed relationship extraction with comprehensive guidelines",
+            "use_case": "Complex texts requiring precision"
+        },
+        {
+            "name": "scientific",
+            "type": "zero-shot", 
+            "description": "Scientific literature relationship extraction with domain expertise",
+            "use_case": "Research papers, scientific articles"
+        },
+        {
+            "name": "metabolomics",
+            "type": "zero-shot",
+            "description": "Plant metabolomics relationship extraction",
+            "use_case": "Metabolomics papers, plant biology"
+        },
+        {
+            "name": "hierarchical",
+            "type": "zero-shot",
+            "description": "Hierarchical differentiation between broad and specific relationships", 
+            "use_case": "Complex biological texts requiring relationship specificity"
+        },
+        {
+            "name": "contextual",
+            "type": "zero-shot",
+            "description": "Context-aware relationship extraction with conditional understanding",
+            "use_case": "Experimental texts with environmental/temporal conditions"
+        },
+        {
+            "name": "multi_type",
+            "type": "zero-shot",
+            "description": "Comprehensive multi-type relationship extraction with cross-validation",
+            "use_case": "Pathway reconstruction, comprehensive analysis"
+        },
+        {
+            "name": "few_shot_metabolomics",
+            "type": "few-shot",
+            "description": "Few-shot metabolomics relationship extraction with domain examples",
+            "use_case": "Metabolomics literature, biosynthetic pathways"
+        },
+        {
+            "name": "few_shot_hierarchical", 
+            "type": "few-shot",
+            "description": "Few-shot hierarchical relationship extraction with specificity examples",
+            "use_case": "Complex biological relationships, regulatory networks"
+        },
+        {
+            "name": "few_shot_contextual",
+            "type": "few-shot", 
+            "description": "Few-shot contextual relationship extraction with conditional examples",
+            "use_case": "Experimental studies, condition-dependent relationships"
+        }
+    ]
+    
+    return templates
