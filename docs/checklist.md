@@ -435,7 +435,7 @@ Independent: No
 - [x] **AIM2-ODIE-027-T2:** Create src/data\_quality/deduplicator.py.  
 - [x] **AIM2-ODIE-027-T3:** Implement deduplicate\_entities(records: list\[dict\], fields: list\[str\], settings\_file: str \= None, training\_file: str \= None) function using dedupe or recordlinkage. This will involve setting up the deduplication process (e.g., defining fields, training if dedupe is used).  
 - [x] **AIM2-ODIE-027-T4:** Integrate normalize\_name from AIM2-ODIE-026 as a preprocessing step for fields used in deduplication.  
-- [ ] **AIM2-ODIE-027-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-027-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-028  
 Description: NCBI Taxonomy Integration & Filtering Module: Integrate multitax and ncbi-taxonomist to fetch, manage, and filter NCBI taxonomic information for robust species identification.  
