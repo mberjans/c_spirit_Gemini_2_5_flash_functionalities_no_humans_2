@@ -218,7 +218,7 @@ class TestOntologyTrimmer:
     @parametrize("keyword,expected_count", [
         ("plant", 1),
         ("metabolite", 1),
-        ("compound", 3),  # Should match classes and individuals
+        ("compound", 1),  # Should match only MetaboliteClass (contains "compound" in label)
         ("class", 0),  # No direct matches in mock data
     ])
     def test_filter_classes_by_keyword_parameterized(
