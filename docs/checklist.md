@@ -149,7 +149,7 @@ Independent: No
 - [x] **AIM2-ODIE-010-T2:** Create src/ontology/scheme\_source.py.  
 - [x] **AIM2-ODIE-010-T3:** Define Python classes for core source annotation concepts (e.g., PlantAnatomy, Species, ExperimentalCondition) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
 - [x] **AIM2-ODIE-010-T4:** Programmatically add initial key terms/instances from Plant Ontology, NCBI Taxonomy, and PECO (as representative examples) to the ontology.  
-- [ ] **AIM2-ODIE-010-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-010-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-011  
 Description: Refined Ontology Scheme Definition (Functional): Programmatically define and integrate terms for "Functional Annotation" (Gene Ontology, Trait Ontology, ChemFont) into the core ontology using Owlready2.  
