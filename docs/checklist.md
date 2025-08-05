@@ -186,7 +186,7 @@ Description: Ontology Reasoning Integration: Integrate Owlready2's reasoning cap
 Dependencies: AIM2-ODIE-004, AIM2-ODIE-012  
 Independent: No
 
-- [ ] **AIM2-ODIE-013-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_reasoner.py) for src/ontology/reasoner.py to cover:  
+- [x] **AIM2-ODIE-013-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_reasoner.py) for src/ontology/reasoner.py to cover:  
   * Loading a small test ontology with implicit facts (e.g., A is\_a B, B is\_a C, then assert A is\_a C after reasoning).  
   * Verification of inferred class memberships for individuals based on property values and restrictions (e.g., if a compound has property has\_structure of type X, and X implies Y, check if compound is classified as Y).  
   * Verification of inferred property values if infer\_property\_values=True is used.  
