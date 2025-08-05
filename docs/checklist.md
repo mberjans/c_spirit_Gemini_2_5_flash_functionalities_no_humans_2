@@ -103,8 +103,8 @@ Independent: No
   * Deletion of a property and verification of its absence.  
   * Verification that associated relations/constructs are also removed upon entity deletion (e.g., if a class is deleted, its instances are also gone).  
   * Error handling for attempting to delete non-existent entities.  
-- [ ] **AIM2-ODIE-007-T2:** Create src/ontology/editor.py.  
-- [ ] **AIM2-ODIE-007-T3:** Implement delete\_class(ontology, class\_iri: str) function using destroy\_entity().  
+- [x] **AIM2-ODIE-007-T2:** Create src/ontology/editor.py.  
+- [x] **AIM2-ODIE-007-T3:** Implement delete\_class(ontology, class\_iri: str) function using destroy\_entity().  
 - [ ] **AIM2-ODIE-007-T4:** Implement delete\_individual(ontology, individual\_iri: str) function using destroy\_entity().  
 - [ ] **AIM2-ODIE-007-T5:** Implement delete\_property(ontology, property\_iri: str) function using destroy\_entity().  
 - [ ] **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.

@@ -27,7 +27,7 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlparse
 
-from owlready2 import OwlReadyError
+from owlready2 import OwlReadyError, destroy_entity
 
 
 # Configure logging - will be initialized when first called
@@ -151,17 +151,17 @@ def delete_class(ontology: Any, class_iri: str) -> None:
                     
                     for instance in instances_list:
                         logger.debug(f"Deleting instance: {instance.iri if hasattr(instance, 'iri') else instance}")
-                        instance.destroy()
+                        destroy_entity(instance)
                         
                 except (TypeError, AttributeError) as iter_error:
                     # If instances is not iterable or has other issues, log and continue
                     logger.debug(f"Could not process instances for class {class_iri}: {iter_error}")
                     # In tests, instances might be a Mock that doesn't behave as expected
-                    # Just try to call destroy on it directly
+                    # Just try to call destroy_entity on it directly
                     try:
-                        instances.destroy()
+                        destroy_entity(instances)
                         logger.debug(f"Destroyed instances directly for class {class_iri}")
-                    except AttributeError:
+                    except (AttributeError, TypeError):
                         logger.debug(f"Could not destroy instances for class {class_iri}")
         except AttributeError:
             # Handle case where instances() method doesn't exist or isn't callable
@@ -172,7 +172,7 @@ def delete_class(ontology: Any, class_iri: str) -> None:
         
         # Delete the class itself
         logger.debug(f"Deleting class entity: {class_iri}")
-        class_entity.destroy()
+        destroy_entity(class_entity)
         
         # Verify deletion was successful
         verification_result = ontology.search_one(iri=class_iri)
@@ -229,7 +229,7 @@ def delete_individual(ontology: Any, individual_iri: str) -> None:
         
         # Delete the individual (relationships are cleaned up automatically by Owlready2)
         logger.debug(f"Deleting individual entity: {individual_iri}")
-        individual_entity.destroy()
+        destroy_entity(individual_entity)
         
         # Verify deletion was successful
         verification_result = ontology.search_one(iri=individual_iri)
@@ -286,7 +286,7 @@ def delete_property(ontology: Any, property_iri: str) -> None:
         
         # Delete the property (relationships are cleaned up automatically by Owlready2)
         logger.debug(f"Deleting property entity: {property_iri}")
-        property_entity.destroy()
+        destroy_entity(property_entity)
         
         # Verify deletion was successful
         verification_result = ontology.search_one(iri=property_iri)
