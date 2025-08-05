@@ -134,8 +134,8 @@ Independent: No
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., NPClass is a subclass of ChemicalClass).  
 - [x] **AIM2-ODIE-009-T2:** Create src/ontology/scheme\_structural.py.  
 - [x] **AIM2-ODIE-009-T3:** Define Python classes for core structural annotation concepts (e.g., ChemontClass, NPClass, PMNCompound) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
-- [ ] **AIM2-ODIE-009-T4:** Programmatically add initial key terms/instances from Chemont, NP Classifier, and PMN (as representative examples) to the ontology.  
-- [ ] **AIM2-ODIE-009-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-009-T4:** Programmatically add initial key terms/instances from Chemont, NP Classifier, and PMN (as representative examples) to the ontology.  
+- [x] **AIM2-ODIE-009-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-010  
 Description: Refined Ontology Scheme Definition (Source): Programmatically define and integrate terms for "Source Annotation" (Plant Ontology, NCBI Taxonomy, PECO) into the core ontology using Owlready2.  
