@@ -25,7 +25,6 @@ from owlready2 import OwlReadyError
 from src.utils.testing_framework import expect_exception, parametrize
 
 
-@pytest.mark.skip(reason="Implementation not yet created - TDD approach")
 class TestOntologyTrimmer:
     """Test suite for ontology trimming and filtering functionality."""
 
