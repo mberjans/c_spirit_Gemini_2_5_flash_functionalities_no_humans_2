@@ -406,7 +406,7 @@ Independent: No
 - [x] **AIM2-ODIE-025-T2:** Create src/ontology\_mapping/relation\_mapper.py.  
 - [x] **AIM2-ODIE-025-T3:** Implement map\_relationships\_to\_ontology(relationships: list\[tuple\], ontology\_obj: Any) function. This function will likely involve iterating through relationships, attempting to map relation\_text to Owlready2.ObjectProperty instances, and potentially mapping subject/object texts to ontology entities using text2term (from AIM2-ODIE-024).  
 - [x] **AIM2-ODIE-025-T4:** Add logic to verify that mapped subjects and objects conform to the domain and range of the mapped ObjectProperty in the ontology.  
-- [ ] **AIM2-ODIE-025-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-025-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-026  
 Description: Entity Name Normalization Module: Develop a module (src/data\_quality/normalizer.py) for normalizing entity names (case, spacing, phrasing) using Python string methods and FuzzyWuzzy for fuzzy matching.  
