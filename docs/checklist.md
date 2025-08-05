@@ -266,7 +266,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-017-T3:** Implement scrape\_journal\_metadata(journal\_name: str, query: str) function using paperscraper.  
 - [x] **AIM2-ODIE-017-T4:** Implement download\_journal\_fulltext(article\_url: str, output\_path: str) function using paperscraper or requests with appropriate headers.  
 - [x] **AIM2-ODIE-017-T5:** Implement check\_robots\_txt(url: str) to parse and respect robots.txt rules before scraping.  
-- [ ] **AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.  
+- [x] **AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.  
 - [ ] **AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-018  
