@@ -336,15 +336,15 @@ Independent: No
 - [x] **AIM2-ODIE-021-T2:** Create src/llm\_extraction/relations.py.  
 - [x] **AIM2-ODIE-021-T3:** Implement extract\_relationships(text: str, entities: list\[dict\], relationship\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
 - [x] **AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).  
-- [ ] **AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.  
-- [ ] **AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.  
+- [x] **AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-022  
 Description: CLI for Literature Corpus Building: Create a command-line interface for the data acquisition modules, allowing users to download/scrape literature from various sources.  
 Dependencies: AIM2-ODIE-015, AIM2-ODIE-016, AIM2-ODIE-017  
 Independent: No
 
-- [ ] **AIM2-ODIE-022-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_corpus\_cli.py) for the CLI:  
+- [x] **AIM2-ODIE-022-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_corpus\_cli.py) for the CLI:  
   * Test corpus pubmed-download \--query \<query\> \--output \<dir\> command (mocking pubmed.py calls).  
   * Test corpus pdf-extract \--input \<file\> \--output \<dir\> command (mocking pdf\_extractor.py calls).  
   * Test corpus journal-scrape \--url \<url\> \--output \<dir\> command (mocking journal\_scraper.py calls).  
