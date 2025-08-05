@@ -280,8 +280,8 @@ Independent: Yes
   * Test remove\_duplicates for exact duplicates and fuzzy matching with FuzzyWuzzy (e.g., "Compound A" vs "compound a").  
   * Test filter\_stopwords with a predefined list of common English and biomedical stopwords.  
   * Test standardize\_encoding for various input encodings.  
-- [ ] **AIM2-ODIE-018-T2:** Create src/text\_processing/cleaner.py.  
-- [ ] **AIM2-ODIE-018-T3:** Implement normalize\_text(text: str) function using regex and string methods.  
+- [x] **AIM2-ODIE-018-T2:** Create src/text\_processing/cleaner.py.  
+- [x] **AIM2-ODIE-018-T3:** Implement normalize\_text(text: str) function using regex and string methods.  
 - [ ] **AIM2-ODIE-018-T4:** Implement tokenize\_text(text: str) function using spaCy or NLTK.  
 - [ ] **AIM2-ODIE-018-T5:** Implement remove\_duplicates(text\_list: list\[str\], fuzzy\_threshold: int \= 90\) function using FuzzyWuzzy.  
 - [ ] **AIM2-ODIE-018-T6:** Implement filter\_stopwords(tokens: list\[str\], custom\_stopwords\_list: list\[str\] \= None) function.  
