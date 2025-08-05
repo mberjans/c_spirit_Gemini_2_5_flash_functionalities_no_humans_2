@@ -318,9 +318,9 @@ Independent: No
   * Error handling for LLM API failures, invalid responses, or rate limits.  
 - [x] **AIM2-ODIE-020-T2:** Create src/llm\_extraction/ner.py.  
 - [x] **AIM2-ODIE-020-T3:** Implement extract\_entities(text: str, entity\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
-- [ ] **AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.  
-- [ ] **AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.  
-- [ ] **AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.  
+- [x] **AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.  
+- [x] **AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-021  
 Description: Relationship Extraction Module (LLM-based): Implement relationship extraction functionality (src/llm\_extraction/relations.py) using LLM-IE or OntoGPT to identify complex relationships between extracted entities. Focus on sophisticated prompt engineering and handling hierarchical relationships.  
