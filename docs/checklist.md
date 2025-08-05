@@ -160,7 +160,7 @@ Independent: No
   * Creation of new Owlready2 classes representing GO, Trait Ontology, and ChemFont categories.  
   * Verification that these classes are correctly added and accessible in the ontology.  
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., DroughtTolerance is a subclass of PlantTrait).  
-- [ ] **AIM2-ODIE-011-T2:** Create src/ontology/scheme\_functional.py.  
+- [x] **AIM2-ODIE-011-T2:** Create src/ontology/scheme\_functional.py.  
 - [ ] **AIM2-ODIE-011-T3:** Define Python classes for core functional annotation concepts (e.g., MolecularTrait, PlantTrait, HumanTrait) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
 - [ ] **AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.  
 - [ ] **AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
