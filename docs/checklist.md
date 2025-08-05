@@ -274,7 +274,7 @@ Description: Text Cleaning & Preprocessing Module: Implement core text cleaning 
 Dependencies: AIM2-ODIE-002  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-018-T1:** **Develop Unit Tests:** Write unit tests (tests/text\_processing/test\_cleaner.py) for src/text\_processing/cleaner.py:  
+- [x] **AIM2-ODIE-018-T1:** **Develop Unit Tests:** Write unit tests (tests/text\_processing/test\_cleaner.py) for src/text\_processing/cleaner.py:  
   * Test normalize\_text for basic case conversion, whitespace stripping, and special character removal (e.g., HTML tags).  
   * Test tokenize\_text using spaCy or NLTK to ensure correct word/sentence segmentation.  
   * Test remove\_duplicates for exact duplicates and fuzzy matching with FuzzyWuzzy (e.g., "Compound A" vs "compound a").  
