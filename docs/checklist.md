@@ -382,13 +382,13 @@ Description: Entity-to-Ontology Mapping Module: Implement mapping of extracted e
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-005, AIM2-ODIE-020  
 Independent: No
 
-- [ ] **AIM2-ODIE-024-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\_mapping/test\_entity\_mapper.py) for src/ontology\_mapping/entity\_mapper.py:  
+- [x] **AIM2-ODIE-024-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology\_mapping/test\_entity\_mapper.py) for src/ontology\_mapping/entity\_mapper.py:  
   * Test map\_entities\_to\_ontology with a list of extracted entity strings and a small, predefined test ontology.  
   * Test different text2term mapping methods (e.g., Mapper.TFIDF, Mapper.LEVENSHTEIN).  
   * Test min\_score filtering to ensure only high-confidence mappings are returned.  
   * Test mapping to specific term types (class, property).  
   * Test handling of unmapped terms (if incl\_unmapped is used).  
-- [ ] **AIM2-ODIE-024-T2:** Create src/ontology\_mapping/entity\_mapper.py.  
+- [x] **AIM2-ODIE-024-T2:** Create src/ontology\_mapping/entity\_mapper.py.  
 - [ ] **AIM2-ODIE-024-T3:** Implement map\_entities\_to\_ontology(entities: list\[str\], ontology\_iri: str, mapping\_method: str \= 'tfidf', min\_score: float \= 0.3, term\_type: str \= 'class') function using text2term.map\_terms().  
 - [ ] **AIM2-ODIE-024-T4:** Integrate Owlready2 loaded ontology for text2term's target\_ontology parameter if direct Owlready2 object passing is preferred over IRI.  
 - [ ] **AIM2-ODIE-024-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
