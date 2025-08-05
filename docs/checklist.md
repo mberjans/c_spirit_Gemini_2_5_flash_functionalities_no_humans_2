@@ -220,7 +220,7 @@ Description: PubMed/PMC Data Acquisition Module: Develop a module (src/data\_acq
 Dependencies: AIM2-ODIE-002  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-015-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_pubmed.py) for src/data\_acquisition/pubmed.py (mocking Biopython.Entrez calls using unittest.mock or pytest-mock):  
+- [x] **AIM2-ODIE-015-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_acquisition/test\_pubmed.py) for src/data\_acquisition/pubmed.py (mocking Biopython.Entrez calls using unittest.mock or pytest-mock):  
   * Test successful search and ID retrieval for a given keyword.  
   * Test successful fetching of XML content for a list of valid IDs.  
   * Test rate limiting implementation (e.g., verifying delays between calls).  
