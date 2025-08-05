@@ -300,6 +300,12 @@ def pubmed_download_command(
     search query and saves them to the output directory.
     """
     try:
+        # Import PubMed functions
+        from src.data_acquisition.pubmed import (
+            search_pubmed, fetch_pubmed_xml, search_and_fetch,
+            set_entrez_email, configure_api_key, PubMedError
+        )
+        
         if verbose:
             console.print(f"[blue]Starting PubMed download with query: '{query}'[/blue]")
             console.print(f"Output directory: {output}")
@@ -313,20 +319,112 @@ def pubmed_download_command(
         if verbose:
             console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
         
-        # Placeholder implementation
-        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
-        console.print(f"[green]Would download papers for query: '{query}'[/green]")
-        console.print(f"[green]Would save {max_results} results to: {output}[/green]")
-        console.print(f"[green]Would use format: {format}[/green]")
+        # Set up Entrez email (required by NCBI)
+        # Try to get email from environment variable, otherwise use default
+        email = os.environ.get('NCBI_EMAIL', 'user@example.com')
+        try:
+            set_entrez_email(email)
+            if verbose:
+                console.print(f"[blue]Configured NCBI email: {email}[/blue]")
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not set email ({e}), using default[/yellow]")
         
-        # TODO: Call actual PubMed download function from src.data_acquisition.pubmed
-        # from src.data_acquisition.pubmed import download_papers
-        # results = download_papers(query=query, max_results=max_results, output_dir=output, format=format)
+        # Configure API key if provided
+        api_key = os.environ.get('NCBI_API_KEY')
+        if api_key:
+            try:
+                configure_api_key(api_key)
+                if verbose:
+                    console.print("[blue]NCBI API key configured for higher rate limits[/blue]")
+            except Exception as e:
+                console.print(f"[yellow]Warning: Could not configure API key ({e})[/yellow]")
         
-        console.print(f"[green]✓ PubMed download completed (placeholder)[/green]")
+        # Validate format (currently only XML is fully supported)
+        if format.lower() != "xml":
+            console.print(f"[yellow]Warning: Format '{format}' requested, but only XML is currently supported. Using XML.[/yellow]")
         
+        # Search and fetch data
+        console.print(f"[blue]Searching PubMed for: '{query}'[/blue]")
+        
+        if verbose:
+            console.print("[blue]Step 1: Searching for article IDs...[/blue]")
+        
+        # Search for PubMed IDs
+        id_list = search_pubmed(query, max_results)
+        
+        if not id_list:
+            console.print(f"[yellow]No articles found for query: '{query}'[/yellow]")
+            return
+        
+        console.print(f"[green]Found {len(id_list)} articles[/green]")
+        
+        if verbose:
+            console.print(f"[blue]Step 2: Fetching XML content for {len(id_list)} articles...[/blue]")
+        
+        # Fetch XML content
+        xml_content = fetch_pubmed_xml(id_list)
+        
+        if not xml_content:
+            console.print("[yellow]No content retrieved[/yellow]")
+            return
+        
+        # Save XML content to file
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f"pubmed_results_{timestamp}_{len(id_list)}_articles.xml"
+        output_file_path = output_path / output_filename
+        
+        if verbose:
+            console.print(f"[blue]Step 3: Saving results to {output_file_path}[/blue]")
+        
+        # Handle both string and bytes content
+        if isinstance(xml_content, bytes):
+            with open(output_file_path, 'wb') as f:
+                f.write(xml_content)
+        else:
+            with open(output_file_path, 'w', encoding='utf-8') as f:
+                f.write(xml_content)
+        
+        # Create a metadata file with query information
+        metadata_filename = f"pubmed_metadata_{timestamp}_{len(id_list)}_articles.txt"
+        metadata_file_path = output_path / metadata_filename
+        
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        metadata_content = f"""PubMed Download Metadata
+========================
+Query: {query}
+Date: {current_time}
+Results: {len(id_list)} articles
+IDs: {', '.join(id_list[:10])}{'...' if len(id_list) > 10 else ''}
+Output File: {output_filename}
+XML Content Size: {len(xml_content)} characters
+
+PubMed IDs (complete list):
+{chr(10).join(id_list)}
+"""
+        
+        with open(metadata_file_path, 'w', encoding='utf-8') as f:
+            f.write(metadata_content)
+        
+        # Summary
+        console.print(f"[green]✓ PubMed download completed successfully![/green]")
+        console.print(f"[green]  - Downloaded {len(id_list)} articles[/green]")
+        console.print(f"[green]  - XML content: {len(xml_content):,} characters[/green]")
+        console.print(f"[green]  - Results saved to: {output_file_path}[/green]")
+        console.print(f"[green]  - Metadata saved to: {metadata_file_path}[/green]")
+        
+    except PubMedError as e:
+        console.print(f"[red]PubMed API error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+    except ImportError as e:
+        console.print(f"[red]Missing required dependencies: {e}[/red]")
+        console.print("[yellow]Please install Biopython with: pip install biopython[/yellow]")
+        raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error during PubMed download: {e}[/red]")
+        console.print(f"[red]Unexpected error: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())

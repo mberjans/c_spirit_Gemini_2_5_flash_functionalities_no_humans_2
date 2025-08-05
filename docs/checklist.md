@@ -349,8 +349,8 @@ Independent: No
   * Test corpus pdf-extract \--input \<file\> \--output \<dir\> command (mocking pdf\_extractor.py calls).  
   * Test corpus journal-scrape \--url \<url\> \--output \<dir\> command (mocking journal\_scraper.py calls).  
   * Test invalid arguments and ensure proper error messages are displayed.  
-- [ ] **AIM2-ODIE-022-T2:** Extend src/cli.py with a corpus subcommand using the chosen CLI framework.  
-- [ ] **AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\_acquisition/pubmed.py and handling output saving.  
+- [x] **AIM2-ODIE-022-T2:** Extend src/cli.py with a corpus subcommand using the chosen CLI framework.  
+- [x] **AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\_acquisition/pubmed.py and handling output saving.  
 - [ ] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\_acquisition/pdf\_extractor.py and handling output saving.  
 - [ ] **AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\_acquisition/journal\_scraper.py and handling output saving.  
 - [ ] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.  
