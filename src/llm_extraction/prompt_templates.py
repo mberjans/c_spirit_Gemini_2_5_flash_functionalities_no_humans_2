@@ -2985,3 +2985,229 @@ def get_recommended_template(
         return get_recall_focused_template()
     else:
         return get_detailed_zero_shot_template()
+
+
+# Relationship extraction templates
+RELATIONSHIP_BASIC_TEMPLATE = """Extract relationships between entities from the following text.
+
+Text: {text}
+
+Entities:
+{entities}
+
+Available relationship types:
+{schema}
+
+Instructions:
+1. Identify meaningful relationships between the provided entities
+2. Use only the relationship types from the schema above
+3. Return results in the specified JSON format
+4. Each relationship should have a confidence score between 0.0 and 1.0
+5. Include supporting context where possible
+
+{examples}
+
+Output the relationships in this JSON format:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity1", "label": "LABEL1"}},
+            "relation_type": "relationship_type",
+            "object_entity": {{"text": "entity2", "label": "LABEL2"}},
+            "confidence": 0.95,
+            "context": "supporting context",
+            "evidence": "text span supporting relationship"
+        }}
+    ]
+}}"""
+
+RELATIONSHIP_DETAILED_TEMPLATE = """You are an expert in extracting semantic relationships from scientific text. Your task is to identify meaningful relationships between the provided entities.
+
+Text: {text}
+
+Entities to consider:
+{entities}
+
+Relationship Schema:
+{schema}
+
+Guidelines:
+1. ENTITY MATCHING: Only create relationships between entities that are explicitly provided in the entities list
+2. RELATIONSHIP TYPES: Use only the relationship types defined in the schema above
+3. DIRECTION: Pay attention to the direction of relationships (subject -> relation -> object)
+4. CONFIDENCE: Assign confidence scores based on:
+   - 0.9-1.0: Explicitly stated in text with clear evidence
+   - 0.7-0.9: Strongly implied with good contextual support
+   - 0.5-0.7: Reasonably inferred from context
+   - Below 0.5: Uncertain or speculative (avoid these)
+5. CONTEXT: Include relevant context that supports the relationship
+6. EVIDENCE: Provide the text span that most directly supports the relationship
+
+{examples}
+
+Output Format:
+Return a JSON object with the following structure:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "subject_text", "label": "SUBJECT_LABEL"}},
+            "relation_type": "valid_relationship_type",
+            "object_entity": {{"text": "object_text", "label": "OBJECT_LABEL"}},
+            "confidence": 0.95,
+            "context": "relevant surrounding context",
+            "evidence": "specific text span supporting this relationship"
+        }}
+    ]
+}}
+
+If no relationships are found, return: {{"relationships": []}}"""
+
+RELATIONSHIP_SCIENTIFIC_TEMPLATE = """Extract semantic relationships from scientific text with high precision and domain expertise.
+
+Scientific Text: {text}
+
+Identified Entities:
+{entities}
+
+Relationship Taxonomy:
+{schema}
+
+Scientific Relationship Extraction Protocol:
+1. PRECISION FIRST: Only extract relationships with strong textual evidence
+2. NO SPECULATION: Avoid inferring relationships not clearly supported by the text
+3. DOMAIN EXPERTISE: Apply scientific domain knowledge for accurate interpretation
+4. RELATIONSHIP HIERARCHY: Choose the most specific applicable relationship type
+5. BIDIRECTIONAL ANALYSIS: Consider if relationships should be bidirectional
+6. TEMPORAL CONTEXT: Account for temporal or conditional relationships when mentioned
+
+Quality Criteria:
+- Confidence ≥ 0.8 for scientific literature
+- Clear evidence in original text
+- Scientifically meaningful relationships
+- Proper entity pairing based on scientific logic
+
+{examples}
+
+Expected JSON Output:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "entity_text", "label": "ENTITY_TYPE"}},
+            "relation_type": "precise_relationship",
+            "object_entity": {{"text": "target_text", "label": "TARGET_TYPE"}},
+            "confidence": 0.92,
+            "context": "scientific context supporting relationship",
+            "evidence": "exact text evidence"
+        }}
+    ]
+}}"""
+
+RELATIONSHIP_METABOLOMICS_TEMPLATE = """Extract metabolomics-specific relationships from plant science literature.
+
+Text: {text}
+
+Entities:
+{entities}
+
+Metabolomics Relationship Types:
+{schema}
+
+Domain-Specific Guidelines:
+1. METABOLIC PATHWAYS: Focus on biosynthetic and catabolic relationships
+2. ENZYME-SUBSTRATE: Identify catalytic relationships and conversions  
+3. LOCALIZATION: Extract spatial relationships (tissue, cellular, subcellular)
+4. REGULATION: Capture regulatory relationships (up/downregulation)
+5. ANALYTICAL: Include detection and measurement relationships
+6. STRESS RESPONSES: Identify stress-related metabolic changes
+
+Metabolomics Context:
+- Consider pathway hierarchies and metabolic networks
+- Account for tissue-specific expression and accumulation
+- Recognize analytical method associations
+- Include environmental and stress response relationships
+
+{examples}
+
+JSON Output Format:
+{{
+    "relationships": [
+        {{
+            "subject_entity": {{"text": "metabolite", "label": "METABOLITE"}},
+            "relation_type": "synthesized_by",
+            "object_entity": {{"text": "enzyme", "label": "ENZYME"}},
+            "confidence": 0.94,
+            "context": "in specific tissue under conditions",
+            "evidence": "direct text support"
+        }}
+    ]
+}}"""
+
+
+def get_relationship_template(template_type: str = "basic") -> str:
+    """
+    Get relationship extraction template by type.
+    
+    Args:
+        template_type: Type of template ("basic", "detailed", "scientific", "metabolomics")
+        
+    Returns:
+        Relationship extraction template string
+        
+    Raises:
+        TemplateNotFoundError: If template type is not found
+    """
+    templates = {
+        "basic": RELATIONSHIP_BASIC_TEMPLATE,
+        "detailed": RELATIONSHIP_DETAILED_TEMPLATE,
+        "scientific": RELATIONSHIP_SCIENTIFIC_TEMPLATE,
+        "metabolomics": RELATIONSHIP_METABOLOMICS_TEMPLATE,
+        "relationship_basic": RELATIONSHIP_BASIC_TEMPLATE,
+        "relationship_detailed": RELATIONSHIP_DETAILED_TEMPLATE,
+        "relationship_scientific": RELATIONSHIP_SCIENTIFIC_TEMPLATE,
+        "relationship_metabolomics": RELATIONSHIP_METABOLOMICS_TEMPLATE
+    }
+    
+    if template_type not in templates:
+        raise TemplateNotFoundError(f"Relationship template '{template_type}' not found. Available: {list(templates.keys())}")
+    
+    return templates[template_type]
+
+
+def get_relationship_template_metadata(template_type: str) -> Dict[str, Any]:
+    """
+    Get metadata for relationship extraction templates.
+    
+    Args:
+        template_type: Type of template
+        
+    Returns:
+        Dictionary with template metadata
+    """
+    metadata = {
+        "basic": {
+            "description": "Basic relationship extraction template",
+            "use_cases": ["general relationship extraction", "simple texts"],
+            "strengths": ["easy to use", "fast processing"],
+            "limitations": ["may miss complex relationships"]
+        },
+        "detailed": {
+            "description": "Detailed relationship extraction with comprehensive guidelines",
+            "use_cases": ["complex texts", "high-precision extraction"],
+            "strengths": ["detailed instructions", "high precision"],
+            "limitations": ["may be slower", "more verbose"]
+        },
+        "scientific": {
+            "description": "Scientific literature relationship extraction",
+            "use_cases": ["research papers", "scientific articles"],
+            "strengths": ["domain expertise", "high precision"],
+            "limitations": ["specialized for scientific text"]
+        },
+        "metabolomics": {
+            "description": "Plant metabolomics relationship extraction",
+            "use_cases": ["metabolomics papers", "plant biology"],
+            "strengths": ["domain-specific", "pathway-aware"],
+            "limitations": ["specialized domain only"]
+        }
+    }
+    
+    return metadata.get(template_type, {})

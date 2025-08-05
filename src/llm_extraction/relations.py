@@ -111,7 +111,7 @@ def extract_relationships(
     llm_model_name: str,
     prompt_template: str,
     few_shot_examples: Optional[List[Dict[str, Any]]] = None
-) -> List[Dict[str, Any]]:
+) -> List[Tuple[str, str, str]]:
     """
     Extract relationships between entities from text using LLM-based approach.
     
@@ -128,13 +128,12 @@ def extract_relationships(
         few_shot_examples: Optional list of examples for few-shot learning
         
     Returns:
-        List of dictionaries containing extracted relationships with:
-        - subject_entity: The source entity (dict with text, label, start, end)
+        List of tuples containing extracted relationships in format:
+        (subject_entity_text, relation_type, object_entity_text)
+        Where:
+        - subject_entity_text: The source entity text
         - relation_type: The relationship type/label
-        - object_entity: The target entity (dict with text, label, start, end)
-        - confidence: Confidence score (0.0-1.0)
-        - context: Supporting context from text
-        - evidence: Text span supporting the relationship
+        - object_entity_text: The target entity text
         
     Raises:
         ValueError: For invalid input parameters
@@ -197,10 +196,6 @@ def extract_relationships(
     # Parse and validate response
     relationships = _parse_llm_response(response)
     _validate_response_format(relationships, entities)
-    
-    # Filter and enhance relationships
-    relationships = _filter_valid_relationships(relationships, entities, text)
-    relationships = _add_relationship_context(relationships, text)
     
     return relationships
 
@@ -279,12 +274,12 @@ def _format_entities_for_prompt(entities: List[Dict[str, Any]]) -> str:
     return "\n".join(entity_strings)
 
 
-def _format_relationships_for_prompt(relationships: List[Dict[str, Any]]) -> str:
+def _format_relationships_for_prompt(relationships: List[Any]) -> str:
     """
     Format relationships for inclusion in prompt examples.
     
     Args:
-        relationships: List of relationship dictionaries
+        relationships: List of relationship dictionaries or tuples
         
     Returns:
         Formatted string representation of relationships
@@ -294,9 +289,22 @@ def _format_relationships_for_prompt(relationships: List[Dict[str, Any]]) -> str
     
     rel_strings = []
     for rel in relationships:
-        subject = rel['subject_entity']['text']
-        relation = rel['relation_type']
-        obj = rel['object_entity']['text']
+        if isinstance(rel, tuple):
+            # Tuple format: (subject, relation, object)
+            subject, relation, obj = rel
+        elif isinstance(rel, dict):
+            # Dictionary format
+            if 'subject_entity' in rel:
+                subject = rel['subject_entity']['text'] if isinstance(rel['subject_entity'], dict) else rel['subject_entity']
+                relation = rel['relation_type']
+                obj = rel['object_entity']['text'] if isinstance(rel['object_entity'], dict) else rel['object_entity']
+            else:
+                subject = rel.get('subject', '')
+                relation = rel.get('relation', '')
+                obj = rel.get('object', '')
+        else:
+            continue  # Skip invalid formats
+        
         rel_strings.append(f"{subject} --{relation}--> {obj}")
     
     return "; ".join(rel_strings)
@@ -357,7 +365,7 @@ def _make_llm_request(prompt: str, model_name: str) -> Dict[str, Any]:
         raise LLMAPIError("Invalid JSON response from LLM API")
 
 
-def _parse_llm_response(response: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _parse_llm_response(response: Dict[str, Any]) -> List[Tuple[str, str, str]]:
     """
     Parse LLM API response to extract relationships.
     
@@ -365,7 +373,7 @@ def _parse_llm_response(response: Dict[str, Any]) -> List[Dict[str, Any]]:
         response: LLM API response
         
     Returns:
-        List of extracted relationships
+        List of extracted relationships as tuples (subject, relation, object)
         
     Raises:
         LLMAPIError: For invalid response format
@@ -395,7 +403,68 @@ def _parse_llm_response(response: Dict[str, Any]) -> List[Dict[str, Any]]:
     if not isinstance(relationships, list):
         raise LLMAPIError("Invalid response format: 'relationships' must be a list")
     
-    return relationships
+    # Convert from dictionary format to tuple format
+    return _convert_relationships_to_tuples(relationships)
+
+
+def _convert_relationships_to_tuples(relationships: List[Dict[str, Any]]) -> List[Tuple[str, str, str]]:
+    """
+    Convert relationship dictionaries to tuple format expected by tests.
+    
+    Args:
+        relationships: List of relationship dictionaries
+        
+    Returns:
+        List of tuples (subject, relation, object)
+        
+    Raises:
+        LLMAPIError: For invalid relationship format
+    """
+    tuples = []
+    
+    for i, relationship in enumerate(relationships):
+        if not isinstance(relationship, dict):
+            raise LLMAPIError(f"Relationship {i} must be a dictionary")
+        
+        # Handle different formats for subject and object entities
+        try:
+            if "subject" in relationship:
+                # Format: {"subject": "text", "relation": "type", "object": "text"}
+                subject = relationship["subject"]
+                relation = relationship["relation"]
+                obj = relationship["object"]
+            elif "subject_entity" in relationship:
+                # Format: {"subject_entity": {"text": "..."}, "relation_type": "...", "object_entity": {"text": "..."}}
+                subject_entity = relationship["subject_entity"]
+                if isinstance(subject_entity, dict):
+                    subject = subject_entity.get("text", str(subject_entity))
+                else:
+                    subject = str(subject_entity)
+                
+                relation = relationship.get("relation_type", relationship.get("relation", ""))
+                
+                object_entity = relationship["object_entity"]
+                if isinstance(object_entity, dict):
+                    obj = object_entity.get("text", str(object_entity))
+                else:
+                    obj = str(object_entity)
+            else:
+                raise LLMAPIError(f"Invalid relationship format in relationship {i}: missing subject field")
+        
+        except KeyError as e:
+            raise LLMAPIError(f"Missing required field in relationship {i}: {e}")
+        
+        # Validate that all components are strings and non-empty
+        if not isinstance(subject, str) or not subject.strip():
+            raise LLMAPIError(f"Invalid subject in relationship {i}: must be non-empty string")
+        if not isinstance(relation, str) or not relation.strip():
+            raise LLMAPIError(f"Invalid relation in relationship {i}: must be non-empty string")
+        if not isinstance(obj, str) or not obj.strip():
+            raise LLMAPIError(f"Invalid object in relationship {i}: must be non-empty string")
+        
+        tuples.append((subject.strip(), relation.strip(), obj.strip()))
+    
+    return tuples
 
 
 def _validate_relationship_schema(schema: Dict[str, str]) -> None:
@@ -441,6 +510,12 @@ def _validate_entities_format(entities: List[Dict[str, Any]]) -> None:
     Raises:
         InvalidEntitiesError: For invalid entity format
     """
+    if entities is None:
+        raise InvalidEntitiesError("Entities list cannot be None")
+    
+    if not isinstance(entities, list):
+        raise InvalidEntitiesError("Entities must be a list")
+    
     required_fields = ["text", "label"]
     
     for i, entity in enumerate(entities):
@@ -461,6 +536,19 @@ def _validate_entities_format(entities: List[Dict[str, Any]]) -> None:
         
         if not entity["text"].strip():
             raise InvalidEntitiesError(f"Entity text cannot be empty in entity {i}")
+        
+        # Check optional fields if present
+        if "start" in entity:
+            if not isinstance(entity["start"], int) or entity["start"] < 0:
+                raise InvalidEntitiesError(f"Invalid field value: 'start' must be non-negative integer in entity {i}")
+        
+        if "end" in entity:
+            if not isinstance(entity["end"], int) or entity["end"] < 0:
+                raise InvalidEntitiesError(f"Invalid field value: 'end' must be non-negative integer in entity {i}")
+        
+        if "start" in entity and "end" in entity:
+            if entity["start"] >= entity["end"]:
+                raise InvalidEntitiesError(f"Invalid field range: 'start' must be less than 'end' in entity {i}")
 
 
 def _validate_few_shot_relationship_examples(examples: List[Dict[str, Any]]) -> None:
@@ -500,59 +588,62 @@ def _validate_few_shot_relationship_examples(examples: List[Dict[str, Any]]) -> 
         
         # Validate relationships in example
         for j, relationship in enumerate(example["relationships"]):
-            if not isinstance(relationship, dict):
-                raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} must be a dictionary")
-            
-            required_rel_fields = ["subject_entity", "relation_type", "object_entity"]
-            for field in required_rel_fields:
-                if field not in relationship:
-                    raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} missing '{field}' field")
+            if isinstance(relationship, tuple):
+                # Tuple format: (subject, relation, object)
+                if len(relationship) != 3:
+                    raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} tuple must have 3 elements")
+                subject, relation, obj = relationship
+                if not all(isinstance(x, str) for x in [subject, relation, obj]):
+                    raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} tuple elements must be strings")
+            elif isinstance(relationship, dict):
+                # Dictionary format
+                required_rel_fields = ["subject_entity", "relation_type", "object_entity"]
+                for field in required_rel_fields:
+                    if field not in relationship:
+                        raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} missing '{field}' field")
+            else:
+                raise ValueError(f"Invalid few-shot examples format: example {i} relationship {j} must be a dictionary or tuple")
 
 
-def _validate_response_format(relationships: List[Dict[str, Any]], entities: List[Dict[str, Any]]) -> None:
+def _validate_response_format(relationships: List[Tuple[str, str, str]], entities: Optional[List[Dict[str, Any]]] = None) -> None:
     """
     Validate extracted relationships format.
     
     Args:
-        relationships: List of extracted relationships
+        relationships: List of extracted relationships as tuples
         entities: List of available entities
         
     Raises:
         LLMAPIError: For invalid relationship format
     """
-    required_fields = ["subject_entity", "relation_type", "object_entity", "confidence"]
-    
     for i, relationship in enumerate(relationships):
-        if not isinstance(relationship, dict):
-            raise LLMAPIError(f"Relationship {i} must be a dictionary")
+        if not isinstance(relationship, tuple):
+            raise LLMAPIError(f"Relationship {i} must be a tuple")
         
-        # Check required fields
-        for field in required_fields:
-            if field not in relationship:
-                raise LLMAPIError(f"Missing required field '{field}' in relationship {i}")
+        if len(relationship) != 3:
+            raise LLMAPIError(f"Relationship {i} must have exactly 3 elements (subject, relation, object)")
         
-        # Check field types
-        if not isinstance(relationship["subject_entity"], dict):
-            raise LLMAPIError(f"Invalid field type: 'subject_entity' must be dict in relationship {i}")
+        subject, relation, obj = relationship
         
-        if not isinstance(relationship["object_entity"], dict):
-            raise LLMAPIError(f"Invalid field type: 'object_entity' must be dict in relationship {i}")
+        # Check that all elements are strings
+        if not isinstance(subject, str):
+            raise LLMAPIError(f"Invalid field type: subject must be string in relationship {i}")
         
-        if not isinstance(relationship["relation_type"], str):
-            raise LLMAPIError(f"Invalid field type: 'relation_type' must be string in relationship {i}")
+        if not isinstance(relation, str):
+            raise LLMAPIError(f"Invalid field type: relation must be string in relationship {i}")
         
-        if not isinstance(relationship["confidence"], (int, float)):
-            raise LLMAPIError(f"Invalid field type: 'confidence' must be number in relationship {i}")
+        if not isinstance(obj, str):
+            raise LLMAPIError(f"Invalid field type: object must be string in relationship {i}")
         
-        # Check confidence range
-        if not (0.0 <= relationship["confidence"] <= 1.0):
-            raise LLMAPIError(f"Invalid field range: 'confidence' must be between 0.0 and 1.0 in relationship {i}")
+        # Check that elements are non-empty
+        if not subject.strip():
+            raise LLMAPIError(f"Invalid field value: subject cannot be empty in relationship {i}")
         
-        # Validate entity structures
-        for entity_key in ["subject_entity", "object_entity"]:
-            entity = relationship[entity_key]
-            if "text" not in entity or "label" not in entity:
-                raise LLMAPIError(f"Missing required fields in {entity_key} of relationship {i}")
+        if not relation.strip():
+            raise LLMAPIError(f"Invalid field value: relation cannot be empty in relationship {i}")
+        
+        if not obj.strip():
+            raise LLMAPIError(f"Invalid field value: object cannot be empty in relationship {i}")
 
 
 def _filter_valid_relationships(

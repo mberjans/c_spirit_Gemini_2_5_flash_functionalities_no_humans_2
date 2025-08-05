@@ -327,14 +327,14 @@ Description: Relationship Extraction Module (LLM-based): Implement relationship 
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-020  
 Independent: No
 
-- [ ] **AIM2-ODIE-021-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_relations.py) for src/llm\_extraction/relations.py (mocking LLM API calls):  
+- [x] **AIM2-ODIE-021-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_relations.py) for src/llm\_extraction/relations.py (mocking LLM API calls):  
   * Test extract\_relationships with a simple text, a list of extracted entities, and a defined relationship schema.  
   * Test extraction of specific relationship types like "affects", "involved in", "upregulates".  
   * Test handling of hierarchical relationships (e.g., distinguishing "involved in" from "upregulates" based on context).  
   * Verify output format matches expected structured data (e.g., list of triples: (subject\_entity, relation\_type, object\_entity)).  
   * Error handling for LLM API failures or invalid responses.  
-- [ ] **AIM2-ODIE-021-T2:** Create src/llm\_extraction/relations.py.  
-- [ ] **AIM2-ODIE-021-T3:** Implement extract\_relationships(text: str, entities: list\[dict\], relationship\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
+- [x] **AIM2-ODIE-021-T2:** Create src/llm\_extraction/relations.py.  
+- [x] **AIM2-ODIE-021-T3:** Implement extract\_relationships(text: str, entities: list\[dict\], relationship\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
 - [ ] **AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).  
 - [ ] **AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.  
 - [ ] **AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
