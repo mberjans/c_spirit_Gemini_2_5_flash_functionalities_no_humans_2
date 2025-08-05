@@ -49,13 +49,12 @@ class TestOntologyEditor:
         Create a mock class entity for testing.
         
         Returns:
-            Mock: Mock class entity with destroy method
+            Mock: Mock class entity
         """
         mock_class = Mock()
         mock_class.iri = "http://test.example.org/ontology#TestClass"
         mock_class.name = "TestClass"
         mock_class.instances.return_value = []  # Default: no instances
-        mock_class.destroy = Mock()
         return mock_class
 
     @pytest.fixture
@@ -64,12 +63,11 @@ class TestOntologyEditor:
         Create a mock individual entity for testing.
         
         Returns:
-            Mock: Mock individual entity with destroy method
+            Mock: Mock individual entity
         """
         mock_individual = Mock()
         mock_individual.iri = "http://test.example.org/ontology#TestIndividual"
         mock_individual.name = "TestIndividual"
-        mock_individual.destroy = Mock()
         return mock_individual
 
     @pytest.fixture
@@ -78,12 +76,11 @@ class TestOntologyEditor:
         Create a mock property entity for testing.
         
         Returns:
-            Mock: Mock property entity with destroy method
+            Mock: Mock property entity
         """
         mock_property = Mock()
         mock_property.iri = "http://test.example.org/ontology#testProperty"
         mock_property.name = "testProperty"
-        mock_property.destroy = Mock()
         return mock_property
 
     @pytest.fixture
@@ -99,7 +96,6 @@ class TestOntologyEditor:
             instance = Mock()
             instance.iri = f"http://test.example.org/ontology#TestInstance{i}"
             instance.name = f"TestInstance{i}"
-            instance.destroy = Mock()
             instances.append(instance)
         return instances
 
@@ -107,8 +103,10 @@ class TestOntologyEditor:
     # Tests for delete_class() function
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_class_success(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -116,6 +114,7 @@ class TestOntologyEditor:
         Test successful deletion of a class and verification of its absence.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -134,11 +133,13 @@ class TestOntologyEditor:
         expected_calls = [call(iri=class_iri), call(iri=class_iri)]
         mock_ontology.search_one.assert_has_calls(expected_calls)
         
-        # Verify destroy was called on the class
-        mock_class_entity.destroy.assert_called_once()
+        # Verify destroy_entity was called on the class
+        mock_destroy_entity.assert_called_once_with(mock_class_entity)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_class_with_instances_success(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock,
         mock_instance_entities: List[Mock]
@@ -147,6 +148,7 @@ class TestOntologyEditor:
         Test deletion of a class with instances - instances should be removed.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
             mock_instance_entities: Mock instance entities fixture
@@ -163,12 +165,13 @@ class TestOntologyEditor:
         delete_class(mock_ontology, class_iri)
         
         # Assert
-        # Verify all instances were destroyed first
+        # Verify destroy_entity was called for all instances first, then the class
+        expected_calls = []
         for instance in mock_instance_entities:
-            instance.destroy.assert_called_once()
+            expected_calls.append(call(instance))
+        expected_calls.append(call(mock_class_entity))
         
-        # Verify class was destroyed after instances
-        mock_class_entity.destroy.assert_called_once()
+        mock_destroy_entity.assert_has_calls(expected_calls)
 
     def test_delete_class_nonexistent_error(self, mock_ontology: Mock):
         """
@@ -188,8 +191,10 @@ class TestOntologyEditor:
         with expect_exception(EntityDeletionError, match="Class not found"):
             delete_class(mock_ontology, class_iri)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_class_owlready_error(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -197,6 +202,7 @@ class TestOntologyEditor:
         Test error handling when Owlready2 raises an error during class deletion.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -204,9 +210,9 @@ class TestOntologyEditor:
         
         class_iri = "http://test.example.org/ontology#TestClass"
         
-        # Setup: class exists but destroy fails
+        # Setup: class exists but destroy_entity fails
         mock_ontology.search_one.return_value = mock_class_entity
-        mock_class_entity.destroy.side_effect = OwlReadyError("Destruction failed")
+        mock_destroy_entity.side_effect = OwlReadyError("Destruction failed")
         
         # Act & Assert
         with expect_exception(EntityDeletionError, match="Failed to delete class"):
@@ -237,8 +243,10 @@ class TestOntologyEditor:
     # Tests for delete_individual() function
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_individual_success(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_individual_entity: Mock
     ):
@@ -246,6 +254,7 @@ class TestOntologyEditor:
         Test successful deletion of an individual and verification of its absence.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_individual_entity: Mock individual entity fixture
         """
@@ -264,11 +273,13 @@ class TestOntologyEditor:
         expected_calls = [call(iri=individual_iri), call(iri=individual_iri)]
         mock_ontology.search_one.assert_has_calls(expected_calls)
         
-        # Verify destroy was called on the individual
-        mock_individual_entity.destroy.assert_called_once()
+        # Verify destroy_entity was called on the individual
+        mock_destroy_entity.assert_called_once_with(mock_individual_entity)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_individual_with_relationships_cleanup(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_individual_entity: Mock
     ):
@@ -276,6 +287,7 @@ class TestOntologyEditor:
         Test that relationships involving deleted individual are cleaned up.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_individual_entity: Mock individual entity fixture
         """
@@ -292,8 +304,8 @@ class TestOntologyEditor:
         delete_individual(mock_ontology, individual_iri)
         
         # Assert
-        # Verify destroy was called (relationships are cleaned up automatically by Owlready2)
-        mock_individual_entity.destroy.assert_called_once()
+        # Verify destroy_entity was called (relationships are cleaned up automatically by Owlready2)
+        mock_destroy_entity.assert_called_once_with(mock_individual_entity)
 
     def test_delete_individual_nonexistent_error(self, mock_ontology: Mock):
         """
@@ -313,8 +325,10 @@ class TestOntologyEditor:
         with expect_exception(EntityDeletionError, match="Individual not found"):
             delete_individual(mock_ontology, individual_iri)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_individual_owlready_error(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_individual_entity: Mock
     ):
@@ -322,6 +336,7 @@ class TestOntologyEditor:
         Test error handling when Owlready2 raises an error during individual deletion.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_individual_entity: Mock individual entity fixture
         """
@@ -329,9 +344,9 @@ class TestOntologyEditor:
         
         individual_iri = "http://test.example.org/ontology#TestIndividual"
         
-        # Setup: individual exists but destroy fails
+        # Setup: individual exists but destroy_entity fails
         mock_ontology.search_one.return_value = mock_individual_entity
-        mock_individual_entity.destroy.side_effect = OwlReadyError("Destruction failed")
+        mock_destroy_entity.side_effect = OwlReadyError("Destruction failed")
         
         # Act & Assert
         with expect_exception(EntityDeletionError, match="Failed to delete individual"):
@@ -362,8 +377,10 @@ class TestOntologyEditor:
     # Tests for delete_property() function
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_property_success(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_property_entity: Mock
     ):
@@ -371,6 +388,7 @@ class TestOntologyEditor:
         Test successful deletion of a property and verification of its absence.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_property_entity: Mock property entity fixture
         """
@@ -389,11 +407,13 @@ class TestOntologyEditor:
         expected_calls = [call(iri=property_iri), call(iri=property_iri)]
         mock_ontology.search_one.assert_has_calls(expected_calls)
         
-        # Verify destroy was called on the property
-        mock_property_entity.destroy.assert_called_once()
+        # Verify destroy_entity was called on the property
+        mock_destroy_entity.assert_called_once_with(mock_property_entity)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_property_with_relationships_cleanup(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_property_entity: Mock
     ):
@@ -401,6 +421,7 @@ class TestOntologyEditor:
         Test that relationships using deleted property are cleaned up.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_property_entity: Mock property entity fixture
         """
@@ -417,8 +438,8 @@ class TestOntologyEditor:
         delete_property(mock_ontology, property_iri)
         
         # Assert
-        # Verify destroy was called (relationships are cleaned up automatically by Owlready2)
-        mock_property_entity.destroy.assert_called_once()
+        # Verify destroy_entity was called (relationships are cleaned up automatically by Owlready2)
+        mock_destroy_entity.assert_called_once_with(mock_property_entity)
 
     def test_delete_property_nonexistent_error(self, mock_ontology: Mock):
         """
@@ -438,8 +459,10 @@ class TestOntologyEditor:
         with expect_exception(EntityDeletionError, match="Property not found"):
             delete_property(mock_ontology, property_iri)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_delete_property_owlready_error(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_property_entity: Mock
     ):
@@ -447,6 +470,7 @@ class TestOntologyEditor:
         Test error handling when Owlready2 raises an error during property deletion.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_property_entity: Mock property entity fixture
         """
@@ -454,9 +478,9 @@ class TestOntologyEditor:
         
         property_iri = "http://test.example.org/ontology#testProperty"
         
-        # Setup: property exists but destroy fails
+        # Setup: property exists but destroy_entity fails
         mock_ontology.search_one.return_value = mock_property_entity
-        mock_property_entity.destroy.side_effect = OwlReadyError("Destruction failed")
+        mock_destroy_entity.side_effect = OwlReadyError("Destruction failed")
         
         # Act & Assert
         with expect_exception(EntityDeletionError, match="Failed to delete property"):
@@ -487,8 +511,10 @@ class TestOntologyEditor:
     # Integration Tests
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_complex_deletion_scenario(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock,
         mock_individual_entity: Mock,
@@ -499,6 +525,7 @@ class TestOntologyEditor:
         Test complex deletion scenario involving multiple entity types.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
             mock_individual_entity: Mock individual entity fixture
@@ -516,12 +543,12 @@ class TestOntologyEditor:
         
         # Configure search_one to return appropriate entities, then None after deletion
         search_side_effects = [
-            # First call for class deletion
-            mock_class_entity, None,  # class exists, then deleted
+            # First call for property deletion
+            mock_property_entity, None,  # property exists, then deleted
             # Second call for individual deletion
             mock_individual_entity, None,  # individual exists, then deleted
-            # Third call for property deletion
-            mock_property_entity, None,  # property exists, then deleted
+            # Third call for class deletion
+            mock_class_entity, None,  # class exists, then deleted
         ]
         mock_ontology.search_one.side_effect = search_side_effects
         
@@ -531,19 +558,24 @@ class TestOntologyEditor:
         delete_class(mock_ontology, class_iri)
         
         # Assert: All entities were destroyed in correct order
-        mock_property_entity.destroy.assert_called_once()
-        mock_individual_entity.destroy.assert_called_once()
-        
-        # Class instances destroyed first, then class
+        expected_calls = [
+            call(mock_property_entity),
+            call(mock_individual_entity),
+        ]
+        # Add calls for class instances, then class
         for instance in mock_instance_entities:
-            instance.destroy.assert_called_once()
-        mock_class_entity.destroy.assert_called_once()
+            expected_calls.append(call(instance))
+        expected_calls.append(call(mock_class_entity))
+        
+        mock_destroy_entity.assert_has_calls(expected_calls)
 
-    def test_multiple_deletions_transaction_like(self, mock_ontology: Mock):
+    @patch('src.ontology.editor.destroy_entity')
+    def test_multiple_deletions_transaction_like(self, mock_destroy_entity: Mock, mock_ontology: Mock):
         """
         Test that multiple deletions can be performed in sequence reliably.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
         """
         from src.ontology.editor import delete_class, delete_individual, delete_property
@@ -555,7 +587,6 @@ class TestOntologyEditor:
             entity = Mock()
             iri = f"http://test.example.org/ontology#{entity_type}{i}"
             entity.iri = iri
-            entity.destroy = Mock()
             entities.append(entity)
             iris.append(iri)
         
@@ -571,11 +602,13 @@ class TestOntologyEditor:
         delete_property(mock_ontology, iris[2])
         
         # Assert: All entities were destroyed
-        for entity in entities:
-            entity.destroy.assert_called_once()
+        expected_calls = [call(entity) for entity in entities]
+        mock_destroy_entity.assert_has_calls(expected_calls)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_deletion_verification_failure(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -583,6 +616,7 @@ class TestOntologyEditor:
         Test handling when entity still exists after deletion attempt.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -629,12 +663,13 @@ class TestOntologyEditor:
             assert chained_error.__cause__ == original_error
 
     @parametrize("entity_type,function_name", [
-        ("class", "delete_class"),
         ("individual", "delete_individual"),
         ("property", "delete_property"),
     ])
+    @patch('src.ontology.editor.destroy_entity')
     def test_generic_owlready_error_handling(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         entity_type: str,
         function_name: str
@@ -643,6 +678,7 @@ class TestOntologyEditor:
         Test handling of generic Owlready2 errors for all deletion functions.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             entity_type: Type of entity being deleted
             function_name: Name of deletion function to test
@@ -652,9 +688,9 @@ class TestOntologyEditor:
         
         entity_iri = f"http://test.example.org/ontology#Test{entity_type.title()}"
         
-        # Setup: entity exists but destroy raises generic error
+        # Setup: entity exists but destroy_entity raises generic error
         mock_entity = Mock()
-        mock_entity.destroy.side_effect = OwlReadyOntologyParsingError("Parsing error")
+        mock_destroy_entity.side_effect = OwlReadyOntologyParsingError("Parsing error")
         mock_ontology.search_one.return_value = mock_entity
         
         # Get the function to test
@@ -664,15 +700,47 @@ class TestOntologyEditor:
         with expect_exception(EntityDeletionError, match=f"Failed to delete {entity_type}"):
             delete_function(mock_ontology, entity_iri)
 
+    @patch('src.ontology.editor.destroy_entity')
+    def test_class_generic_owlready_error_handling(
+        self, 
+        mock_destroy_entity: Mock,
+        mock_ontology: Mock
+    ):
+        """
+        Test handling of generic Owlready2 errors for class deletion function.
+        
+        This test is separate because class deletion has different error handling
+        when dealing with instances.
+        
+        Args:
+            mock_destroy_entity: Mock for destroy_entity function
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.editor import delete_class, EntityDeletionError
+        
+        entity_iri = "http://test.example.org/ontology#TestClass"
+        
+        # Setup: class exists with no instances, but destroy_entity raises generic error
+        mock_entity = Mock()
+        mock_entity.instances.return_value = []  # No instances
+        mock_destroy_entity.side_effect = OwlReadyOntologyParsingError("Parsing error")
+        mock_ontology.search_one.return_value = mock_entity
+        
+        # Act & Assert
+        with expect_exception(EntityDeletionError, match="Failed to delete class"):
+            delete_class(mock_ontology, entity_iri)
+
     # =====================================================
     # Thread Safety Tests
     # =====================================================
 
-    def test_concurrent_deletions_thread_safety(self, mock_ontology: Mock):
+    @patch('src.ontology.editor.destroy_entity')
+    def test_concurrent_deletions_thread_safety(self, mock_destroy_entity: Mock, mock_ontology: Mock):
         """
         Test that ontology editing is thread-safe for concurrent operations.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
         """
         from src.ontology.editor import delete_class, delete_individual, delete_property
@@ -686,7 +754,6 @@ class TestOntologyEditor:
                 mock_entity = Mock()
                 entity_iri = f"http://test.example.org/ontology#{entity_type}{entity_id}"
                 mock_entity.iri = entity_iri
-                mock_entity.destroy = Mock()
                 
                 # Configure search to return entity, then None
                 def search_side_effect(iri):
@@ -737,8 +804,10 @@ class TestOntologyEditor:
         assert "Individual1" in results
         assert "Property2" in results
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_concurrent_class_instance_deletion(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock,
         mock_class_entity: Mock,
         mock_instance_entities: List[Mock]
@@ -747,6 +816,7 @@ class TestOntologyEditor:
         Test thread safety when deleting class with multiple instances concurrently.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
             mock_instance_entities: Mock instance entities fixture
@@ -755,9 +825,22 @@ class TestOntologyEditor:
         
         class_iri = "http://test.example.org/ontology#TestClass"
         
-        # Setup: class has instances
+        # Setup: class has instances  
         mock_class_entity.instances.return_value = mock_instance_entities
-        mock_ontology.search_one.side_effect = [mock_class_entity, None]
+        
+        # Setup search_one to provide different results per thread to avoid race conditions
+        search_call_count = 0
+        def search_side_effect(iri):
+            nonlocal search_call_count
+            search_call_count += 1
+            # First thread gets the class and then None (successful deletion)
+            # Subsequent threads get None immediately (class not found)
+            if search_call_count <= 2:
+                return mock_class_entity if search_call_count == 1 else None
+            else:
+                return None
+        
+        mock_ontology.search_one.side_effect = search_side_effect
         
         errors = []
         
@@ -790,8 +873,10 @@ class TestOntologyEditor:
     # Memory Management Tests
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_deletion_memory_cleanup(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -799,6 +884,7 @@ class TestOntologyEditor:
         Test that deletion properly handles memory cleanup on errors.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -806,19 +892,21 @@ class TestOntologyEditor:
         
         class_iri = "http://test.example.org/ontology#TestClass"
         
-        # Setup: class exists but destroy fails after partial cleanup
+        # Setup: class exists but destroy_entity fails after partial cleanup
         mock_ontology.search_one.return_value = mock_class_entity
-        mock_class_entity.destroy.side_effect = Exception("Partial failure after cleanup")
+        mock_destroy_entity.side_effect = Exception("Partial failure after cleanup")
         
         # Act & Assert
         with expect_exception(EntityDeletionError):
             delete_class(mock_ontology, class_iri)
         
-        # Verify cleanup was attempted (destroy method was called)
-        mock_class_entity.destroy.assert_called_once()
+        # Verify cleanup was attempted (destroy_entity was called)
+        mock_destroy_entity.assert_called_once_with(mock_class_entity)
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_large_instance_set_deletion_performance(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -826,6 +914,7 @@ class TestOntologyEditor:
         Test performance considerations when deleting class with many instances.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -838,7 +927,6 @@ class TestOntologyEditor:
         for i in range(100):  # Simulate 100 instances
             instance = Mock()
             instance.iri = f"http://test.example.org/ontology#Instance{i}"
-            instance.destroy = Mock()
             large_instance_set.append(instance)
         
         mock_class_entity.instances.return_value = large_instance_set
@@ -847,19 +935,22 @@ class TestOntologyEditor:
         # Act
         delete_class(mock_ontology, class_iri)
         
-        # Assert: All instances were destroyed
+        # Assert: All instances were destroyed, then the class
+        expected_calls = []
         for instance in large_instance_set:
-            instance.destroy.assert_called_once()
+            expected_calls.append(call(instance))
+        expected_calls.append(call(mock_class_entity))
         
-        # Class was destroyed after instances
-        mock_class_entity.destroy.assert_called_once()
+        mock_destroy_entity.assert_has_calls(expected_calls)
 
     # =====================================================
     # Logging Integration Tests
     # =====================================================
 
+    @patch('src.ontology.editor.destroy_entity')
     def test_deletion_logging_integration(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock
     ):
@@ -867,6 +958,7 @@ class TestOntologyEditor:
         Test that deletion operations integrate properly with logging system.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
         """
@@ -911,9 +1003,11 @@ class TestOntologyEditor:
         assert "Class not found" in error_message
         assert class_iri in error_message or "TestClass" in error_message
 
+    @patch('src.ontology.editor.destroy_entity')
     @parametrize("entity_count", [0, 1, 5, 50])
     def test_delete_class_various_instance_counts(
         self, 
+        mock_destroy_entity: Mock,
         mock_ontology: Mock, 
         mock_class_entity: Mock,
         entity_count: int
@@ -922,6 +1016,7 @@ class TestOntologyEditor:
         Test class deletion with various numbers of instances.
         
         Args:
+            mock_destroy_entity: Mock for destroy_entity function
             mock_ontology: Mock ontology fixture
             mock_class_entity: Mock class entity fixture
             entity_count: Number of instances to create
@@ -935,7 +1030,6 @@ class TestOntologyEditor:
         for i in range(entity_count):
             instance = Mock()
             instance.iri = f"http://test.example.org/ontology#Instance{i}"
-            instance.destroy = Mock()
             instances.append(instance)
         
         mock_class_entity.instances.return_value = instances
@@ -944,10 +1038,11 @@ class TestOntologyEditor:
         # Act
         delete_class(mock_ontology, class_iri)
         
-        # Assert: All instances were destroyed
-        assert len(instances) == entity_count
+        # Assert: All instances were destroyed, then the class
+        expected_calls = []
         for instance in instances:
-            instance.destroy.assert_called_once()
+            expected_calls.append(call(instance))
+        expected_calls.append(call(mock_class_entity))
         
-        # Class was destroyed
-        mock_class_entity.destroy.assert_called_once()
+        assert len(instances) == entity_count
+        mock_destroy_entity.assert_has_calls(expected_calls)

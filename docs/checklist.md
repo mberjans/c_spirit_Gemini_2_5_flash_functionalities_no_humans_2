@@ -105,7 +105,7 @@ Independent: No
   * Error handling for attempting to delete non-existent entities.  
 - [x] **AIM2-ODIE-007-T2:** Create src/ontology/editor.py.  
 - [x] **AIM2-ODIE-007-T3:** Implement delete\_class(ontology, class\_iri: str) function using destroy\_entity().  
-- [ ] **AIM2-ODIE-007-T4:** Implement delete\_individual(ontology, individual\_iri: str) function using destroy\_entity().  
+- [x] **AIM2-ODIE-007-T4:** Implement delete\_individual(ontology, individual\_iri: str) function using destroy\_entity().  
 - [ ] **AIM2-ODIE-007-T5:** Implement delete\_property(ontology, property\_iri: str) function using destroy\_entity().  
 - [ ] **AIM2-ODIE-007-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
