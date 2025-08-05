@@ -310,14 +310,14 @@ Description: Named Entity Recognition (NER) Module (LLM-based): Implement NER fu
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-019  
 Independent: No
 
-- [ ] **AIM2-ODIE-020-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_ner.py) for src/llm\_extraction/ner.py (mocking LLM API calls using unittest.mock or pytest-mock):  
+- [x] **AIM2-ODIE-020-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_ner.py) for src/llm\_extraction/ner.py (mocking LLM API calls using unittest.mock or pytest-mock):  
   * Test extract\_entities with a simple text and a predefined entity schema.  
   * Test zero-shot NER with a few example entity types.  
   * Test few-shot NER with provided examples in the prompt.  
   * Verify output format matches expected structured data (e.g., list of dictionaries with entity type, text, span).  
   * Error handling for LLM API failures, invalid responses, or rate limits.  
-- [ ] **AIM2-ODIE-020-T2:** Create src/llm\_extraction/ner.py.  
-- [ ] **AIM2-ODIE-020-T3:** Implement extract\_entities(text: str, entity\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
+- [x] **AIM2-ODIE-020-T2:** Create src/llm\_extraction/ner.py.  
+- [x] **AIM2-ODIE-020-T3:** Implement extract\_entities(text: str, entity\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
 - [ ] **AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.  
 - [ ] **AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.  
 - [ ] **AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
