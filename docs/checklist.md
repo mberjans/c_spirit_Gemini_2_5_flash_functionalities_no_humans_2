@@ -442,7 +442,7 @@ Description: NCBI Taxonomy Integration & Filtering Module: Integrate multitax an
 Dependencies: AIM2-ODIE-002  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-028-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_quality/test\_taxonomy.py) for src/data\_quality/taxonomy.py (mocking external multitax/ncbi-taxonomist calls if they access external APIs):  
+- [x] **AIM2-ODIE-028-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_quality/test\_taxonomy.py) for src/data\_quality/taxonomy.py (mocking external multitax/ncbi-taxonomist calls if they access external APIs):  
   * Test load\_ncbi\_taxonomy to ensure successful loading of taxonomy data.  
   * Test filter\_species\_by\_lineage to filter species based on a given taxonomic lineage (e.g., "Viridiplantae").  
   * Test get\_lineage\_for\_species to retrieve the full taxonomic lineage for a given species name or ID.  
