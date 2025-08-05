@@ -264,8 +264,8 @@ Independent: Yes
   * Error handling for HTTP errors (4xx, 5xx), connection issues, and scraping failures.  
 - [x] **AIM2-ODIE-017-T2:** Create src/data\_acquisition/journal\_scraper.py.  
 - [x] **AIM2-ODIE-017-T3:** Implement scrape\_journal\_metadata(journal\_name: str, query: str) function using paperscraper.  
-- [ ] **AIM2-ODIE-017-T4:** Implement download\_journal\_fulltext(article\_url: str, output\_path: str) function using paperscraper or requests with appropriate headers.  
-- [ ] **AIM2-ODIE-017-T5:** Implement check\_robots\_txt(url: str) to parse and respect robots.txt rules before scraping.  
+- [x] **AIM2-ODIE-017-T4:** Implement download\_journal\_fulltext(article\_url: str, output\_path: str) function using paperscraper or requests with appropriate headers.  
+- [x] **AIM2-ODIE-017-T5:** Implement check\_robots\_txt(url: str) to parse and respect robots.txt rules before scraping.  
 - [ ] **AIM2-ODIE-017-T6:** Implement request throttling and User-Agent rotation strategies within the scraping functions.  
 - [ ] **AIM2-ODIE-017-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
