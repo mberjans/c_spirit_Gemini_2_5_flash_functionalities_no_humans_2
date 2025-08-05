@@ -368,7 +368,7 @@ Independent: No
   * Test extract relations \--input \<file\> \--entities \<file\> \--schema \<file\> \--output \<file\> command.  
   * Test invalid arguments and ensure proper error messages.  
 - [x] **AIM2-ODIE-023-T2:** Extend src/cli.py with process and extract subcommands.  
-- [ ] **AIM2-ODIE-023-T3:** Implement process clean subcommand, calling functions from src/text\_processing/cleaner.py.  
+- [x] **AIM2-ODIE-023-T3:** Implement process clean subcommand, calling functions from src/text\_processing/cleaner.py.  
 - [ ] **AIM2-ODIE-023-T4:** Implement process chunk subcommand, calling functions from src/text\_processing/chunker.py.  
 - [ ] **AIM2-ODIE-023-T5:** Implement extract ner subcommand, calling functions from src/llm\_extraction/ner.py.  
 - [ ] **AIM2-ODIE-023-T6:** Implement extract relations subcommand, calling functions from src/llm\_extraction/relations.py.  
