@@ -14,6 +14,7 @@ proper error handling.
 """
 
 import random
+import re
 import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -52,7 +53,9 @@ except ImportError:
 
 
 def expect_exception(
-    exception_type: type[Exception], match: Union[str, None] = None
+    exception_type: type[Exception], 
+    message_or_match: Union[str, None] = None,
+    match: Union[str, None] = None
 ) -> Any:
     """Wrapper for pytest.raises with improved interface.
 
@@ -62,6 +65,8 @@ def expect_exception(
 
     Args:
         exception_type: The type of exception expected to be raised.
+        message_or_match: Optional string to match against the exception message.
+            Can be passed as positional or keyword argument for backward compatibility.
         match: Optional regex pattern to match against the exception message.
             If provided, the exception message must match this pattern.
 
@@ -74,7 +79,11 @@ def expect_exception(
         >>> with expect_exception(ValueError):
         ...     raise ValueError("Invalid input")
 
-        With message matching:
+        With message matching (positional):
+        >>> with expect_exception(ValueError, "Invalid input"):
+        ...     raise ValueError("Invalid input")
+
+        With message matching (keyword):
         >>> with expect_exception(ValueError, match=r"Invalid.*input"):
         ...     raise ValueError("Invalid input provided")
 
@@ -83,8 +92,12 @@ def expect_exception(
         ...     raise ValueError("Test message")
         >>> assert str(exc_info.value) == "Test message"
     """
-    if match is not None:
-        return pytest.raises(exception_type, match=match)
+    # Handle backward compatibility - if message_or_match is provided, use it
+    # If both are provided, prefer the match parameter
+    effective_match = match or message_or_match
+    
+    if effective_match is not None:
+        return pytest.raises(exception_type, match=re.escape(effective_match))
     return pytest.raises(exception_type)
 
 

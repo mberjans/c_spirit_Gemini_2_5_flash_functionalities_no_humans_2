@@ -622,7 +622,7 @@ def classify_functional_annotation_type(ontology: Any, class_name: str) -> str:
         name_lower = class_name.lower()
         
         if "molecular" in name_lower and "trait" in name_lower:
-            return "go_molecular_function_classification"
+            return "go_molecular_function"
         elif "plant" in name_lower and "trait" in name_lower:
             return "trait_ontology_classification"
         elif "human" in name_lower and "trait" in name_lower:
@@ -976,7 +976,7 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
         ontology: Target ontology for instance creation
         
     Returns:
-        Dictionary with keys "molecular_trait_instances", "plant_trait_instances", "human_trait_instances"
+        Dictionary with keys "go_instances", "trait_ontology_instances", "chemfont_instances"
         containing lists of created instances
         
     Raises:
@@ -984,9 +984,9 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
         
     Example:
         instances = add_initial_key_terms(ontology)
-        atpase_activity = instances['molecular_trait_instances'][0]
-        drought_tolerance = instances['plant_trait_instances'][0]
-        toxicity = instances['human_trait_instances'][0]
+        atpase_activity = instances['go_instances'][0]
+        drought_tolerance = instances['trait_ontology_instances'][0]
+        toxicity = instances['chemfont_instances'][0]
     """
     _validate_ontology(ontology)
     
@@ -1030,19 +1030,19 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
                     "comment": "Catalysis of the transfer of a phosphate group, usually from ATP, to a substrate molecule."
                 },
                 {
-                    "name": "Transcription_factor_activity",
-                    "label": "Transcription factor activity",
-                    "comment": "A protein or a member of a complex that interacts selectively and non-covalently with a specific DNA sequence to regulate the transcription of that gene."
-                },
-                {
-                    "name": "Hydrolase_activity",
-                    "label": "Hydrolase activity",
-                    "comment": "Catalysis of the hydrolysis of various bonds, e.g. C-O, C-N, C-C, phosphoric anhydride bonds, etc."
+                    "name": "Phosphatase_activity",
+                    "label": "Phosphatase activity",
+                    "comment": "Catalysis of the removal of a phosphate group from a substrate molecule."
                 },
                 {
                     "name": "Oxidoreductase_activity",
                     "label": "Oxidoreductase activity",
                     "comment": "Catalysis of an oxidation-reduction (redox) reaction, a reversible chemical reaction in which the oxidation state of an atom or atoms within a molecule is altered."
+                },
+                {
+                    "name": "Transferase_activity",
+                    "label": "Transferase activity",
+                    "comment": "Catalysis of the transfer of a group, e.g. a methyl group, glycosyl group, acyl group, phosphorus-containing, or other groups, from one compound (generally regarded as donor) to another compound (generally regarded as acceptor)."
                 }
             ]
             
@@ -1069,24 +1069,24 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
                     "comment": "The weight of mature seeds, typically measured as 100-seed weight or 1000-seed weight."
                 },
                 {
-                    "name": "RootLength",
-                    "label": "Root length",
-                    "comment": "The measurement of root system extension, including primary root length and total root system length."
+                    "name": "YieldTrait",
+                    "label": "Yield trait",
+                    "comment": "Plant traits related to productivity and harvestable output."
                 },
                 {
-                    "name": "LeafArea",
-                    "label": "Leaf area",
-                    "comment": "The total surface area of leaves, important for photosynthesis and gas exchange."
+                    "name": "StressResistance",
+                    "label": "Stress resistance",
+                    "comment": "Plant's ability to resist various biotic and abiotic stress factors."
                 },
                 {
-                    "name": "SaltTolerance",
-                    "label": "Salt tolerance",
-                    "comment": "Plant's ability to grow and survive in saline conditions."
+                    "name": "NutrientUseEfficiency",
+                    "label": "Nutrient use efficiency",
+                    "comment": "Plant's ability to efficiently utilize available nutrients for growth and development."
                 },
                 {
-                    "name": "ColdTolerance",
-                    "label": "Cold tolerance",
-                    "comment": "Plant's ability to survive and maintain function under low temperature stress."
+                    "name": "PhotosynthesisEfficiency",
+                    "label": "Photosynthesis efficiency",
+                    "comment": "Plant's efficiency in converting light energy into chemical energy through photosynthesis."
                 }
             ]
             
@@ -1123,14 +1123,14 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
                     "comment": "The ability of a compound to cross biological membranes."
                 },
                 {
-                    "name": "Cytotoxicity",
-                    "label": "Cytotoxicity",
-                    "comment": "The quality of being toxic to cells, often measured as the concentration causing cell death."
+                    "name": "ProteinBinding",
+                    "label": "Protein binding",
+                    "comment": "The degree to which a compound binds to proteins in blood plasma or tissues."
                 },
                 {
-                    "name": "Mutagenicity",
-                    "label": "Mutagenicity",
-                    "comment": "The ability of a chemical agent to cause mutations in the genetic material of organisms."
+                    "name": "ClearanceRate",
+                    "label": "Clearance rate",
+                    "comment": "The volume of plasma from which a substance is completely removed per unit time."
                 }
             ]
             
@@ -1165,9 +1165,9 @@ def add_initial_key_terms(ontology: Any) -> Dict[str, List[Any]]:
                     logger.debug(f"Created Human Trait instance: {term_data['name']}")
                 
                 result = {
-                    'molecular_trait_instances': molecular_trait_instances,
-                    'plant_trait_instances': plant_trait_instances, 
-                    'human_trait_instances': human_trait_instances
+                    'go_instances': molecular_trait_instances,
+                    'trait_ontology_instances': plant_trait_instances, 
+                    'chemfont_instances': human_trait_instances
                 }
                 
                 total_instances = len(molecular_trait_instances) + len(plant_trait_instances) + len(human_trait_instances)
@@ -1208,7 +1208,7 @@ def validate_initial_key_terms(ontology: Any) -> Dict[str, int]:
         
         if not all([molecular_trait_class, plant_trait_class, human_trait_class]):
             logger.warning("Required functional classes not found")
-            return {"molecular_trait_count": 0, "plant_trait_count": 0, "human_trait_count": 0, "total_count": 0}
+            return {"go_count": 0, "trait_ontology_count": 0, "chemfont_count": 0, "total_count": 0}
         
         # Count instances of each class
         molecular_trait_instances = list(molecular_trait_class.instances())
@@ -1234,20 +1234,20 @@ def validate_initial_key_terms(ontology: Any) -> Dict[str, int]:
                     valid_instances["human_trait"] += 1
         
         result = {
-            "molecular_trait_count": valid_instances["molecular_trait"],
-            "plant_trait_count": valid_instances["plant_trait"], 
-            "human_trait_count": valid_instances["human_trait"],
+            "go_count": valid_instances["molecular_trait"],
+            "trait_ontology_count": valid_instances["plant_trait"], 
+            "chemfont_count": valid_instances["human_trait"],
             "total_count": sum(valid_instances.values())
         }
         
         logger.info(f"Validated key terms: {result['total_count']} total instances "
-                   f"({result['molecular_trait_count']} Molecular Trait, {result['plant_trait_count']} Plant Trait, {result['human_trait_count']} Human Trait)")
+                   f"({result['go_count']} GO, {result['trait_ontology_count']} Trait Ontology, {result['chemfont_count']} ChemFont)")
         
         return result
         
     except Exception as e:
         logger.error(f"Error validating initial key terms: {e}")
-        return {"molecular_trait_count": 0, "plant_trait_count": 0, "human_trait_count": 0, "total_count": 0}
+        return {"go_count": 0, "trait_ontology_count": 0, "chemfont_count": 0, "total_count": 0}
 
 
 def validate_core_functional_classes(ontology: Any) -> bool:

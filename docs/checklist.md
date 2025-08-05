@@ -286,21 +286,21 @@ Independent: Yes
 - [x] **AIM2-ODIE-018-T5:** Implement remove\_duplicates(text\_list: list\[str\], fuzzy\_threshold: int \= 90\) function using FuzzyWuzzy.  
 - [x] **AIM2-ODIE-018-T6:** Implement filter\_stopwords(tokens: list\[str\], custom\_stopwords\_list: list\[str\] \= None) function.  
 - [x] **AIM2-ODIE-018-T7:** Implement standardize\_encoding(text: bytes, target\_encoding: str \= 'utf-8') function.  
-- [ ] **AIM2-ODIE-018-T8:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-018-T8:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-019  
 Description: Text Chunking Module for LLMs: Develop a module (src/text\_processing/chunker.py) for text chunking using strategies like fixed-size, sentence-based (NLTK/spaCy), and recursive character level (LangChain's RecursiveCharacterTextSplitter).  
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-018  
 Independent: No
 
-- [ ] **AIM2-ODIE-019-T1:** **Develop Unit Tests:** Write unit tests (tests/text\_processing/test\_chunker.py) for src/text\_processing/chunker.py:  
+- [x] **AIM2-ODIE-019-T1:** **Develop Unit Tests:** Write unit tests (tests/text\_processing/test\_chunker.py) for src/text\_processing/chunker.py:  
   * Test chunk\_fixed\_size with various chunk sizes and overlaps, ensuring correct token counts.  
   * Test chunk\_by\_sentences using NLTK/spaCy sentence tokenizers, verifying chunks are complete sentences.  
   * Test chunk\_recursive\_char using LangChain's RecursiveCharacterTextSplitter with different separators and chunk sizes.  
   * Test handling of empty or very short texts.  
   * Verify that chunks maintain semantic coherence where possible (e.g., not splitting mid-word).  
-- [ ] **AIM2-ODIE-019-T2:** Create src/text\_processing/chunker.py.  
-- [ ] **AIM2-ODIE-019-T3:** Implement chunk\_fixed\_size(text: str, chunk\_size: int, chunk\_overlap: int) function.  
+- [x] **AIM2-ODIE-019-T2:** Create src/text\_processing/chunker.py.  
+- [x] **AIM2-ODIE-019-T3:** Implement chunk\_fixed\_size(text: str, chunk\_size: int, chunk\_overlap: int) function.  
 - [ ] **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.  
 - [ ] **AIM2-ODIE-019-T5:** Implement chunk\_recursive\_char(text: str, chunk\_size: int, chunk\_overlap: int, separators: list\[str\] \= None) function using LangChain's RecursiveCharacterTextSplitter.  
 - [ ] **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
