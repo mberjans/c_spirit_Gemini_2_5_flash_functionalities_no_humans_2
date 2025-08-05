@@ -361,13 +361,13 @@ Description: CLI for Text Preprocessing & LLM Extraction: Create a command-line 
 Dependencies: AIM2-ODIE-018, AIM2-ODIE-019, AIM2-ODIE-020, AIM2-ODIE-021  
 Independent: No
 
-- [ ] **AIM2-ODIE-023-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_extraction\_cli.py) for the CLI:  
+- [x] **AIM2-ODIE-023-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_extraction\_cli.py) for the CLI:  
   * Test process clean \--input \<file\> \--output \<file\> command.  
   * Test process chunk \--input \<file\> \--output \<dir\> \--size \<int\> command.  
   * Test extract ner \--input \<file\> \--schema \<file\> \--output \<file\> command.  
   * Test extract relations \--input \<file\> \--entities \<file\> \--schema \<file\> \--output \<file\> command.  
   * Test invalid arguments and ensure proper error messages.  
-- [ ] **AIM2-ODIE-023-T2:** Extend src/cli.py with process and extract subcommands.  
+- [x] **AIM2-ODIE-023-T2:** Extend src/cli.py with process and extract subcommands.  
 - [ ] **AIM2-ODIE-023-T3:** Implement process clean subcommand, calling functions from src/text\_processing/cleaner.py.  
 - [ ] **AIM2-ODIE-023-T4:** Implement process chunk subcommand, calling functions from src/text\_processing/chunker.py.  
 - [ ] **AIM2-ODIE-023-T5:** Implement extract ner subcommand, calling functions from src/llm\_extraction/ner.py.  

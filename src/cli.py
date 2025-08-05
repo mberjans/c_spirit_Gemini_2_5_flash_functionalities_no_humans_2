@@ -1,8 +1,8 @@
 """
 Command-Line Interface for AIM2 Project
 
-This module provides a comprehensive CLI for ontology management and corpus
-development operations in the AIM2 project.
+This module provides a comprehensive CLI for ontology management, corpus
+development, text processing, and information extraction operations in the AIM2 project.
 
 Features:
 - Load ontologies from various formats
@@ -11,11 +11,17 @@ Features:
 - Download papers from PubMed
 - Extract content from PDF files
 - Scrape content from journal websites
+- Clean and preprocess text data
+- Chunk text into manageable segments
+- Extract entities using named entity recognition
+- Extract relationships between entities
 - Comprehensive error handling and user feedback
 
 Dependencies:
 - Typer for CLI framework
 - Rich for enhanced output formatting
+- Text processing libraries for cleaning and chunking
+- LLM libraries for information extraction
 """
 
 import typer
@@ -49,6 +55,31 @@ except ImportError as e:
     print(f"Error importing PDF extraction modules: {e}")
     sys.exit(1)
 
+# Import text processing modules
+try:
+    from src.text_processing.cleaner import (
+        normalize_text, tokenize_text, remove_duplicates, 
+        filter_stopwords, standardize_encoding, TextCleaningError
+    )
+    from src.text_processing.chunker import (
+        chunk_fixed_size, chunk_by_sentences, chunk_recursive_char, ChunkingError
+    )
+except ImportError as e:
+    print(f"Error importing text processing modules: {e}")
+    sys.exit(1)
+
+# Import LLM extraction modules
+try:
+    from src.llm_extraction.ner import (
+        extract_entities, extract_entities_few_shot, NERError
+    )
+    from src.llm_extraction.relations import (
+        extract_relationships, extract_domain_specific_relationships, RelationsError
+    )
+except ImportError as e:
+    print(f"Error importing LLM extraction modules: {e}")
+    sys.exit(1)
+
 # Initialize Typer app and Rich console
 app = typer.Typer(
     name="aim2-odie",
@@ -80,6 +111,38 @@ corpus_app = typer.Typer(
     Use 'corpus [command] --help' for detailed information about each command."""
 )
 app.add_typer(corpus_app, name="corpus")
+
+# Create text processing subcommand group
+process_app = typer.Typer(
+    name="process",
+    help="""Text processing and preprocessing tools for corpus preparation.
+
+    Commands for cleaning, normalizing, and chunking text data to prepare
+    it for analysis, machine learning, and information extraction tasks.
+    
+    Available commands:
+    • clean - Clean and normalize raw text data removing noise and artifacts
+    • chunk - Split text into manageable segments for processing
+    
+    Use 'process [command] --help' for detailed information about each command."""
+)
+app.add_typer(process_app, name="process")
+
+# Create LLM extraction subcommand group  
+extract_app = typer.Typer(
+    name="extract",
+    help="""LLM-powered information extraction and analysis tools.
+
+    Commands for extracting structured information from text using large language
+    models including named entity recognition and relationship extraction.
+    
+    Available commands:
+    • ner - Named Entity Recognition to identify entities in text
+    • relations - Extract relationships and connections between entities
+    
+    Use 'extract [command] --help' for detailed information about each command."""
+)
+app.add_typer(extract_app, name="extract")
 
 
 @ontology_app.command("load")
@@ -1084,7 +1147,13 @@ def main(
     AIM2 Ontology Development and Information Extraction CLI
     
     A comprehensive command-line tool for ontology management, corpus development,
-    and information extraction tasks in the AIM2 project.
+    text processing, and information extraction tasks in the AIM2 project.
+    
+    Available command groups:
+    • ontology - Load, trim, and export ontology files
+    • corpus - Download papers, extract PDF content, scrape journals
+    • process - Clean and chunk text data for analysis
+    • extract - Extract entities and relationships using LLMs
     """
     if debug:
         import logging
