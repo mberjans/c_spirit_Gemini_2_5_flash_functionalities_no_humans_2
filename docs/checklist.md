@@ -389,7 +389,7 @@ Independent: No
   * Test mapping to specific term types (class, property).  
   * Test handling of unmapped terms (if incl\_unmapped is used).  
 - [x] **AIM2-ODIE-024-T2:** Create src/ontology\_mapping/entity\_mapper.py.  
-- [ ] **AIM2-ODIE-024-T3:** Implement map\_entities\_to\_ontology(entities: list\[str\], ontology\_iri: str, mapping\_method: str \= 'tfidf', min\_score: float \= 0.3, term\_type: str \= 'class') function using text2term.map\_terms().  
+- [x] **AIM2-ODIE-024-T3:** Implement map\_entities\_to\_ontology(entities: list\[str\], ontology\_iri: str, mapping\_method: str \= 'tfidf', min\_score: float \= 0.3, term\_type: str \= 'class') function using text2term.map\_terms().  
 - [ ] **AIM2-ODIE-024-T4:** Integrate Owlready2 loaded ontology for text2term's target\_ontology parameter if direct Owlready2 object passing is preferred over IRI.  
 - [ ] **AIM2-ODIE-024-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
