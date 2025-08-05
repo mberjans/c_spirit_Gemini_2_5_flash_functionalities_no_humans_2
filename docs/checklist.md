@@ -179,7 +179,7 @@ Independent: No
 - [x] **AIM2-ODIE-012-T3:** Define ObjectProperty classes for "made\_via", "accumulates\_in", "affects" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \-010, \-011.  
 - [x] **AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.  
 - [x] **AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\_made\_via as inverse of made\_via).  
-- [ ] **AIM2-ODIE-012-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-012-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-013  
 Description: Ontology Reasoning Integration: Integrate Owlready2's reasoning capabilities (HermiT/Pellet) to infer new facts and reclassify instances/classes based on defined relationships.  
