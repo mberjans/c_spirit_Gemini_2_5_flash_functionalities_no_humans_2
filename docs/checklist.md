@@ -303,7 +303,7 @@ Independent: No
 - [x] **AIM2-ODIE-019-T3:** Implement chunk\_fixed\_size(text: str, chunk\_size: int, chunk\_overlap: int) function.  
 - [x] **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.  
 - [x] **AIM2-ODIE-019-T5:** Implement chunk\_recursive\_char(text: str, chunk\_size: int, chunk\_overlap: int, separators: list\[str\] \= None) function using LangChain's RecursiveCharacterTextSplitter.  
-- [ ] **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-020  
 Description: Named Entity Recognition (NER) Module (LLM-based): Implement NER functionality (src/llm\_extraction/ner.py) using LLM-IE or OntoGPT for zero-shot/few-shot extraction of specified entities (chemicals, species, traits, etc.). Focus on prompt engineering.  
