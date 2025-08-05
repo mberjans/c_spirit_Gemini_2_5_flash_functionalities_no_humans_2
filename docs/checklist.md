@@ -372,7 +372,7 @@ Independent: No
 - [x] **AIM2-ODIE-023-T4:** Implement process chunk subcommand, calling functions from src/text\_processing/chunker.py.  
 - [x] **AIM2-ODIE-023-T5:** Implement extract ner subcommand, calling functions from src/llm\_extraction/ner.py.  
 - [x] **AIM2-ODIE-023-T6:** Implement extract relations subcommand, calling functions from src/llm\_extraction/relations.py.  
-- [ ] **AIM2-ODIE-023-T7:** Add comprehensive help messages for all process and extract commands and their arguments.  
+- [x] **AIM2-ODIE-023-T7:** Add comprehensive help messages for all process and extract commands and their arguments.  
 - [ ] **AIM2-ODIE-023-T8:** **Conduct Integration Tests:** Run integration tests developed in T1.
 
 ### **4\. Ontology Mapping and Post-processing**
