@@ -142,12 +142,12 @@ Description: Refined Ontology Scheme Definition (Source): Programmatically defin
 Dependencies: AIM2-ODIE-005, AIM2-ODIE-007  
 Independent: No
 
-- [ ] **AIM2-ODIE-010-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_source.py) for src/ontology/scheme\_source.py to cover:  
+- [x] **AIM2-ODIE-010-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_scheme\_source.py) for src/ontology/scheme\_source.py to cover:  
   * Creation of new Owlready2 classes representing Plant Ontology, NCBI Taxonomy, and PECO categories.  
   * Verification that these classes are correctly added and accessible in the ontology.  
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., Root is a subclass of PlantAnatomy).  
-- [ ] **AIM2-ODIE-010-T2:** Create src/ontology/scheme\_source.py.  
-- [ ] **AIM2-ODIE-010-T3:** Define Python classes for core source annotation concepts (e.g., PlantAnatomy, Species, ExperimentalCondition) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
+- [x] **AIM2-ODIE-010-T2:** Create src/ontology/scheme\_source.py.  
+- [x] **AIM2-ODIE-010-T3:** Define Python classes for core source annotation concepts (e.g., PlantAnatomy, Species, ExperimentalCondition) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
 - [ ] **AIM2-ODIE-010-T4:** Programmatically add initial key terms/instances from Plant Ontology, NCBI Taxonomy, and PECO (as representative examples) to the ontology.  
 - [ ] **AIM2-ODIE-010-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 

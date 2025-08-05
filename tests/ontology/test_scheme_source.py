@@ -1222,3 +1222,101 @@ class TestSchemeSource:
             
             # Verify parent class was searched for
             mock_ontology.search_one.assert_called_once_with(iri="*ExperimentalCondition")
+
+    def test_define_core_source_classes_success(self):
+        """
+        Test successful definition of core source annotation classes.
+        
+        This integration test verifies that define_core_source_classes() meets all
+        requirements for AIM2-ODIE-010-T3 with a real (temporary) ontology:
+        - Defines PlantAnatomy, Species, ExperimentalCondition classes
+        - All classes inherit from owlready2.Thing
+        - All classes are associated with main ontology namespace
+        - Classes are programmatically defined as code
+        - Proper semantic annotations are included
+        """
+        import tempfile
+        from pathlib import Path
+        from owlready2 import get_ontology, Thing
+        from src.ontology.scheme_source import define_core_source_classes
+        
+        # Create a temporary ontology file
+        with tempfile.NamedTemporaryFile(suffix='.owl', delete=False) as temp_file:
+            temp_path = temp_file.name
+        
+        try:
+            # Create a test ontology
+            ontology = get_ontology(f"file://{temp_path}")
+            
+            # Act - Call the function under test
+            result = define_core_source_classes(ontology)
+            
+            # Assert - Requirement 1: Define core source annotation concepts
+            required_classes = ['PlantAnatomy', 'Species', 'ExperimentalCondition']
+            assert all(class_name in result for class_name in required_classes), \
+                f"Missing required classes. Expected: {required_classes}, Got: {list(result.keys())}"
+            
+            # Assert - Requirement 2: Classes inherit from owlready2.Thing
+            for class_name, cls in result.items():
+                assert issubclass(cls, Thing), f"{class_name} does not inherit from Thing"
+            
+            # Assert - Requirement 3: Associated with main ontology namespace
+            for class_name, cls in result.items():
+                assert cls.namespace == ontology, f"{class_name} not associated with main ontology namespace"
+            
+            # Assert - Requirement 4: Proper semantic annotations
+            plant_anatomy = result['PlantAnatomy']
+            species = result['Species']
+            experimental_condition = result['ExperimentalCondition']
+            
+            # Verify labels exist and are appropriate
+            assert hasattr(plant_anatomy, 'label') and plant_anatomy.label, "PlantAnatomy missing label"
+            assert hasattr(species, 'label') and species.label, "Species missing label"
+            assert hasattr(experimental_condition, 'label') and experimental_condition.label, "ExperimentalCondition missing label"
+            
+            assert "Plant Anatomical Entity" in plant_anatomy.label
+            assert "Taxonomic Species" in species.label
+            assert "Plant Experimental Condition" in experimental_condition.label
+            
+            # Verify comments exist and provide context
+            assert hasattr(plant_anatomy, 'comment') and plant_anatomy.comment, "PlantAnatomy missing comment"
+            assert hasattr(species, 'comment') and species.comment, "Species missing comment"
+            assert hasattr(experimental_condition, 'comment') and experimental_condition.comment, "ExperimentalCondition missing comment"
+            
+            assert "Plant Ontology" in plant_anatomy.comment[0]
+            assert "NCBI Taxonomy" in species.comment[0]
+            assert "PECO" in experimental_condition.comment[0]
+            
+            # Verify function returns exactly the expected number of classes
+            assert len(result) == 3, f"Expected 3 classes, got {len(result)}"
+            
+        finally:
+            # Clean up temporary file
+            Path(temp_path).unlink(missing_ok=True)
+
+    def test_define_core_source_classes_invalid_ontology(self):
+        """
+        Test that define_core_source_classes raises SourceClassError for invalid ontology.
+        """
+        from src.ontology.scheme_source import define_core_source_classes, SourceClassError
+        
+        # Act & Assert
+        with expect_exception(SourceClassError, "Invalid ontology: cannot be None"):
+            define_core_source_classes(None)
+
+    def test_define_core_source_classes_with_owlready_error(self, mock_ontology: Mock):
+        """
+        Test that define_core_source_classes handles OwlReadyError properly.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        from src.ontology.scheme_source import define_core_source_classes, SourceClassError
+        
+        # Setup mock ontology context manager to raise OwlReadyError
+        mock_ontology.__enter__ = Mock(side_effect=OwlReadyError("Test error"))
+        mock_ontology.__exit__ = Mock(return_value=None)
+        
+        # Act & Assert
+        with expect_exception(SourceClassError, "Owlready2 error defining core source classes: Test error"):
+            define_core_source_classes(mock_ontology)
