@@ -90,7 +90,7 @@ Independent: No
 - [x] **AIM2-ODIE-006-T4:** Implement filter\_individuals\_by\_property(ontology, property\_name: str, value: Any) function.  
 - [x] **AIM2-ODIE-006-T5:** Implement get\_subclasses(ontology, base\_class\_iri: str) function.  
 - [x] **AIM2-ODIE-006-T6:** Implement a general apply\_filters(ontology, filters: dict) function that combines multiple filtering criteria.  
-- [ ] **AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-006-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-007  
 Description: Ontology Entity Deletion Functionality: Implement functions (src/ontology/editor.py) to programmatically delete irrelevant classes, individuals, or properties using Owlready2's destroy\_entity() function.  
