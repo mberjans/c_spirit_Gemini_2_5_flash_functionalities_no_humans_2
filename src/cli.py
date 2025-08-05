@@ -587,7 +587,10 @@ def journal_scrape_command(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
     max_depth: int = typer.Option(1, "--max-depth", help="Maximum depth for recursive scraping"),
     delay: float = typer.Option(1.0, "--delay", help="Delay between requests in seconds"),
-    include_metadata: bool = typer.Option(True, "--include-metadata/--no-metadata", help="Include article metadata")
+    include_metadata: bool = typer.Option(True, "--include-metadata/--no-metadata", help="Include article metadata"),
+    journal_name: Optional[str] = typer.Option(None, "--journal", "-j", help="Journal name for metadata scraping"),
+    query: Optional[str] = typer.Option(None, "--query", "-q", help="Search query for metadata scraping"),
+    max_results: int = typer.Option(10, "--max-results", "-m", help="Maximum number of results for metadata scraping")
 ):
     """
     Scrape content from journal websites and articles.
@@ -596,12 +599,23 @@ def journal_scrape_command(
     journal websites for corpus development.
     """
     try:
+        # Import journal scraper functions
+        from src.data_acquisition.journal_scraper import (
+            download_journal_fulltext, scrape_journal_metadata, 
+            configure_rate_limiter, JournalScraperError
+        )
+        
         if verbose:
             console.print(f"[blue]Starting journal scraping from: {url}[/blue]")
             console.print(f"Output directory: {output}")
             console.print(f"Maximum depth: {max_depth}")
             console.print(f"Request delay: {delay}s")
             console.print(f"Include metadata: {include_metadata}")
+            if journal_name:
+                console.print(f"Journal name: {journal_name}")
+            if query:
+                console.print(f"Search query: {query}")
+                console.print(f"Max results: {max_results}")
         
         # Basic URL validation
         if not url.startswith(('http://', 'https://')):
@@ -616,24 +630,151 @@ def journal_scrape_command(
         if verbose:
             console.print(f"[blue]Created output directory: {output_path.absolute()}[/blue]")
         
-        # Placeholder implementation
-        console.print("[yellow]Note: This is a placeholder implementation[/yellow]")
-        console.print(f"[green]Would scrape content from: {url}[/green]")
-        console.print(f"[green]Would save scraped content to: {output}[/green]")
-        console.print(f"[green]Would use max depth: {max_depth}[/green]")
-        console.print(f"[green]Would use delay: {delay}s between requests[/green]")
+        # Configure rate limiter based on delay parameter
+        requests_per_second = 1.0 / delay if delay > 0 else 1.0
+        configure_rate_limiter(requests_per_second=requests_per_second)
         
-        if include_metadata:
-            console.print("[green]Would include article metadata[/green]")
+        if verbose:
+            console.print(f"[blue]Configured rate limiter: {requests_per_second:.2f} requests/second[/blue]")
         
-        # TODO: Call actual journal scraping function from src.data_acquisition.journal_scraper
-        # from src.data_acquisition.journal_scraper import scrape_journal
-        # results = scrape_journal(url=url, output_dir=output, max_depth=max_depth, delay=delay, include_metadata=include_metadata)
+        results = {}
         
-        console.print(f"[green]✓ Journal scraping completed (placeholder)[/green]")
+        # If journal name and query are provided, scrape metadata first
+        if journal_name and query:
+            if verbose:
+                console.print(f"[blue]Step 1: Scraping metadata for journal '{journal_name}' with query '{query}'...[/blue]")
+            
+            try:
+                metadata_results = scrape_journal_metadata(
+                    journal_name=journal_name,
+                    query=query,
+                    max_results=max_results,
+                    return_detailed=True
+                )
+                
+                if metadata_results and isinstance(metadata_results, dict):
+                    articles = metadata_results.get('articles', [])
+                    results['metadata'] = metadata_results
+                    
+                    console.print(f"[green]✓ Found {len(articles)} articles[/green]")
+                    
+                    # Save metadata results
+                    import datetime
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    metadata_filename = f"metadata_{journal_name.replace(' ', '_')}_{timestamp}.json"
+                    metadata_file_path = output_path / metadata_filename
+                    
+                    with open(metadata_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(metadata_results, f, indent=2, default=str)
+                    
+                    console.print(f"[green]✓ Metadata saved to: {metadata_filename}[/green]")
+                    
+                    if verbose and articles:
+                        console.print("[dim]Sample articles found:[/dim]")
+                        for i, article in enumerate(articles[:3]):  # Show first 3
+                            title = article.get('title', 'No title')[:60]
+                            console.print(f"[dim]  {i+1}. {title}...[/dim]")
+                
+                else:
+                    console.print("[yellow]No metadata results found[/yellow]")
+                    
+            except JournalScraperError as e:
+                console.print(f"[yellow]Warning: Metadata scraping failed: {e}[/yellow]")
+                if verbose:
+                    import traceback
+                    console.print(traceback.format_exc())
         
+        # Download full-text content from the provided URL
+        if verbose:
+            console.print(f"[blue]Step 2: Downloading full-text content from: {url}[/blue]")
+        
+        try:
+            # Generate filename from URL
+            from urllib.parse import urlparse
+            parsed_url = urlparse(url)
+            filename = parsed_url.path.split('/')[-1] if parsed_url.path else 'article'
+            if not filename or filename == '/':
+                filename = 'article'
+            
+            # Ensure proper file extension
+            if not filename.endswith(('.pdf', '.xml', '.html')):
+                filename += '.pdf'  # Default to PDF
+            
+            article_file_path = output_path / filename
+            
+            success = download_journal_fulltext(
+                article_url=url,
+                output_path=str(article_file_path),
+                check_robots=True,
+                use_paperscraper=True
+            )
+            
+            if success:
+                console.print(f"[green]✓ Full-text content downloaded to: {filename}[/green]")
+                results['fulltext_file'] = filename
+                
+                # Get file size information
+                if article_file_path.exists():
+                    file_size = article_file_path.stat().st_size
+                    size_mb = file_size / (1024 * 1024)
+                    console.print(f"[blue]Downloaded file size: {size_mb:.2f} MB[/blue]")
+                    results['file_size_mb'] = round(size_mb, 2)
+            else:
+                console.print("[yellow]Full-text download failed or no content available[/yellow]")
+                results['fulltext_error'] = "Download failed"
+                
+        except JournalScraperError as e:
+            console.print(f"[yellow]Warning: Full-text download failed: {e}[/yellow]")
+            results['fulltext_error'] = str(e)
+            if verbose:
+                import traceback
+                console.print(traceback.format_exc())
+        
+        # Save summary results
+        import datetime
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        summary_filename = f"scraping_summary_{timestamp}.json"
+        summary_file_path = output_path / summary_filename
+        
+        summary_data = {
+            "timestamp": timestamp,
+            "url": url,
+            "output_directory": str(output_path.absolute()),
+            "parameters": {
+                "max_depth": max_depth,
+                "delay": delay,
+                "include_metadata": include_metadata,
+                "journal_name": journal_name,
+                "query": query,
+                "max_results": max_results
+            },
+            "results": results
+        }
+        
+        with open(summary_file_path, 'w', encoding='utf-8') as f:
+            json.dump(summary_data, f, indent=2, default=str)
+        
+        console.print(f"[green]✓ Scraping summary saved to: {summary_filename}[/green]")
+        
+        # Final summary
+        console.print(f"[green]✓ Journal scraping completed successfully![/green]")
+        console.print(f"[blue]Output directory: {output_path.absolute()}[/blue]")
+        
+        total_files = len([f for f in output_path.iterdir() if f.is_file()])
+        console.print(f"[blue]Total files created: {total_files}[/blue]")
+        
+    except ImportError as e:
+        console.print(f"[red]Missing required dependencies for journal scraping: {e}[/red]")
+        console.print("[yellow]Please install required packages: pip install paperscraper requests[/yellow]")
+        raise typer.Exit(1)
+    except JournalScraperError as e:
+        console.print(f"[red]Journal scraping error: {e}[/red]")
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error during journal scraping: {e}[/red]")
+        console.print(f"[red]Unexpected error during journal scraping: {e}[/red]")
         if verbose:
             import traceback
             console.print(traceback.format_exc())
