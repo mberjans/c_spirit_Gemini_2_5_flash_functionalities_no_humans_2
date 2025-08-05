@@ -176,9 +176,9 @@ Independent: No
   * Definition of inverse\_property for relevant relationships (e.g., is\_accumulated\_in as inverse of accumulates\_in) and verification of Owlready2's automatic handling.  
   * Creation of example instances with these relationships and verification of property values.  
 - [x] **AIM2-ODIE-012-T2:** Create src/ontology/relationships.py.  
-- [ ] **AIM2-ODIE-012-T3:** Define ObjectProperty classes for "made\_via", "accumulates\_in", "affects" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \-010, \-011.  
-- [ ] **AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.  
-- [ ] **AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\_made\_via as inverse of made\_via).  
+- [x] **AIM2-ODIE-012-T3:** Define ObjectProperty classes for "made\_via", "accumulates\_in", "affects" within the ontology, linking them to the relevant classes defined in AIM2-ODIE-009, \-010, \-011.  
+- [x] **AIM2-ODIE-012-T4:** Set domain and range for each property using Owlready2 syntax.  
+- [x] **AIM2-ODIE-012-T5:** Define inverse properties where logically applicable (e.g., is\_made\_via as inverse of made\_via).  
 - [ ] **AIM2-ODIE-012-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-013  

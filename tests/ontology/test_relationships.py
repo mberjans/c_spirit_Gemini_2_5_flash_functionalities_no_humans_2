@@ -50,6 +50,8 @@ from src.ontology.relationships import (
     complete_aim2_odie_012_t3_integration,
     set_property_domain_and_range_owlready2,
     complete_aim2_odie_012_t4,
+    define_logical_inverse_properties,
+    complete_aim2_odie_012_t5,
     validate_all_relationships,
     cleanup_relationship_properties,
     define_core_relationship_properties,
@@ -1443,3 +1445,197 @@ class TestRelationships:
         
         # Should have range constraints for ObjectProperties and DataProperties
         assert len([key for key in range_constraints if 'made_via' in key or 'accumulates_in' in key or 'affects' in key or 'has_molecular_weight' in key or 'has_concentration' in key]) >= 0
+
+    def test_define_logical_inverse_properties_success(self, mock_ontology: Mock):
+        """
+        Test successful creation of logical inverse properties.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Arrange
+        mock_made_via = Mock(name="made_via")
+        mock_made_via.name = "made_via"
+        mock_accumulates_in = Mock(name="accumulates_in")
+        mock_accumulates_in.name = "accumulates_in"
+        mock_affects = Mock(name="affects")
+        mock_affects.name = "affects"
+        
+        relationship_properties = {
+            'made_via': mock_made_via,
+            'accumulates_in': mock_accumulates_in,
+            'affects': mock_affects
+        }
+        
+        # Mock the create_inverse_property function to return inverse properties
+        mock_is_made_via = Mock(name="is_made_via")
+        mock_is_made_via.inverse_property = mock_made_via
+        mock_is_accumulated_in = Mock(name="is_accumulated_in")
+        mock_is_accumulated_in.inverse_property = mock_accumulates_in
+        mock_is_affected_by = Mock(name="is_affected_by")
+        mock_is_affected_by.inverse_property = mock_affects
+        
+        # Act
+        with patch('src.ontology.relationships.create_inverse_property') as mock_create_inverse:
+            mock_create_inverse.side_effect = [
+                mock_is_made_via,
+                mock_is_accumulated_in,
+                mock_is_affected_by
+            ]
+            
+            result = define_logical_inverse_properties(mock_ontology, relationship_properties)
+        
+        # Assert
+        assert result['task_completed'] is True
+        assert result['created_count'] == 3
+        assert result['validated_count'] == 3
+        assert result['success_rate'] == 100.0
+        
+        # Check that inverse properties were created
+        assert 'is_made_via' in result['inverse_properties']
+        assert 'is_accumulated_in' in result['inverse_properties']
+        assert 'is_affected_by' in result['inverse_properties']
+        
+        # Verify create_inverse_property was called for each expected property
+        expected_calls = [
+            call(mock_ontology, 'is_made_via', mock_made_via),
+            call(mock_ontology, 'is_accumulated_in', mock_accumulates_in),
+            call(mock_ontology, 'is_affected_by', mock_affects)
+        ]
+        mock_create_inverse.assert_has_calls(expected_calls, any_order=True)
+
+    def test_define_logical_inverse_properties_missing_original_property(self, mock_ontology: Mock):
+        """
+        Test behavior when original property is missing from relationship_properties.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Arrange - only provide made_via, missing accumulates_in and affects
+        mock_made_via = Mock(name="made_via")
+        mock_made_via.name = "made_via"
+        
+        relationship_properties = {
+            'made_via': mock_made_via
+        }
+        
+        mock_is_made_via = Mock(name="is_made_via")
+        mock_is_made_via.inverse_property = mock_made_via
+        
+        # Act
+        with patch('src.ontology.relationships.create_inverse_property') as mock_create_inverse:
+            mock_create_inverse.return_value = mock_is_made_via
+            
+            result = define_logical_inverse_properties(mock_ontology, relationship_properties)
+        
+        # Assert - should still work but only create the one available inverse property
+        assert result['created_count'] == 1
+        assert result['validated_count'] == 1
+        assert result['task_completed'] is False  # Not all expected properties created
+        assert 'is_made_via' in result['inverse_properties']
+        assert 'is_accumulated_in' not in result['inverse_properties']
+        assert 'is_affected_by' not in result['inverse_properties']
+
+    def test_define_logical_inverse_properties_invalid_relationship_properties(self, mock_ontology: Mock):
+        """
+        Test error handling for invalid relationship_properties parameter.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Act & Assert - empty dict
+        with expect_exception(RelationshipError, "Invalid relationship_properties"):
+            define_logical_inverse_properties(mock_ontology, {})
+        
+        # Act & Assert - None
+        with expect_exception(RelationshipError, "Invalid relationship_properties"):
+            define_logical_inverse_properties(mock_ontology, None)
+        
+        # Act & Assert - wrong type
+        with expect_exception(RelationshipError, "Invalid relationship_properties"):
+            define_logical_inverse_properties(mock_ontology, "not_a_dict")
+
+    def test_define_logical_inverse_properties_creation_failure(self, mock_ontology: Mock):
+        """
+        Test error handling when inverse property creation fails.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Arrange
+        mock_made_via = Mock(name="made_via")
+        mock_made_via.name = "made_via"
+        
+        relationship_properties = {
+            'made_via': mock_made_via
+        }
+        
+        # Act & Assert
+        with patch('src.ontology.relationships.create_inverse_property') as mock_create_inverse:
+            mock_create_inverse.side_effect = Exception("Creation failed")
+            
+            with expect_exception(RelationshipError, "Failed to create inverse property 'is_made_via'"):
+                define_logical_inverse_properties(mock_ontology, relationship_properties)
+
+    def test_complete_aim2_odie_012_t5_success(self, mock_ontology: Mock):
+        """
+        Test successful completion of AIM2-ODIE-012-T5 task.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Arrange
+        mock_made_via = Mock(name="made_via")
+        mock_made_via.name = "made_via"
+        mock_accumulates_in = Mock(name="accumulates_in")
+        mock_accumulates_in.name = "accumulates_in"
+        mock_affects = Mock(name="affects")
+        mock_affects.name = "affects"
+        
+        relationship_properties = {
+            'made_via': mock_made_via,
+            'accumulates_in': mock_accumulates_in,
+            'affects': mock_affects
+        }
+        
+        # Mock successful results from define_logical_inverse_properties
+        mock_result = {
+            'task_completed': True,
+            'created_count': 3,
+            'validated_count': 3,
+            'success_rate': 100.0,
+            'inverse_properties': {'is_made_via': Mock(), 'is_accumulated_in': Mock(), 'is_affected_by': Mock()}
+        }
+        
+        # Act
+        with patch('src.ontology.relationships.define_logical_inverse_properties') as mock_define:
+            mock_define.return_value = mock_result
+            
+            result = complete_aim2_odie_012_t5(mock_ontology, relationship_properties)
+        
+        # Assert
+        assert result['task_completed'] is True
+        mock_define.assert_called_once_with(mock_ontology, relationship_properties)
+
+    def test_complete_aim2_odie_012_t5_failure(self, mock_ontology: Mock):
+        """
+        Test error handling when AIM2-ODIE-012-T5 task fails.
+        
+        Args:
+            mock_ontology: Mock ontology fixture
+        """
+        
+        # Arrange
+        relationship_properties = {'made_via': Mock()}
+        
+        # Act & Assert
+        with patch('src.ontology.relationships.define_logical_inverse_properties') as mock_define:
+            mock_define.side_effect = Exception("Task failed")
+            
+            with expect_exception(RelationshipError, "Failed to complete AIM2-ODIE-012-T5"):
+                complete_aim2_odie_012_t5(mock_ontology, relationship_properties)

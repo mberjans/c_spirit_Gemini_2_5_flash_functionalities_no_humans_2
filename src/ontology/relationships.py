@@ -1556,6 +1556,175 @@ def complete_aim2_odie_012_t3_integration(ontology: Any, structural_classes: Dic
         raise RelationshipError(f"Failed to complete AIM2-ODIE-012-T3 integration: {e}")
 
 
+def define_logical_inverse_properties(ontology: Any, relationship_properties: 
+                                     Dict[str, Any]) -> Dict[str, Any]:
+    """Define inverse properties where logically applicable (AIM2-ODIE-012-T5).
+    
+    Creates inverse properties for the core ObjectProperty relationships where
+    logically applicable. This implements AIM2-ODIE-012-T5 by establishing
+    the following inverse relationships:
+    
+    - is_made_via (inverse of made_via): processes/pathways make compounds
+    - is_accumulated_in (inverse of accumulates_in): locations contain compounds  
+    - is_affected_by (inverse of affects): traits are affected by compounds
+    
+    DataProperties (has_molecular_weight, has_concentration) do not have logical
+    inverses as they relate compounds to literal values rather than other entities.
+    
+    Args:
+        ontology: Target ontology for inverse property creation
+        relationship_properties: Dict of existing property names to property objects
+        
+    Returns:
+        Dictionary mapping inverse property names to created inverse property objects
+        
+    Raises:
+        RelationshipError: If inverse property creation fails
+        
+    Example:
+        inverse_props = define_logical_inverse_properties(ontology, relationship_properties)
+        is_made_via_prop = inverse_props['is_made_via']
+    """
+    _validate_ontology(ontology)
+    
+    if not relationship_properties or not isinstance(relationship_properties, dict):
+        raise RelationshipError("Invalid relationship_properties: must be a non-empty dictionary")
+    
+    try:
+        with _creation_lock:
+            logger.info("Starting AIM2-ODIE-012-T5: Defining inverse properties where logically applicable")
+            
+            inverse_properties = {}
+            
+            # Define inverse property mappings (original -> inverse)
+            inverse_mappings = {
+                'made_via': 'is_made_via',
+                'accumulates_in': 'is_accumulated_in', 
+                'affects': 'is_affected_by'
+            }
+            
+            # Create each inverse property
+            for original_name, inverse_name in inverse_mappings.items():
+                if original_name in relationship_properties:
+                    original_property = relationship_properties[original_name]
+                    
+                    try:
+                        # Create the inverse property
+                        inverse_property = create_inverse_property(ontology, inverse_name, original_property)
+                        inverse_properties[inverse_name] = inverse_property
+                        
+                        logger.info(f"✅ Created inverse property: {inverse_name} ↔ {original_name}")
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Failed to create inverse property '{inverse_name}' for '{original_name}': {e}")
+                        raise RelationshipError(f"Failed to create inverse property '{inverse_name}': {e}")
+                        
+                else:
+                    logger.warning(f"⚠️  Original property '{original_name}' not found in relationship_properties")
+            
+            # Validate inverse relationships
+            validation_results = {}
+            for inverse_name, inverse_prop in inverse_properties.items():
+                try:
+                    # Check if inverse relationship is properly established
+                    has_inverse = hasattr(inverse_prop, 'inverse_property') and inverse_prop.inverse_property is not None
+                    validation_results[inverse_name] = has_inverse
+                    
+                    if has_inverse:
+                        logger.debug(f"✓ Inverse relationship validated: {inverse_name}")
+                    else:
+                        logger.warning(f"✗ Inverse relationship validation failed: {inverse_name}")
+                        
+                except Exception as e:
+                    logger.warning(f"Error validating inverse property {inverse_name}: {e}")
+                    validation_results[inverse_name] = False
+            
+            # Calculate success metrics
+            total_expected = len(inverse_mappings)
+            created_count = len(inverse_properties)
+            validated_count = sum(1 for valid in validation_results.values() if valid)
+            success_rate = (validated_count / total_expected) * 100 if total_expected > 0 else 0
+            
+            # Log comprehensive results
+            if created_count == total_expected and validated_count == total_expected:
+                logger.info("🎉 AIM2-ODIE-012-T5 COMPLETED SUCCESSFULLY")
+                logger.info(f"  - All {total_expected} logical inverse properties defined and validated")
+                logger.info(f"  - is_made_via ↔ made_via: processes/pathways ↔ compounds")
+                logger.info(f"  - is_accumulated_in ↔ accumulates_in: locations ↔ compounds") 
+                logger.info(f"  - is_affected_by ↔ affects: traits ↔ compounds")
+                logger.info(f"  - DataProperties (has_molecular_weight, has_concentration) correctly excluded")
+            else:
+                logger.warning("❌ AIM2-ODIE-012-T5 PARTIALLY COMPLETED")
+                logger.warning(f"  - Created: {created_count}/{total_expected} inverse properties")
+                logger.warning(f"  - Validated: {validated_count}/{total_expected} inverse relationships")
+                logger.warning(f"  - Success rate: {success_rate:.1f}%")
+            
+            # Return comprehensive results
+            results = {
+                'inverse_properties': inverse_properties,
+                'validation_results': validation_results,
+                'total_expected': total_expected,
+                'created_count': created_count,
+                'validated_count': validated_count,
+                'success_rate': success_rate,
+                'task_completed': (created_count == total_expected and validated_count == total_expected),
+                'inverse_mappings_applied': inverse_mappings
+            }
+            
+            return results
+            
+    except Exception as e:
+        logger.error(f"AIM2-ODIE-012-T5 failed: {e}")
+        raise RelationshipError(f"Failed to define logical inverse properties: {e}")
+
+
+def complete_aim2_odie_012_t5(ontology: Any, relationship_properties: 
+                             Dict[str, Any]) -> Dict[str, Any]:
+    """Complete AIM2-ODIE-012-T5: Define inverse properties where logically applicable.
+    
+    This is the main entry point function for completing AIM2-ODIE-012-T5. It calls the
+    define_logical_inverse_properties function to create inverse properties for the
+    core ObjectProperty relationships where logically applicable.
+    
+    Args:
+        ontology: Target ontology containing the properties
+        relationship_properties: Dict of existing property names to property objects
+        
+    Returns:
+        Dictionary with detailed results of the inverse property definition task
+        
+    Raises:
+        RelationshipError: If the task fails
+        
+    Example:
+        # First get the relationship properties (from previous tasks)
+        relationship_properties = define_core_relationship_properties(ontology)
+        
+        # Complete the inverse property definition task
+        result = complete_aim2_odie_012_t5(ontology, relationship_properties)
+        print(f"Task completed: {result['task_completed']}")
+    """
+    try:
+        logger.info("Starting AIM2-ODIE-012-T5 completion")
+        
+        # Execute the main inverse property definition function
+        result = define_logical_inverse_properties(ontology, relationship_properties)
+        
+        # Log final status
+        if result['task_completed']:
+            logger.info("🎉 AIM2-ODIE-012-T5 SUCCESSFULLY COMPLETED")
+            logger.info("All logical inverse properties have been defined and validated")
+        else:
+            logger.warning("⚠️  AIM2-ODIE-012-T5 PARTIALLY COMPLETED")
+            logger.warning(f"Success rate: {result['success_rate']:.1f}%")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"AIM2-ODIE-012-T5 completion failed: {e}")
+        raise RelationshipError(f"Failed to complete AIM2-ODIE-012-T5: {e}")
+
+
 def complete_aim2_odie_012_t4(ontology: Any, structural_classes: Dict[str, Any], 
                              source_classes: Dict[str, Any], functional_classes: Dict[str, Any]) -> Dict[str, Any]:
     """Complete AIM2-ODIE-012-T4: Set domain and range for each property using Owlready2 syntax.
