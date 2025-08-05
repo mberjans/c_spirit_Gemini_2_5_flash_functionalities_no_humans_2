@@ -427,13 +427,13 @@ Description: Fact Deduplication & Entity Resolution Module: Implement deduplicat
 Dependencies: AIM2-ODIE-002, AIM2-ODIE-026  
 Independent: No
 
-- [ ] **AIM2-ODIE-027-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_quality/test\_deduplicator.py) for src/data\_quality/deduplicator.py:  
+- [x] **AIM2-ODIE-027-T1:** **Develop Unit Tests:** Write unit tests (tests/data\_quality/test\_deduplicator.py) for src/data\_quality/deduplicator.py:  
   * Test deduplicate\_entities with a simple list of dictionaries representing entities, including exact duplicates.  
   * Test deduplicate\_entities with records containing minor variations, using dedupe or recordlinkage to identify approximate matches.  
   * Test the output format (e.g., a list of unique, consolidated entities).  
   * Test handling of empty input lists.  
-- [ ] **AIM2-ODIE-027-T2:** Create src/data\_quality/deduplicator.py.  
-- [ ] **AIM2-ODIE-027-T3:** Implement deduplicate\_entities(records: list\[dict\], fields: list\[str\], settings\_file: str \= None, training\_file: str \= None) function using dedupe or recordlinkage. This will involve setting up the deduplication process (e.g., defining fields, training if dedupe is used).  
+- [x] **AIM2-ODIE-027-T2:** Create src/data\_quality/deduplicator.py.  
+- [x] **AIM2-ODIE-027-T3:** Implement deduplicate\_entities(records: list\[dict\], fields: list\[str\], settings\_file: str \= None, training\_file: str \= None) function using dedupe or recordlinkage. This will involve setting up the deduplication process (e.g., defining fields, training if dedupe is used).  
 - [ ] **AIM2-ODIE-027-T4:** Integrate normalize\_name from AIM2-ODIE-026 as a preprocessing step for fields used in deduplication.  
 - [ ] **AIM2-ODIE-027-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
