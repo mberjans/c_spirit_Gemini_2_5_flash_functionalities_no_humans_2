@@ -488,14 +488,28 @@ def _get_domain_range_constraints(ontology_obj: Any, property_iri: str) -> Tuple
         return ([], [])
     
     try:
-        # Extract property name from IRI
-        property_name = property_iri.split('/')[-1].split('#')[-1]
+        # Extract property name from IRI (handle both / and # separators)
+        if '#' in property_iri:
+            property_name = property_iri.split('#')[-1]
+        else:
+            property_name = property_iri.split('/')[-1]
         
-        # Search for property in ontology
+        # Search for property in ontology by IRI first (most reliable)
         properties = ontology_obj.search(iri=property_iri)
+        
+        # If not found by IRI, try searching by name
         if not properties:
-            # Try searching by name
             properties = ontology_obj.search(name=property_name)
+        
+        # If still not found, try searching with underscore-to-space conversion
+        if not properties and '_' in property_name:
+            space_name = property_name.replace('_', ' ')
+            properties = ontology_obj.search(name=space_name)
+        
+        # If still not found, try searching with spaces-to-underscore conversion
+        if not properties and ' ' in property_name:
+            underscore_name = property_name.replace(' ', '_')
+            properties = ontology_obj.search(name=underscore_name)
         
         if not properties:
             return ([], [])
@@ -508,6 +522,11 @@ def _get_domain_range_constraints(ontology_obj: Any, property_iri: str) -> Tuple
             for domain_class in property_obj.domain:
                 if hasattr(domain_class, 'name') and domain_class.name:
                     domain_classes.append(domain_class.name)
+                elif hasattr(domain_class, 'iri') and domain_class.iri:
+                    # Extract class name from IRI if name is not available
+                    class_name = domain_class.iri.split('#')[-1].split('/')[-1]
+                    if class_name:
+                        domain_classes.append(class_name)
         
         # Extract range constraints
         range_classes = []
@@ -515,11 +534,280 @@ def _get_domain_range_constraints(ontology_obj: Any, property_iri: str) -> Tuple
             for range_class in property_obj.range:
                 if hasattr(range_class, 'name') and range_class.name:
                     range_classes.append(range_class.name)
+                elif hasattr(range_class, 'iri') and range_class.iri:
+                    # Extract class name from IRI if name is not available
+                    class_name = range_class.iri.split('#')[-1].split('/')[-1]
+                    if class_name:
+                        range_classes.append(class_name)
         
         return (domain_classes, range_classes)
         
     except Exception:
         return ([], [])
+
+
+def _classify_entity_type(entity: str, ontology_obj: Any) -> List[str]:
+    """
+    Classify an entity by determining its possible ontological types.
+    
+    This function attempts to classify an entity by searching for it in the ontology
+    and determining what class(es) it might belong to based on various heuristics.
+    
+    Args:
+        entity: Entity name to classify
+        ontology_obj: Owlready2 ontology object
+        
+    Returns:
+        List of possible class names that the entity could belong to
+    """
+    if not OWLREADY2_AVAILABLE or not _is_owlready2_ontology(ontology_obj):
+        return []
+    
+    try:
+        possible_types = []
+        
+        # First, try to find the entity directly in the ontology
+        entity_results = ontology_obj.search(name=entity)
+        if entity_results:
+            for result in entity_results:
+                if hasattr(result, 'is_a') and result.is_a:
+                    for parent_class in result.is_a:
+                        if hasattr(parent_class, 'name') and parent_class.name:
+                            possible_types.append(parent_class.name)
+        
+        # If not found directly, try variations of the entity name
+        if not possible_types:
+            # Try with underscores replaced by spaces
+            if '_' in entity:
+                space_entity = entity.replace('_', ' ')
+                entity_results = ontology_obj.search(name=space_entity)
+                if entity_results:
+                    for result in entity_results:
+                        if hasattr(result, 'is_a') and result.is_a:
+                            for parent_class in result.is_a:
+                                if hasattr(parent_class, 'name') and parent_class.name:
+                                    possible_types.append(parent_class.name)
+            
+            # Try with spaces replaced by underscores
+            if ' ' in entity:
+                underscore_entity = entity.replace(' ', '_')
+                entity_results = ontology_obj.search(name=underscore_entity)
+                if entity_results:
+                    for result in entity_results:
+                        if hasattr(result, 'is_a') and result.is_a:
+                            for parent_class in result.is_a:
+                                if hasattr(parent_class, 'name') and parent_class.name:
+                                    possible_types.append(parent_class.name)
+        
+        # If still no direct matches, use heuristic classification based on entity name patterns
+        if not possible_types:
+            possible_types = _heuristic_entity_classification(entity)
+        
+        # Remove duplicates and return
+        return list(set(possible_types))
+        
+    except Exception:
+        # Fall back to heuristic classification if ontology search fails
+        return _heuristic_entity_classification(entity)
+
+
+def _heuristic_entity_classification(entity: str) -> List[str]:
+    """
+    Perform heuristic entity classification based on naming patterns.
+    
+    This function uses common naming conventions and patterns to classify entities
+    when they cannot be found directly in the ontology.
+    
+    Args:
+        entity: Entity name to classify
+        
+    Returns:
+        List of possible class names based on heuristics
+    """
+    entity_lower = entity.lower()
+    possible_types = []
+    
+    # Chemical entity patterns
+    chemical_patterns = [
+        'glucose', 'atp', 'nadh', 'nadph', 'acetyl', 'pyruvate', 'lactate',
+        'amino_acid', 'fatty_acid', 'protein', 'enzyme', 'hormone', 'drug',
+        'compound', 'metabolite', 'cofactor', 'substrate', 'product',
+        'inhibitor', 'activator', 'ligand', 'neurotransmitter', 'vitamin',
+        'mineral', 'ion', 'salt', 'acid', 'base', 'alcohol', 'ester',
+        'aldehyde', 'ketone', 'lipid', 'carbohydrate', 'nucleotide'
+    ]
+    
+    # Biological entity patterns  
+    biological_patterns = [
+        'cell', 'tissue', 'organ', 'organism', 'bacteria', 'virus',
+        'gene', 'chromosome', 'dna', 'rna', 'mrna', 'protein', 'enzyme',
+        'receptor', 'antibody', 'antigen', 'membrane', 'organelle',
+        'mitochondria', 'nucleus', 'ribosome', 'chloroplast',
+        'arabidopsis', 'plant', 'animal', 'human', 'mouse', 'rat'
+    ]
+    
+    # Process patterns
+    process_patterns = [
+        'photosynthesis', 'respiration', 'glycolysis', 'metabolism',
+        'transcription', 'translation', 'replication', 'repair',
+        'synthesis', 'degradation', 'transport', 'signaling',
+        'regulation', 'development', 'differentiation', 'apoptosis',
+        'cell_cycle', 'mitosis', 'meiosis', 'fermentation'
+    ]
+    
+    # Function patterns
+    function_patterns = [
+        'catalysis', 'binding', 'transport', 'regulation', 'signaling',
+        'recognition', 'activation', 'inhibition', 'modulation',
+        'protection', 'repair', 'maintenance', 'homeostasis'
+    ]
+    
+    # Check patterns and assign types
+    for pattern in chemical_patterns:
+        if pattern in entity_lower:
+            possible_types.extend(['ChemicalEntity', 'Molecule', 'Compound'])
+            break
+    
+    for pattern in biological_patterns:
+        if pattern in entity_lower:
+            possible_types.extend(['BiologicalEntity', 'LivingThing'])
+            break
+    
+    for pattern in process_patterns:
+        if pattern in entity_lower:
+            possible_types.extend(['BiologicalProcess', 'Process'])
+            break
+    
+    for pattern in function_patterns:
+        if pattern in entity_lower:
+            possible_types.extend(['MolecularFunction', 'Function'])
+            break
+    
+    # Default fallback classifications
+    if not possible_types:
+        # If entity contains certain keywords, make educated guesses
+        if any(keyword in entity_lower for keyword in ['gene', 'protein', 'enzyme']):
+            possible_types = ['BiologicalEntity', 'Macromolecule']
+        elif any(keyword in entity_lower for keyword in ['cell', 'tissue', 'organ']):
+            possible_types = ['AnatomicalEntity', 'BiologicalEntity']
+        elif entity_lower.endswith('ase') or entity_lower.endswith('in'):
+            # Likely enzyme or protein
+            possible_types = ['Protein', 'Enzyme', 'Macromolecule']
+        else:
+            # Very general fallback
+            possible_types = ['Entity', 'Thing']
+    
+    return list(set(possible_types))
+
+
+def _check_class_inheritance(entity_types: List[str], constraint_classes: List[str], ontology_obj: Any) -> bool:
+    """
+    Check if any of the entity types match the constraint classes, considering inheritance.
+    
+    This function checks if an entity's inferred types are compatible with the domain/range
+    constraints of a property, taking into account class inheritance hierarchies.
+    
+    Args:
+        entity_types: List of possible types for the entity
+        constraint_classes: List of constraint classes (domain or range)
+        ontology_obj: Owlready2 ontology object
+        
+    Returns:
+        bool: True if entity types are compatible with constraints, False otherwise
+    """
+    if not entity_types or not constraint_classes:
+        return True  # Permissive approach when no constraints
+    
+    if not OWLREADY2_AVAILABLE or not _is_owlready2_ontology(ontology_obj):
+        # Fall back to simple string matching if Owlready2 not available
+        return bool(set(entity_types) & set(constraint_classes))
+    
+    try:
+        # Direct match check first
+        if set(entity_types) & set(constraint_classes):
+            return True
+        
+        # Check inheritance relationships using ontology
+        for entity_type in entity_types:
+            entity_class_results = ontology_obj.search(name=entity_type)
+            if entity_class_results:
+                entity_class = entity_class_results[0]
+                
+                # Get all superclasses (ancestors) of the entity class
+                if hasattr(entity_class, 'ancestors'):
+                    ancestors = entity_class.ancestors()
+                    ancestor_names = []
+                    for ancestor in ancestors:
+                        if hasattr(ancestor, 'name') and ancestor.name:
+                            ancestor_names.append(ancestor.name)
+                    
+                    # Check if any ancestor matches constraint classes
+                    if set(ancestor_names) & set(constraint_classes):
+                        return True
+                
+                # Alternative approach: check is_a relationships recursively
+                if hasattr(entity_class, 'is_a'):
+                    if _check_is_a_hierarchy(entity_class, constraint_classes, set()):
+                        return True
+        
+        # Check the reverse: if constraint classes are subclasses of entity types
+        for constraint_class in constraint_classes:
+            constraint_class_results = ontology_obj.search(name=constraint_class)
+            if constraint_class_results:
+                constraint_class_obj = constraint_class_results[0]
+                
+                if hasattr(constraint_class_obj, 'ancestors'):
+                    ancestors = constraint_class_obj.ancestors()
+                    ancestor_names = []
+                    for ancestor in ancestors:
+                        if hasattr(ancestor, 'name') and ancestor.name:
+                            ancestor_names.append(ancestor.name)
+                    
+                    # Check if any ancestor matches entity types
+                    if set(ancestor_names) & set(entity_types):
+                        return True
+        
+        return False
+        
+    except Exception:
+        # Fall back to simple string matching on error
+        return bool(set(entity_types) & set(constraint_classes))
+
+
+def _check_is_a_hierarchy(class_obj: Any, target_classes: List[str], visited: set) -> bool:
+    """
+    Recursively check is_a hierarchy to find target classes.
+    
+    Args:
+        class_obj: Owlready2 class object to check
+        target_classes: List of target class names to find
+        visited: Set of already visited classes to avoid cycles
+        
+    Returns:
+        bool: True if any target class is found in hierarchy, False otherwise
+    """
+    try:
+        # Avoid infinite recursion
+        if hasattr(class_obj, 'name') and class_obj.name in visited:
+            return False
+        
+        if hasattr(class_obj, 'name') and class_obj.name:
+            visited.add(class_obj.name)
+            
+            # Check if current class matches target
+            if class_obj.name in target_classes:
+                return True
+        
+        # Recursively check parent classes
+        if hasattr(class_obj, 'is_a') and class_obj.is_a:
+            for parent in class_obj.is_a:
+                if _check_is_a_hierarchy(parent, target_classes, visited):
+                    return True
+        
+        return False
+        
+    except Exception:
+        return False
 
 
 def _validate_semantic_consistency(
@@ -531,6 +819,12 @@ def _validate_semantic_consistency(
 ) -> bool:
     """
     Validate semantic consistency of a relationship against ontology constraints.
+    
+    This function performs comprehensive domain and range validation by:
+    1. Extracting domain/range constraints from the ontology property
+    2. Classifying the subject and object entities to determine their types
+    3. Checking if entity types conform to domain/range constraints
+    4. Handling inheritance hierarchies in the validation process
     
     Args:
         subject: Subject entity of the relationship
@@ -546,21 +840,29 @@ def _validate_semantic_consistency(
         SemanticValidationError: If validation process fails
     """
     try:
-        # Get domain and range constraints
+        # Get domain and range constraints from the ontology property
         domain_classes, range_classes = _get_domain_range_constraints(ontology_obj, property_iri)
         
         # If no constraints are found, consider it valid (permissive approach)
         if not domain_classes and not range_classes:
             return True
         
-        # For now, we'll implement a basic validation that always returns True
-        # In a real implementation, this would involve:
-        # 1. Entity type classification of subject and object
-        # 2. Checking if entity types match domain/range constraints
-        # 3. Handling multiple possible types and inheritance hierarchies
+        # Classify subject and object entities to determine their possible types
+        subject_types = _classify_entity_type(subject, ontology_obj)
+        object_types = _classify_entity_type(obj, ontology_obj)
         
-        # This is a placeholder implementation for testing purposes
-        return True
+        # Domain validation: check if subject conforms to domain constraints
+        domain_valid = True
+        if domain_classes:
+            domain_valid = _check_class_inheritance(subject_types, domain_classes, ontology_obj)
+        
+        # Range validation: check if object conforms to range constraints  
+        range_valid = True
+        if range_classes:
+            range_valid = _check_class_inheritance(object_types, range_classes, ontology_obj)
+        
+        # Both domain and range must be valid for the relationship to be semantically consistent
+        return domain_valid and range_valid
         
     except Exception as e:
         raise SemanticValidationError(f"Semantic validation failed: {str(e)}")
