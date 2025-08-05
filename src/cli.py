@@ -67,7 +67,17 @@ app.add_typer(ontology_app, name="ontology")
 # Create corpus subcommand group
 corpus_app = typer.Typer(
     name="corpus",
-    help="Corpus management commands (pubmed-download, pdf-extract, journal-scrape)"
+    help="""Academic corpus development and content acquisition tools.
+
+    Commands for downloading, extracting, and processing academic content from
+    various sources including PubMed database, PDF documents, and journal websites.
+    
+    Available commands:
+    • pubmed-download - Download papers and metadata from PubMed database
+    • pdf-extract - Extract text, tables, and metadata from PDF files  
+    • journal-scrape - Scrape content from academic journal websites
+    
+    Use 'corpus [command] --help' for detailed information about each command."""
 )
 app.add_typer(corpus_app, name="corpus")
 
@@ -300,17 +310,82 @@ def export_ontology_command(
 
 @corpus_app.command("pubmed-download")
 def pubmed_download_command(
-    query: str = typer.Argument(..., help="PubMed search query"),
-    output: str = typer.Option("./pubmed_data", "--output", "-o", help="Output directory for downloaded papers"),
-    max_results: int = typer.Option(100, "--max-results", "-m", help="Maximum number of results to download"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
-    format: str = typer.Option("xml", "--format", "-f", help="Download format (xml, json, txt)")
+    query: str = typer.Argument(
+        ..., 
+        help="PubMed search query using standard PubMed syntax. Examples: 'covid vaccine', 'diabetes[MeSH Terms]', 'smith[Author] AND cancer', 'journal nature[Journal]'"
+    ),
+    output: str = typer.Option(
+        "./pubmed_data", 
+        "--output", "-o", 
+        help="Output directory path where downloaded papers and metadata will be saved. Creates directory if it doesn't exist."
+    ),
+    max_results: int = typer.Option(
+        100, 
+        "--max-results", "-m", 
+        help="Maximum number of articles to download (1-10000). Higher numbers may take longer and use more storage."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed progress information including search steps, API responses, and file operations."
+    ),
+    format: str = typer.Option(
+        "xml", 
+        "--format", "-f", 
+        help="Output format for downloaded data (currently only 'xml' is fully supported). XML contains complete article metadata and abstracts."
+    )
 ):
     """
-    Download papers from PubMed based on search query.
+    Download academic papers and metadata from PubMed database.
     
-    Downloads academic papers and metadata from PubMed database using the specified
-    search query and saves them to the output directory.
+    This command searches the PubMed database using your query and downloads article
+    metadata, abstracts, and bibliographic information. The results are saved as
+    XML files along with metadata summaries for further processing.
+    
+    \b
+    SEARCH QUERY EXAMPLES:
+    • Basic keyword search: 'machine learning'
+    • MeSH terms: 'diabetes[MeSH Terms]'
+    • Author search: 'smith[Author]'
+    • Journal search: 'nature[Journal]'
+    • Date range: 'cancer AND 2020:2023[PDAT]'
+    • Complex query: '(covid OR coronavirus) AND vaccine AND clinical trial[Publication Type]'
+    
+    \b
+    OUTPUT FILES:
+    • pubmed_results_[timestamp]_[count]_articles.xml - Main XML data with articles
+    • pubmed_metadata_[timestamp]_[count]_articles.txt - Summary metadata file
+    
+    \b
+    REQUIREMENTS:
+    • Internet connection for PubMed API access
+    • Biopython library (installed automatically)
+    • Optional: NCBI_EMAIL environment variable for better API access
+    • Optional: NCBI_API_KEY environment variable for higher rate limits
+    
+    \b
+    RATE LIMITS:
+    • Without API key: 3 requests/second
+    • With API key: 10 requests/second
+    • Large queries may take several minutes
+    
+    \b
+    USAGE EXAMPLES:
+    # Download 50 COVID-19 vaccine papers
+    corpus pubmed-download "covid vaccine" --max-results 50 --output ./covid_papers
+    
+    # Search with MeSH terms and save to specific directory
+    corpus pubmed-download "diabetes[MeSH Terms]" --output ~/research/diabetes --verbose
+    
+    # Complex search with author and date filters
+    corpus pubmed-download "smith[Author] AND cancer AND 2020:2023[PDAT]" --max-results 200
+    
+    \b
+    TROUBLESHOOTING:
+    • If download fails, check internet connection and query syntax
+    • Large queries may timeout - try reducing max-results
+    • Set NCBI_EMAIL environment variable to avoid warnings
+    • Use --verbose flag to see detailed progress and debug issues
     """
     try:
         # Import PubMed functions
@@ -446,17 +521,104 @@ PubMed IDs (complete list):
 
 @corpus_app.command("pdf-extract")
 def pdf_extract_command(
-    input_file: str = typer.Argument(..., help="Path to the PDF file to extract"),
-    output: str = typer.Option("./extracted_text", "--output", "-o", help="Output directory for extracted content"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
-    extract_images: bool = typer.Option(False, "--extract-images", help="Also extract images from PDF"),
-    extract_tables: bool = typer.Option(False, "--extract-tables", help="Also extract tables from PDF")
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to the PDF file to process. Supports both scientific papers and general documents. File must be readable and not password-protected."
+    ),
+    output: str = typer.Option(
+        "./extracted_text", 
+        "--output", "-o", 
+        help="Output directory where extracted content will be saved. Creates directory structure if it doesn't exist."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed output showing extraction progress, file sizes, metadata fields, and table statistics."
+    ),
+    extract_images: bool = typer.Option(
+        False, 
+        "--extract-images", 
+        help="Extract embedded images from PDF (feature planned for future release). Currently shows notification only."
+    ),
+    extract_tables: bool = typer.Option(
+        False, 
+        "--extract-tables", 
+        help="Extract tables from PDF and save as structured JSON data with row/column information and cell contents."
+    )
 ):
     """
-    Extract text and content from PDF files.
+    Extract text, metadata, and structured content from PDF files.
     
-    Processes PDF files to extract text, images, and tables for further analysis
-    and corpus development.
+    This command processes PDF files to extract readable text content, document
+    metadata, and optionally tables for corpus development and text analysis.
+    Uses multiple extraction methods with automatic fallback for maximum reliability.
+    
+    \b
+    EXTRACTION CAPABILITIES:
+    • Text content - Full document text with layout preservation
+    • Document metadata - Title, author, creation date, page count, etc.  
+    • Table extraction - Structured tables as JSON with row/column data
+    • Multiple PDF formats - Academic papers, reports, books, articles
+    • Fallback methods - PyMuPDF primary, with automatic fallback options
+    
+    \b
+    OUTPUT FILES:
+    • [filename]_text.txt - Extracted plain text content
+    • [filename]_metadata.json - PDF metadata (title, author, dates, etc.)
+    • [filename]_tables.json - Structured table data (if --extract-tables used)
+    
+    \b
+    SUPPORTED PDF TYPES:
+    • Research papers and journal articles
+    • Technical reports and documentation  
+    • Books and e-books with text content
+    • Multi-column layouts (newspapers, magazines)
+    • Mixed content with text and tables
+    
+    \b
+    REQUIREMENTS:
+    • PyMuPDF (fitz) library for PDF processing
+    • Readable PDF files (not scanned images or password-protected)
+    • Sufficient disk space for output files
+    • For table extraction: pandas and tabula-py libraries
+    
+    \b
+    USAGE EXAMPLES:
+    # Basic text extraction from research paper
+    corpus pdf-extract research_paper.pdf --output ./text_output --verbose
+    
+    # Extract text and tables from technical report
+    corpus pdf-extract report.pdf --extract-tables --output ./structured_data
+    
+    # Process multiple files with detailed output
+    corpus pdf-extract document.pdf --extract-tables --verbose --output ~/extracts
+    
+    # Extract from PDF with custom output location
+    corpus pdf-extract "/path/to/document.pdf" --output "./results/pdf_content"
+    
+    \b
+    TEXT EXTRACTION FEATURES:
+    • Preserves paragraph structure and line breaks
+    • Handles multiple languages and character encodings
+    • Processes multi-column layouts intelligently
+    • Extracts footnotes and headers when possible
+    • Automatic text cleaning and formatting
+    
+    \b
+    TABLE EXTRACTION DETAILS:
+    • Detects table boundaries automatically
+    • Preserves cell relationships and structure  
+    • Outputs JSON with table metadata (rows, columns, position)
+    • Handles merged cells and complex table layouts
+    • Provides statistics on extracted tables
+    
+    \b
+    TROUBLESHOOTING:
+    • If extraction fails, PDF may be corrupted or password-protected
+    • Poor quality scanned PDFs may have limited text extraction
+    • Large files may take longer to process - use --verbose to monitor progress
+    • For complex tables, manual review of JSON output may be needed
+    • Some PDF protection methods may prevent content extraction
     """
     try:
         if verbose:
@@ -582,21 +744,145 @@ def pdf_extract_command(
 
 @corpus_app.command("journal-scrape")
 def journal_scrape_command(
-    url: str = typer.Argument(..., help="URL of the journal or article to scrape"),
-    output: str = typer.Option("./scraped_content", "--output", "-o", help="Output directory for scraped content"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
-    max_depth: int = typer.Option(1, "--max-depth", help="Maximum depth for recursive scraping"),
-    delay: float = typer.Option(1.0, "--delay", help="Delay between requests in seconds"),
-    include_metadata: bool = typer.Option(True, "--include-metadata/--no-metadata", help="Include article metadata"),
-    journal_name: Optional[str] = typer.Option(None, "--journal", "-j", help="Journal name for metadata scraping"),
-    query: Optional[str] = typer.Option(None, "--query", "-q", help="Search query for metadata scraping"),
-    max_results: int = typer.Option(10, "--max-results", "-m", help="Maximum number of results for metadata scraping")
+    url: str = typer.Argument(
+        ..., 
+        help="URL of the journal article or publisher page to scrape. Must be a valid HTTP/HTTPS URL. Examples: 'https://www.nature.com/articles/article-id', 'https://doi.org/10.1000/journal'"
+    ),
+    output: str = typer.Option(
+        "./scraped_content", 
+        "--output", "-o", 
+        help="Output directory where scraped content, metadata, and summary files will be saved. Creates directory if it doesn't exist."
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", "-v", 
+        help="Enable detailed logging of scraping progress, HTTP requests, file operations, and metadata extraction steps."
+    ),
+    max_depth: int = typer.Option(
+        1, 
+        "--max-depth", 
+        help="Maximum depth for recursive link following (1-5). Higher values scrape linked articles but increase time and data usage."
+    ),
+    delay: float = typer.Option(
+        1.0, 
+        "--delay", 
+        help="Delay between HTTP requests in seconds (0.5-10.0). Longer delays are more respectful to servers but slower. Recommended: 1-2 seconds."
+    ),
+    include_metadata: bool = typer.Option(
+        True, 
+        "--include-metadata/--no-metadata", 
+        help="Whether to extract and save article metadata (title, authors, DOI, publication date, etc.) in addition to full text."
+    ),
+    journal_name: Optional[str] = typer.Option(
+        None, 
+        "--journal", "-j", 
+        help="Specific journal name for targeted metadata scraping. Examples: 'Nature', 'Science', 'PLOS ONE'. Used with --query for journal-specific searches."
+    ),
+    query: Optional[str] = typer.Option(
+        None, 
+        "--query", "-q", 
+        help="Search query for finding articles within the specified journal. Used together with --journal for targeted content discovery."
+    ),
+    max_results: int = typer.Option(
+        10, 
+        "--max-results", "-m", 
+        help="Maximum number of search results to process when using --journal and --query options (1-100)."
+    )
 ):
     """
-    Scrape content from journal websites and articles.
+    Scrape academic content from journal websites and publisher platforms.
     
-    Extracts article content, metadata, and related information from academic
-    journal websites for corpus development.
+    This command extracts full-text articles, metadata, and bibliographic information
+    from academic journal websites. It supports both direct article URL scraping and
+    journal-specific search-based content discovery with respectful rate limiting.
+    
+    \b
+    SCRAPING CAPABILITIES:
+    • Full-text article content in PDF/HTML formats
+    • Article metadata (title, authors, DOI, dates, keywords)
+    • Bibliographic information and citation data
+    • Journal-specific search and discovery
+    • Respectful crawling with configurable delays
+    • Robots.txt compliance checking
+    
+    \b
+    SUPPORTED PUBLISHERS:
+    • Nature Publishing Group (nature.com)
+    • Science/AAAS (science.org) 
+    • PLOS journals (plos.org)
+    • Springer journals (springer.com)
+    • Elsevier ScienceDirect (sciencedirect.com)
+    • Many others through general scraping methods
+    
+    \b
+    OUTPUT FILES:
+    • [article_filename].pdf/html - Downloaded full-text content
+    • metadata_[journal]_[timestamp].json - Article metadata and search results
+    • scraping_summary_[timestamp].json - Complete session summary with parameters
+    
+    \b
+    USAGE MODES:
+    
+    1. Direct Article Scraping:
+       Provide a specific article URL to download that article's content
+       
+    2. Journal Search Mode:
+       Use --journal and --query to search within a specific journal
+       and download multiple matching articles
+    
+    \b
+    REQUIREMENTS:
+    • Internet connection for web access
+    • paperscraper library for academic content extraction
+    • requests library for HTTP operations
+    • Compliance with website terms of service and robots.txt
+    
+    \b
+    RATE LIMITING & ETHICS:
+    • Default 1-second delay between requests (adjustable)
+    • Automatic robots.txt checking and compliance
+    • User-agent identification for transparency
+    • Respectful crawling practices to avoid server overload
+    
+    \b
+    USAGE EXAMPLES:
+    # Download specific article by URL
+    corpus journal-scrape "https://www.nature.com/articles/nature12373" --output ./nature_articles --verbose
+    
+    # Search Nature journal for machine learning articles
+    corpus journal-scrape "https://nature.com" --journal "Nature" --query "machine learning" --max-results 20 --output ./ml_papers
+    
+    # Scrape with custom delay and no metadata
+    corpus journal-scrape "https://doi.org/10.1126/science.123456" --delay 2.0 --no-metadata --output ./science_papers
+    
+    # Comprehensive scraping with full options
+    corpus journal-scrape "https://journals.plos.org/plosone" --journal "PLOS ONE" --query "covid vaccine" --max-results 50 --delay 1.5 --verbose --output ./covid_research
+    
+    \b
+    METADATA EXTRACTION:
+    • Article title and subtitle
+    • Author names and affiliations  
+    • Publication date and DOI
+    • Abstract and keywords
+    • Journal name and volume/issue
+    • Citation information
+    
+    \b
+    TROUBLESHOOTING:
+    • If scraping fails, check URL validity and internet connection
+    • Some publishers block automated access - try different delay settings
+    • Large max-results values may take very long - start with smaller numbers
+    • Use --verbose to see detailed progress and identify issues
+    • Respect rate limits - if blocked, increase --delay parameter
+    • Check robots.txt compliance for specific publishers
+    
+    \b
+    LEGAL & ETHICAL NOTES:
+    • Always respect website terms of service
+    • Use reasonable delays to avoid overloading servers  
+    • Check copyright restrictions for downloaded content
+    • Some content may require institutional access
+    • Consider contacting publishers for bulk access needs
     """
     try:
         # Import journal scraper functions
