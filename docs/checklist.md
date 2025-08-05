@@ -191,10 +191,10 @@ Independent: No
   * Verification of inferred class memberships for individuals based on property values and restrictions (e.g., if a compound has property has\_structure of type X, and X implies Y, check if compound is classified as Y).  
   * Verification of inferred property values if infer\_property\_values=True is used.  
   * Handling of inconsistent ontologies (expecting OwlReadyInconsistentOntologyError or similar).  
-- [ ] **AIM2-ODIE-013-T2:** Create src/ontology/reasoner.py.  
-- [ ] **AIM2-ODIE-013-T3:** Implement run\_reasoner(ontology, infer\_property\_values: bool \= False) function using sync\_reasoner().  
-- [ ] **AIM2-ODIE-013-T4:** Ensure the Java executable path is correctly configured for Owlready2 to find HermiT/Pellet (referencing AIM2-ODIE-004).  
-- [ ] **AIM2-ODIE-013-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-013-T2:** Create src/ontology/reasoner.py.  
+- [x] **AIM2-ODIE-013-T3:** Implement run\_reasoner(ontology, infer\_property\_values: bool \= False) function using sync\_reasoner().  
+- [x] **AIM2-ODIE-013-T4:** Ensure the Java executable path is correctly configured for Owlready2 to find HermiT/Pellet (referencing AIM2-ODIE-004).  
+- [x] **AIM2-ODIE-013-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-014  
 Description: CLI for Ontology Management (Load, Trim, Export): Create a command-line interface for the ontology management module, allowing users to load, trim/filter, and export ontologies via CLI commands.  
