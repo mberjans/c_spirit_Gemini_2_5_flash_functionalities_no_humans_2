@@ -163,7 +163,7 @@ Independent: No
 - [x] **AIM2-ODIE-011-T2:** Create src/ontology/scheme\_functional.py.  
 - [x] **AIM2-ODIE-011-T3:** Define Python classes for core functional annotation concepts (e.g., MolecularTrait, PlantTrait, HumanTrait) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
 - [x] **AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.  
-- [ ] **AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-012  
 Description: Hierarchical Relationship Definition & Management: Implement logic to define and manage hierarchical relationships ("is\_a", "made\_via", "accumulates\_in", "affects") using Owlready2's ObjectProperty and DataProperty classes, including domain, range, and inverse\_property.  
