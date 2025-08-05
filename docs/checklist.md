@@ -170,7 +170,7 @@ Description: Hierarchical Relationship Definition & Management: Implement logic 
 Dependencies: AIM2-ODIE-005, AIM2-ODIE-009, AIM2-ODIE-010, AIM2-ODIE-011  
 Independent: No
 
-- [ ] **AIM2-ODIE-012-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_relationships.py) for src/ontology/relationships.py to cover:  
+- [x] **AIM2-ODIE-012-T1:** **Develop Unit Tests:** Write unit tests (tests/ontology/test\_relationships.py) for src/ontology/relationships.py to cover:  
   * Definition of ObjectProperty classes (e.g., made\_via, accumulates\_in, affects) with correct domain and range specified.  
   * Definition of DataProperty classes if applicable (e.g., has\_molecular\_weight).  
   * Definition of inverse\_property for relevant relationships (e.g., is\_accumulated\_in as inverse of accumulates\_in) and verification of Owlready2's automatic handling.  
