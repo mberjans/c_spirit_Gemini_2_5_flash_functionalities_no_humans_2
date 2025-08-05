@@ -335,7 +335,7 @@ Independent: No
   * Error handling for LLM API failures or invalid responses.  
 - [x] **AIM2-ODIE-021-T2:** Create src/llm\_extraction/relations.py.  
 - [x] **AIM2-ODIE-021-T3:** Implement extract\_relationships(text: str, entities: list\[dict\], relationship\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.  
-- [ ] **AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).  
+- [x] **AIM2-ODIE-021-T4:** Define initial relationship schemas (e.g., Compound-Affects-Trait, Metabolite-InvolvedIn-BiologicalProcess).  
 - [ ] **AIM2-ODIE-021-T5:** Develop sophisticated prompt templates for relationship extraction, including examples for hierarchical differentiation and contextual understanding.  
 - [ ] **AIM2-ODIE-021-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
