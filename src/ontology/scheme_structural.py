@@ -24,7 +24,7 @@ import re
 import threading
 from typing import Any, Dict, List, Optional, Set, Union
 
-from owlready2 import Thing, OwlReadyError, types as owlready_types
+from owlready2 import Thing, OwlReadyError, types as owlready_types, get_ontology
 
 
 # Configure logging
@@ -716,3 +716,181 @@ def cleanup_structural_classes(ontology: Any) -> int:
     except Exception as e:
         logger.error(f"Error during structural class cleanup: {e}")
         return 0
+
+
+def define_core_structural_classes(ontology: Any) -> Dict[str, Any]:
+    """Define core structural annotation classes in the main ontology namespace.
+    
+    Creates the fundamental structural annotation classes (ChemontClass, NPClass, 
+    PMNCompound) that inherit from owlready2.Thing and associates them with the 
+    main ontology namespace. This implements the core requirements for 
+    AIM2-ODIE-009-T3.
+    
+    Args:
+        ontology: Main ontology to define classes in
+        
+    Returns:
+        Dictionary mapping class names to created class objects
+        
+    Raises:
+        StructuralClassError: If class definition fails
+        
+    Example:
+        classes = define_core_structural_classes(ontology)
+        chemont_class = classes['ChemontClass']
+        np_class = classes['NPClass']
+        pmn_compound = classes['PMNCompound']
+    """
+    _validate_ontology(ontology)
+    
+    try:
+        with _creation_lock:
+            # Use the ontology context for class creation
+            with ontology:
+                # Define ChemontClass for chemical entity classification
+                class ChemontClass(Thing):
+                    namespace = ontology
+                    
+                ChemontClass.label = ["Chemical Entity Class (Chemont)"]
+                ChemontClass.comment = [
+                    "Base class for chemical entity classification based on ChEMONT (Chemical Entities of Biological Interest) ontology. "
+                    "Provides structural annotation for metabolites using chemical classification hierarchies."
+                ]
+                
+                # Define NPClass for natural product classification
+                class NPClass(Thing):
+                    namespace = ontology
+                    
+                NPClass.label = ["Natural Product Class"]
+                NPClass.comment = [
+                    "Base class for natural product classification based on NP Classifier system. "
+                    "Provides structural annotation for natural products and secondary metabolites."
+                ]
+                
+                # Define PMNCompound for plant metabolic compounds
+                class PMNCompound(Thing):
+                    namespace = ontology
+                    
+                PMNCompound.label = ["Plant Metabolic Network Compound"]
+                PMNCompound.comment = [
+                    "Base class for plant metabolic compounds from Plant Metabolic Network (PMN) database. "
+                    "Provides structural annotation for compounds involved in plant metabolic pathways."
+                ]
+                
+                # Create the class registry
+                defined_classes = {
+                    'ChemontClass': ChemontClass,
+                    'NPClass': NPClass,
+                    'PMNCompound': PMNCompound
+                }
+                
+                logger.info(f"Successfully defined {len(defined_classes)} core structural classes")
+                
+                return defined_classes
+            
+    except OwlReadyError as e:
+        raise StructuralClassError(f"Owlready2 error defining core structural classes: {e}")
+    except Exception as e:
+        raise StructuralClassError(f"Failed to define core structural classes: {e}")
+
+
+def establish_structural_hierarchy(ontology: Any, classes: Dict[str, Any]) -> None:
+    """Establish hierarchical relationships between structural annotation classes.
+    
+    Creates is_a relationships and other hierarchical connections between the
+    defined structural annotation classes to represent classification hierarchies.
+    
+    Args:
+        ontology: Main ontology containing the classes
+        classes: Dictionary of class names to class objects
+        
+    Raises:
+        StructuralClassError: If hierarchy establishment fails
+        
+    Example:
+        classes = define_core_structural_classes(ontology)
+        establish_structural_hierarchy(ontology, classes)
+    """
+    _validate_ontology(ontology)
+    
+    if not classes or not isinstance(classes, dict):
+        raise StructuralClassError("Invalid classes dictionary")
+    
+    try:
+        with _creation_lock:
+            # Get required classes
+            chemont_class = classes.get('ChemontClass')
+            np_class = classes.get('NPClass')
+            pmn_compound = classes.get('PMNCompound')
+            
+            if not all([chemont_class, np_class, pmn_compound]):
+                raise StructuralClassError("Missing required structural classes")
+            
+            # Create a general StructuralAnnotation superclass within the ontology context
+            with ontology:
+                class StructuralAnnotation(Thing):
+                    namespace = ontology
+                    
+                StructuralAnnotation.label = ["Structural Annotation"]
+                StructuralAnnotation.comment = [
+                    "Superclass for all structural annotation concepts including chemical classifications, "
+                    "natural product categories, and metabolic compound classifications."
+                ]
+            
+            # Establish hierarchical relationships
+            # All structural classes inherit from StructuralAnnotation
+            chemont_class.is_a.append(StructuralAnnotation)
+            np_class.is_a.append(StructuralAnnotation)
+            pmn_compound.is_a.append(StructuralAnnotation)
+            
+            # NPClass and PMNCompound are more specific chemical classifications
+            # So they could also inherit from ChemontClass concepts if needed
+            # For now, keep them as peer classes under StructuralAnnotation
+            
+            logger.info("Successfully established structural class hierarchy")
+            
+    except Exception as e:
+        raise StructuralClassError(f"Failed to establish structural hierarchy: {e}")
+
+
+def validate_core_structural_classes(ontology: Any) -> bool:
+    """Validate that core structural classes are properly defined.
+    
+    Checks that ChemontClass, NPClass, and PMNCompound are properly defined
+    in the ontology with correct inheritance and properties.
+    
+    Args:
+        ontology: Ontology to validate
+        
+    Returns:
+        True if all core classes are properly defined, False otherwise
+        
+    Example:
+        is_valid = validate_core_structural_classes(ontology)
+    """
+    try:
+        _validate_ontology(ontology)
+        
+        required_classes = ['ChemontClass', 'NPClass', 'PMNCompound']
+        
+        for class_name in required_classes:
+            # Check if class exists
+            if not verify_class_accessibility(ontology, class_name):
+                logger.warning(f"Required class not found: {class_name}")
+                return False
+            
+            # Validate class properties
+            if not validate_structural_class_properties(ontology, class_name):
+                logger.warning(f"Invalid properties for class: {class_name}")
+                return False
+            
+            # Verify Thing inheritance
+            if not verify_thing_inheritance(ontology, class_name):
+                logger.warning(f"Class does not inherit from Thing: {class_name}")
+                return False
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error validating core structural classes: {e}")
+        return False
