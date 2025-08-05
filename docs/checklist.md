@@ -353,7 +353,7 @@ Independent: No
 - [x] **AIM2-ODIE-022-T3:** Implement corpus pubmed-download subcommand, calling functions from src/data\_acquisition/pubmed.py and handling output saving.  
 - [x] **AIM2-ODIE-022-T4:** Implement corpus pdf-extract subcommand, calling functions from src/data\_acquisition/pdf\_extractor.py and handling output saving.  
 - [x] **AIM2-ODIE-022-T5:** Implement corpus journal-scrape subcommand, calling functions from src/data\_acquisition/journal\_scraper.py and handling output saving.  
-- [ ] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.  
+- [x] **AIM2-ODIE-022-T6:** Add comprehensive help messages for all corpus commands and their arguments.  
 - [ ] **AIM2-ODIE-022-T7:** **Conduct Integration Tests:** Run integration tests developed in T1.
 
 Ticket ID: AIM2-ODIE-023  
