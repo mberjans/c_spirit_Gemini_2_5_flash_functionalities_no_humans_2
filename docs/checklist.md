@@ -162,7 +162,7 @@ Independent: No
   * Verification of basic hierarchical relationships (e.g., is\_a) if defined within this scheme (e.g., DroughtTolerance is a subclass of PlantTrait).  
 - [x] **AIM2-ODIE-011-T2:** Create src/ontology/scheme\_functional.py.  
 - [x] **AIM2-ODIE-011-T3:** Define Python classes for core functional annotation concepts (e.g., MolecularTrait, PlantTrait, HumanTrait) inheriting from owlready2.Thing and associating them with the main ontology namespace.  
-- [ ] **AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.  
+- [x] **AIM2-ODIE-011-T4:** Programmatically add initial key terms/instances from GO, Trait Ontology, and ChemFont (as representative examples) to the ontology.  
 - [ ] **AIM2-ODIE-011-T5:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-012  
