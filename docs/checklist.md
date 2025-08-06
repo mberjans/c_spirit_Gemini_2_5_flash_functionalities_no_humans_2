@@ -458,7 +458,7 @@ Description: CLI for Ontology Mapping & Post-processing: Create a command-line i
 Dependencies: AIM2-ODIE-024, AIM2-ODIE-025, AIM2-ODIE-026, AIM2-ODIE-027, AIM2-ODIE-028  
 Independent: No
 
-- [ ] **AIM2-ODIE-029-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_postprocessing\_cli.py) for the CLI:  
+- [x] **AIM2-ODIE-029-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_postprocessing\_cli.py) for the CLI:  
   * Test map entities \--input \<file\> \--ontology \<url\> \--output \<file\> command.  
   * Test map relations \--input \<file\> \--ontology \<url\> \--output \<file\> command.  
   * Test clean normalize \--input \<file\> \--output \<file\> command.  
