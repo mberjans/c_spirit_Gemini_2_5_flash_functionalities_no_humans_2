@@ -112,6 +112,9 @@ try:
     from src.evaluation.benchmarker import (
         calculate_ner_metrics, calculate_relation_metrics, run_benchmark
     )
+    from src.evaluation.curation_tool import (
+        load_llm_output, display_for_review, apply_correction, save_curated_output
+    )
 except ImportError as e:
     print(f"Error importing evaluation modules: {e}")
     sys.exit(1)
@@ -482,6 +485,195 @@ def eval_benchmark_command(
         
     except Exception as e:
         console.print(f"[red]Error in benchmark evaluation: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
+@eval_app.command("curate")
+def eval_curate_command(
+    input_file: str = typer.Argument(..., help="Path to LLM extraction results file (JSON format)"),
+    output_file: str = typer.Argument(..., help="Path to save curated results (JSON format)"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Curate and manually review LLM extraction results for quality improvement.
+    
+    This command provides an interactive interface for domain experts to review,
+    correct, and curate entities and relationships extracted by language models
+    from biological literature. The tool enables systematic feedback collection
+    to improve prompt engineering and model performance.
+    
+    INPUT FILE FORMAT:
+    
+    The input file should contain LLM extraction results in JSON format:
+    {
+        "text": "Original document text",
+        "entities": [
+            {
+                "text": "entity mention",
+                "label": "entity type",
+                "start": start_position,
+                "end": end_position
+            }
+        ],
+        "relations": [
+            {
+                "head": "entity1",
+                "tail": "entity2", 
+                "relation": "relationship_type"
+            }
+        ]
+    }
+    
+    CURATION WORKFLOW:
+    
+    1. Load extraction results from input file
+    2. Display text and extracted items for review
+    3. Interactive correction loop:
+       - View entities and relations in context
+       - Apply corrections (modify, add, remove)
+       - Navigate through documents
+    4. Save curated results to output file
+    
+    CORRECTION TYPES:
+    
+    Entity corrections:
+    - modify: Change entity text, label, or boundaries
+    - add: Add missing entities
+    - remove: Remove incorrect entities
+    
+    Relation corrections:
+    - modify: Change relation type or participants
+    - add: Add missing relationships
+    - remove: Remove incorrect relationships
+    
+    Examples:
+        # Curate extractions with verbose output
+        aim2-odie eval curate extractions.json curated_results.json --verbose
+        
+        # Basic curation workflow
+        aim2-odie eval curate llm_output.json corrected_output.json
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading LLM extraction results from: {input_file}[/blue]")
+        
+        # Check if input file exists
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        # Load LLM output
+        extracted_data = load_llm_output(input_file)
+        
+        if verbose:
+            console.print(f"[green]Successfully loaded extraction data[/green]")
+            console.print(f"[blue]Text length: {len(extracted_data.get('text', ''))} characters[/blue]")
+            console.print(f"[blue]Entities found: {len(extracted_data.get('entities', []))}[/blue]")
+            console.print(f"[blue]Relations found: {len(extracted_data.get('relations', []))}[/blue]")
+        
+        # Display content for review
+        console.print("\n[bold cyan]Starting curation review process...[/bold cyan]")
+        display_for_review(
+            extracted_data.get('text', ''),
+            extracted_data.get('entities', []),
+            extracted_data.get('relations', [])
+        )
+        
+        # Interactive correction loop
+        curated_data = dict(extracted_data)  # Copy original data
+        
+        console.print("\n[bold yellow]Interactive Curation Mode[/bold yellow]")
+        console.print("Available correction types:")
+        console.print("  Entity corrections: modify, add, remove")
+        console.print("  Relation corrections: modify, add, remove")
+        console.print("  Commands: 'done' to finish, 'show' to redisplay, 'help' for assistance")
+        
+        while True:
+            try:
+                command = input("\nEnter correction command (or 'done' to finish): ").strip().lower()
+                
+                if command == 'done':
+                    break
+                elif command == 'show':
+                    display_for_review(
+                        curated_data.get('text', ''),
+                        curated_data.get('entities', []),
+                        curated_data.get('relations', [])
+                    )
+                elif command == 'help':
+                    console.print("\n[bold]Curation Commands:[/bold]")
+                    console.print("  done - Finish curation and save results")
+                    console.print("  show - Redisplay current entities and relations")
+                    console.print("  help - Show this help message")
+                    console.print("\n[bold]Correction Format Examples:[/bold]")
+                    console.print("  modify entity <old_text> <new_text>")
+                    console.print("  add entity <text> <label>")
+                    console.print("  remove entity <text>")
+                    console.print("  modify relation <old_relation> <new_relation>")
+                    console.print("  add relation <head> <tail> <relation_type>")
+                    console.print("  remove relation <head> <tail> <relation_type>")
+                elif command:
+                    # Parse correction command
+                    parts = command.split()
+                    if len(parts) >= 3:
+                        correction_type = parts[0]  # modify, add, remove
+                        target_type = parts[1]      # entity, relation
+                        
+                        if target_type in ['entity', 'relation']:
+                            old_value = ' '.join(parts[2:]) if correction_type in ['modify', 'remove'] else None
+                            new_value = None
+                            
+                            if correction_type == 'modify' and len(parts) >= 4:
+                                # For modify, split old and new values
+                                mid_point = len(parts) // 2 + 1
+                                old_value = ' '.join(parts[2:mid_point])
+                                new_value = ' '.join(parts[mid_point:])
+                            elif correction_type == 'add':
+                                new_value = ' '.join(parts[2:])
+                            
+                            # Apply correction
+                            try:
+                                curated_data = apply_correction(
+                                    curated_data, 
+                                    f"{correction_type}_{target_type}",
+                                    old_value,
+                                    new_value
+                                )
+                                console.print(f"[green]Applied {correction_type} {target_type} correction[/green]")
+                            except Exception as correction_error:
+                                console.print(f"[red]Error applying correction: {str(correction_error)}[/red]")
+                        else:
+                            console.print("[red]Invalid target type. Use 'entity' or 'relation'[/red]")
+                    else:
+                        console.print("[red]Invalid command format. Type 'help' for assistance[/red]")
+                        
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Curation interrupted by user[/yellow]")
+                break
+            except Exception as input_error:
+                console.print(f"[red]Input error: {str(input_error)}[/red]")
+        
+        # Save curated output
+        if verbose:
+            console.print(f"[blue]Saving curated results to: {output_file}[/blue]")
+        
+        success = save_curated_output(curated_data, output_file)
+        
+        if success:
+            console.print(f"[green]Successfully saved curated results to: {output_file}[/green]")
+            
+            if verbose:
+                console.print(f"[blue]Final entities count: {len(curated_data.get('entities', []))}[/blue]")
+                console.print(f"[blue]Final relations count: {len(curated_data.get('relations', []))}[/blue]")
+        else:
+            console.print(f"[red]Failed to save curated results[/red]")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]Error in curation process: {str(e)}[/red]")
         if verbose:
             import traceback
             console.print(f"[red]{traceback.format_exc()}[/red]")
