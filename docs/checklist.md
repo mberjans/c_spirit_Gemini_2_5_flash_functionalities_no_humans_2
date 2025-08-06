@@ -520,8 +520,8 @@ Independent: Yes
   * Test display\_for\_review to ensure text and extracted items are presented clearly (mocking print statements).  
   * Test apply\_correction to modify an entity or relation.  
   * Test save\_curated\_output to a file and verify its structure.  
-- [ ] **AIM2-ODIE-032-T2:** Create src/evaluation/curation\_tool.py.  
-- [ ] **AIM2-ODIE-032-T3:** Implement load\_llm\_output(file\_path: str) function to load LLM-generated extractions.  
+- [x] **AIM2-ODIE-032-T2:** Create src/evaluation/curation\_tool.py.  
+- [x] **AIM2-ODIE-032-T3:** Implement load\_llm\_output(file\_path: str) function to load LLM-generated extractions.  
 - [ ] **AIM2-ODIE-032-T4:** Implement display\_for\_review(text: str, entities: list\[dict\], relations: list\[tuple\]) function (CLI-based display).  
 - [ ] **AIM2-ODIE-032-T5:** Implement apply\_correction(extracted\_data: dict, correction\_type: str, old\_value: Any, new\_value: Any) function to modify entities/relations.  
 - [ ] **AIM2-ODIE-032-T6:** Implement save\_curated\_output(curated\_data: dict, output\_file: str) function.  
