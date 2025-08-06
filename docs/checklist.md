@@ -489,7 +489,7 @@ Independent: Yes
   * Test error handling for invalid input or annotation conflicts.  
 - [x] **AIM2-ODIE-030-T2:** Create src/evaluation/gold\_standard\_tool.py.  
 - [x] **AIM2-ODIE-030-T3:** Implement load\_document\_for\_annotation(file\_path: str) function.  
-- [ ] **AIM2-ODIE-030-T4:** Implement add\_entity\_annotation(doc\_id: str, entity\_type: str, text: str, start\_char: int, end\_char: int) function to store annotations in memory.  
+- [x] **AIM2-ODIE-030-T4:** Implement add\_entity\_annotation(doc\_id: str, entity\_type: str, text: str, start\_char: int, end\_char: int) function to store annotations in memory.  
 - [ ] **AIM2-ODIE-030-T5:** Implement add\_relationship\_annotation(doc\_id: str, subject\_id: str, relation\_type: str, object\_id: str) function.  
 - [ ] **AIM2-ODIE-030-T6:** Implement export\_annotations(output\_file: str) function to save annotations in a structured format (e.g., JSON Lines).  
 - [ ] **AIM2-ODIE-030-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
