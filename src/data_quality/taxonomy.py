@@ -95,8 +95,8 @@ def load_ncbi_taxonomy(db_path: Optional[str] = None, download: bool = False) ->
         kwargs = {}
         if db_path is not None:
             kwargs['db_path'] = db_path
-        if download:
-            kwargs['download'] = download
+        # Note: 'download' parameter is not supported by multitax.NcbiTx()
+        # The multitax library handles downloading automatically if needed
             
         # Load taxonomy using multitax
         taxonomy = multitax.NcbiTx(**kwargs)
@@ -192,7 +192,7 @@ def filter_species_by_lineage(
             if rank is not None:
                 kwargs["rank"] = rank
                 
-            result = multitax.filter(taxonomy_obj, **kwargs)
+            result = taxonomy_obj.filter(**kwargs)
             
             # Validate result structure
             if not isinstance(result, list):
@@ -275,7 +275,7 @@ def get_lineage_for_species(
     try:
         if multitax is not None:
             # Use multitax for lineage retrieval
-            result = multitax.get_lineage(taxonomy_obj, identifier)
+            result = taxonomy_obj.lineage(identifier)
             
             if result is None:
                 raise TaxonomyError(f"Species '{species_name_or_id}' not found in taxonomy database")
