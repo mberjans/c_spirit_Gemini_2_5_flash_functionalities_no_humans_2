@@ -269,33 +269,54 @@ def _deduplicate_with_recordlinkage(data: List[Dict[str, Any]], fields: List[str
         # Compute comparison vectors
         comparison_vectors = compare.compute(candidate_pairs, df)
         
-        # Use classifier to predict matches
-        classifier = recordlinkage.NaiveBayesClassifier()
-        matches = classifier.predict(comparison_vectors)
+        # Use threshold-based approach instead of classifier
+        # Calculate overall similarity score as mean of field scores
+        match_threshold = 0.8  # Threshold for considering records as matches
+        matches = []
         
-        # Convert matches to clusters format
-        # This is a simplified clustering - in practice, recordlinkage would need more sophisticated clustering
+        for pair_idx, comparison_row in comparison_vectors.iterrows():
+            # Calculate overall similarity score (mean of all field comparisons)
+            field_scores = comparison_row.values
+            if len(field_scores) > 0:
+                overall_score = float(field_scores.mean())
+                if overall_score >= match_threshold:
+                    matches.append((pair_idx, overall_score))
+        
+        # Convert matches to clusters format using graph-based clustering
         clusters = []
         processed_indices = set()
         
+        # Create adjacency list for connected components (clusters)
+        adjacency = {}
+        for i in range(len(data)):
+            adjacency[i] = []
+        
+        # Add edges for all matches
+        for (idx1, idx2), score in matches:
+            adjacency[idx1].append((idx2, score))
+            adjacency[idx2].append((idx1, score))
+        
+        # Find connected components using depth-first search
         for idx in range(len(data)):
             if idx not in processed_indices:
-                cluster_indices = [idx]
-                cluster_scores = [1.0]
-                processed_indices.add(idx)
+                cluster_indices = []
+                cluster_scores = []
+                stack = [(idx, 1.0)]  # (index, score)
                 
-                # Find all matches for this record
-                for match_pair in matches.index:
-                    if match_pair[0] == idx and match_pair[1] not in processed_indices:
-                        cluster_indices.append(match_pair[1])
-                        cluster_scores.append(0.9)  # Default similarity score
-                        processed_indices.add(match_pair[1])
-                    elif match_pair[1] == idx and match_pair[0] not in processed_indices:
-                        cluster_indices.append(match_pair[0])
-                        cluster_scores.append(0.9)  # Default similarity score
-                        processed_indices.add(match_pair[0])
+                while stack:
+                    current_idx, current_score = stack.pop()
+                    if current_idx not in processed_indices:
+                        processed_indices.add(current_idx)
+                        cluster_indices.append(current_idx)
+                        cluster_scores.append(current_score)
+                        
+                        # Add neighbors to stack
+                        for neighbor_idx, neighbor_score in adjacency[current_idx]:
+                            if neighbor_idx not in processed_indices:
+                                stack.append((neighbor_idx, neighbor_score))
                 
-                clusters.append((cluster_indices, cluster_scores))
+                if cluster_indices:
+                    clusters.append((cluster_indices, cluster_scores))
         
         return clusters
         

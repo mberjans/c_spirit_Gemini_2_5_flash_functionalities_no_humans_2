@@ -469,7 +469,7 @@ Independent: No
 - [x] **AIM2-ODIE-029-T3:** Implement map entities subcommand, calling functions from src/ontology\_mapping/entity\_mapper.py.  
 - [x] **AIM2-ODIE-029-T4:** Implement map relations subcommand, calling functions from src/ontology\_mapping/relation\_mapper.py.  
 - [x] **AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\_quality/normalizer.py.  
-- [ ] **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\_quality/deduplicator.py.  
+- [x] **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\_quality/deduplicator.py.  
 - [ ] **AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\_quality/taxonomy.py.  
 - [ ] **AIM2-ODIE-029-T8:** Add comprehensive help messages for all new commands and arguments.  
 - [ ] **AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.
