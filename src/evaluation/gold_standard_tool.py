@@ -346,7 +346,7 @@ class GoldStandardTool:
         
         Args:
             output_file (str): Path to the output file
-            format (str): Export format - 'json' (default) or 'csv'
+            format (str): Export format - 'json' (default), 'csv', or 'jsonl'
             
         Returns:
             bool: True if export was successful
@@ -359,8 +359,8 @@ class GoldStandardTool:
         if not isinstance(output_file, str) or not output_file.strip():
             raise ValueError("Output file path must be a non-empty string")
         
-        if not isinstance(format, str) or format.lower() not in ['json', 'csv']:
-            raise ValueError("Format must be 'json' or 'csv'")
+        if not isinstance(format, str) or format.lower() not in ['json', 'csv', 'jsonl']:
+            raise ValueError("Format must be 'json', 'csv', or 'jsonl'")
         
         try:
             # Ensure output directory exists
@@ -373,6 +373,8 @@ class GoldStandardTool:
                 self._export_json(output_file)
             elif format_lower == 'csv':
                 self._export_csv(output_file)
+            elif format_lower == 'jsonl':
+                self._export_jsonl(output_file)
             
             logger.info(f"Successfully exported annotations to {output_file} in {format} format")
             return True
@@ -446,6 +448,21 @@ class GoldStandardTool:
                     relationship['object_id'],  # reuse start_char column
                     ''  # empty end_char for relationships
                 ])
+    
+    def _export_jsonl(self, output_file: str) -> None:
+        """Export annotations in JSON Lines format."""
+        with open(output_file, 'w', encoding='utf-8') as f:
+            # Write each document as a separate JSON line
+            for doc_id, document in self.documents.items():
+                doc_data = {
+                    'id': doc_id,
+                    'file_path': document['file_path'],
+                    'created_at': document['created_at'],
+                    'entities': document['entities'].copy(),
+                    'relationships': document['relationships'].copy()
+                }
+                # Write as a single line JSON object
+                f.write(json.dumps(doc_data, ensure_ascii=False) + '\n')
     
     def get_document_info(self, doc_id: str) -> Dict[str, Any]:
         """
@@ -522,7 +539,7 @@ Examples:
     # Export command
     export_parser = subparsers.add_parser('export', help='Export annotations')
     export_parser.add_argument('output_file', help='Output file path')
-    export_parser.add_argument('--format', choices=['json', 'csv'], default='json',
+    export_parser.add_argument('--format', choices=['json', 'csv', 'jsonl'], default='json',
                               help='Export format (default: json)')
     
     # List command
