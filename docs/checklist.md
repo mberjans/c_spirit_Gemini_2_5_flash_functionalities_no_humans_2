@@ -515,7 +515,7 @@ Description: Manual Curation & Feedback Loop Tool: Develop a CLI tool (or script
 Dependencies: AIM2-ODIE-020, AIM2-ODIE-021  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-032-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\_curation\_tool.py) for src/evaluation/curation\_tool.py:  
+- [x] **AIM2-ODIE-032-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\_curation\_tool.py) for src/evaluation/curation\_tool.py:  
   * Test load\_llm\_output to load LLM-generated entities/relations from a file.  
   * Test display\_for\_review to ensure text and extracted items are presented clearly (mocking print statements).  
   * Test apply\_correction to modify an entity or relation.  
