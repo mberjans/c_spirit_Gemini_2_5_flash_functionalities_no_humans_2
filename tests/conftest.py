@@ -207,6 +207,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "data_acquisition: mark test as data acquisition-related"
     )
+    config.addinivalue_line(
+        "markers", "evaluation: mark test as evaluation-related"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -227,6 +230,8 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.llm)
         elif "/tests/data_acquisition/" in test_path:
             item.add_marker(pytest.mark.data_acquisition)
+        elif "/tests/evaluation/" in test_path:
+            item.add_marker(pytest.mark.evaluation)
         
         # Mark integration tests
         if "integration" in item.name.lower() or "test_integration" in test_path:
