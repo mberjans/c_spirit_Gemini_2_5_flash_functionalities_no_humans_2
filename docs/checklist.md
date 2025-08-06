@@ -472,7 +472,7 @@ Independent: No
 - [x] **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\_quality/deduplicator.py.  
 - [x] **AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\_quality/taxonomy.py.  
 - [x] **AIM2-ODIE-029-T8:** Add comprehensive help messages for all new commands and arguments.  
-- [ ] **AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.
+- [x] **AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.
 
 ### **5\. Evaluation and Benchmarking**
 
