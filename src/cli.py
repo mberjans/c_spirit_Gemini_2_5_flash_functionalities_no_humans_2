@@ -107,6 +107,15 @@ except ImportError as e:
     print(f"Error importing data quality modules: {e}")
     sys.exit(1)
 
+# Import evaluation modules
+try:
+    from src.evaluation.benchmarker import (
+        calculate_ner_metrics, calculate_relation_metrics, run_benchmark
+    )
+except ImportError as e:
+    print(f"Error importing evaluation modules: {e}")
+    sys.exit(1)
+
 # Initialize Typer app and Rich console
 app = typer.Typer(
     name="aim2-odie",
@@ -233,6 +242,250 @@ eval_app = typer.Typer(
     Use 'eval [command] --help' for detailed information about each command."""
 )
 app.add_typer(eval_app, name="eval")
+
+
+@eval_app.command("benchmark")
+def eval_benchmark_command(
+    gold: str = typer.Argument(..., help="Path to gold standard data file (JSON format)"),
+    predicted: str = typer.Argument(..., help="Path to predicted results file (JSON format)"),
+    output: Optional[str] = typer.Option(None, "--output", "-o", help="Path to output results file (default: stdout)"),
+    format: str = typer.Option("table", "--format", "-f", help="Output format: json, csv, table (default: table)"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Run benchmark evaluation comparing predicted results against gold standard data.
+    
+    This command evaluates the performance of information extraction systems by comparing
+    predicted entities and relations against gold standard annotations. It calculates
+    precision, recall, and F1 scores for both Named Entity Recognition (NER) and
+    Relationship Extraction (RE) tasks.
+    
+    INPUT FILE FORMATS:
+    
+    Gold standard file should contain a list of documents with entities and relations:
+    [
+        {
+            "text": "Document text content",
+            "entities": [
+                {
+                    "entity_type": "COMPOUND",
+                    "text": "quercetin",
+                    "start_char": 0,
+                    "end_char": 9
+                }
+            ],
+            "relations": [
+                ("quercetin", "found_in", "Arabidopsis thaliana")
+            ]
+        }
+    ]
+    
+    Predicted file should contain entities and relations in the same format.
+    
+    METRICS CALCULATED:
+    • NER metrics: Precision, recall, F1 for entity recognition
+    • Relation metrics: Precision, recall, F1 for relationship extraction
+    • Document counts and entity/relation statistics
+    
+    OUTPUT FORMATS:
+    • table: Human-readable table format (default)
+    • json: Structured JSON format for programmatic use
+    • csv: Comma-separated values for spreadsheet analysis
+    
+    Examples:
+        # Basic benchmark with table output
+        aim2-odie eval benchmark gold_data.json predicted_data.json
+        
+        # Save results to JSON file
+        aim2-odie eval benchmark gold_data.json predicted_data.json -o results.json -f json
+        
+        # CSV output for analysis
+        aim2-odie eval benchmark gold_data.json predicted_data.json -o results.csv -f csv
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading gold standard data from: {gold}[/blue]")
+        
+        # Load gold standard data
+        try:
+            with open(gold, 'r', encoding='utf-8') as f:
+                gold_data = json.load(f)
+        except FileNotFoundError:
+            console.print(f"[red]Error: Gold standard file not found: {gold}[/red]")
+            raise typer.Exit(1)
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error: Invalid JSON in gold standard file: {str(e)}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error reading gold standard file: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[blue]Loading predicted data from: {predicted}[/blue]")
+        
+        # Load predicted data
+        try:
+            with open(predicted, 'r', encoding='utf-8') as f:
+                predicted_data = json.load(f)
+        except FileNotFoundError:
+            console.print(f"[red]Error: Predicted results file not found: {predicted}[/red]")
+            raise typer.Exit(1)
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error: Invalid JSON in predicted results file: {str(e)}[/red]")
+            raise typer.Exit(1)
+        except Exception as e:
+            console.print(f"[red]Error reading predicted results file: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+        # Validate data format
+        if not isinstance(gold_data, list) or not isinstance(predicted_data, list):
+            console.print("[red]Error: Both gold and predicted data must be lists of documents[/red]")
+            raise typer.Exit(1)
+        
+        if len(gold_data) != len(predicted_data):
+            console.print(f"[yellow]Warning: Gold data has {len(gold_data)} documents, predicted data has {len(predicted_data)} documents[/yellow]")
+        
+        if verbose:
+            console.print(f"[blue]Processing {len(gold_data)} gold documents and {len(predicted_data)} predicted documents[/blue]")
+        
+        # Extract entities and relations for comparison
+        all_gold_entities = []
+        all_predicted_entities = []
+        all_gold_relations = []
+        all_predicted_relations = []
+        
+        # Process documents (match by index)
+        min_docs = min(len(gold_data), len(predicted_data))
+        for i in range(min_docs):
+            gold_doc = gold_data[i]
+            pred_doc = predicted_data[i]
+            
+            # Validate document structure
+            if not isinstance(gold_doc, dict) or not isinstance(pred_doc, dict):
+                console.print(f"[red]Error: Document {i} must be a dictionary[/red]")
+                raise typer.Exit(1)
+            
+            # Extract entities
+            gold_entities = gold_doc.get('entities', [])
+            pred_entities = pred_doc.get('entities', [])
+            
+            # Extract relations (convert lists to tuples as expected by benchmarker)
+            gold_relations = gold_doc.get('relations', [])
+            pred_relations = pred_doc.get('relations', [])
+            
+            # Convert relation lists to tuples
+            gold_relations = [tuple(rel) if isinstance(rel, list) else rel for rel in gold_relations]
+            pred_relations = [tuple(rel) if isinstance(rel, list) else rel for rel in pred_relations]
+            
+            # Add to aggregated lists
+            all_gold_entities.extend(gold_entities)
+            all_predicted_entities.extend(pred_entities)
+            all_gold_relations.extend(gold_relations)
+            all_predicted_relations.extend(pred_relations)
+        
+        if verbose:
+            console.print(f"[blue]Total entities - Gold: {len(all_gold_entities)}, Predicted: {len(all_predicted_entities)}[/blue]")
+            console.print(f"[blue]Total relations - Gold: {len(all_gold_relations)}, Predicted: {len(all_predicted_relations)}[/blue]")
+        
+        # Calculate metrics
+        console.print("[blue]Calculating NER metrics...[/blue]")
+        ner_metrics = calculate_ner_metrics(all_gold_entities, all_predicted_entities)
+        
+        console.print("[blue]Calculating relation metrics...[/blue]")
+        relation_metrics = calculate_relation_metrics(all_gold_relations, all_predicted_relations)
+        
+        # Prepare results
+        results = {
+            'ner_metrics': ner_metrics,
+            'relation_metrics': relation_metrics,
+            'documents_processed': min_docs,
+            'total_gold_entities': len(all_gold_entities),
+            'total_predicted_entities': len(all_predicted_entities),
+            'total_gold_relations': len(all_gold_relations),
+            'total_predicted_relations': len(all_predicted_relations),
+            'timestamp': datetime.datetime.now().isoformat()
+        }
+        
+        # Output results
+        if format.lower() == "json":
+            if output:
+                with open(output, 'w', encoding='utf-8') as f:
+                    json.dump(results, f, indent=2, ensure_ascii=False)
+                console.print(f"[green]Results saved to: {output}[/green]")
+            else:
+                console.print(json.dumps(results, indent=2, ensure_ascii=False))
+        
+        elif format.lower() == "csv":
+            import csv
+            
+            csv_data = [
+                ['metric_type', 'precision', 'recall', 'f1'],
+                ['ner', ner_metrics['precision'], ner_metrics['recall'], ner_metrics['f1']],
+                ['relations', relation_metrics['precision'], relation_metrics['recall'], relation_metrics['f1']]
+            ]
+            
+            if output:
+                with open(output, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(csv_data)
+                console.print(f"[green]Results saved to: {output}[/green]")
+            else:
+                for row in csv_data:
+                    console.print(','.join(map(str, row)))
+        
+        else:  # table format (default)
+            # Create results table
+            table = Table(title="Benchmark Evaluation Results")
+            table.add_column("Metric Type", style="bold")
+            table.add_column("Precision", justify="right", style="green")
+            table.add_column("Recall", justify="right", style="blue")
+            table.add_column("F1 Score", justify="right", style="red")
+            
+            table.add_row(
+                "Named Entity Recognition",
+                f"{ner_metrics['precision']:.4f}",
+                f"{ner_metrics['recall']:.4f}",
+                f"{ner_metrics['f1']:.4f}"
+            )
+            
+            table.add_row(
+                "Relationship Extraction",
+                f"{relation_metrics['precision']:.4f}",
+                f"{relation_metrics['recall']:.4f}",
+                f"{relation_metrics['f1']:.4f}"
+            )
+            
+            console.print(table)
+            
+            # Summary statistics
+            summary_table = Table(title="Processing Summary")
+            summary_table.add_column("Statistic", style="bold")
+            summary_table.add_column("Count", justify="right", style="cyan")
+            
+            summary_table.add_row("Documents Processed", str(results['documents_processed']))
+            summary_table.add_row("Gold Entities", str(results['total_gold_entities']))
+            summary_table.add_row("Predicted Entities", str(results['total_predicted_entities']))
+            summary_table.add_row("Gold Relations", str(results['total_gold_relations']))
+            summary_table.add_row("Predicted Relations", str(results['total_predicted_relations']))
+            
+            console.print(summary_table)
+            
+            if output:
+                with open(output, 'w', encoding='utf-8') as f:
+                    json.dump(results, f, indent=2, ensure_ascii=False)
+                console.print(f"[green]Detailed results saved to: {output}[/green]")
+        
+        # Final status message
+        console.print(f"[green]Benchmark evaluation completed successfully![/green]")
+        if verbose:
+            console.print(f"[blue]NER F1: {ner_metrics['f1']:.4f}, Relations F1: {relation_metrics['f1']:.4f}[/blue]")
+        
+    except Exception as e:
+        console.print(f"[red]Error in benchmark evaluation: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
 
 
 @ontology_app.command("load")
