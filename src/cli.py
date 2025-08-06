@@ -88,6 +88,25 @@ except ImportError as e:
     print(f"Error importing LLM extraction modules: {e}")
     sys.exit(1)
 
+# Import ontology mapping modules
+try:
+    from src.ontology_mapping.entity_mapper import map_entities_to_ontology
+    from src.ontology_mapping.relation_mapper import map_relationships_to_ontology
+except ImportError as e:
+    print(f"Error importing ontology mapping modules: {e}")
+    sys.exit(1)
+
+# Import data quality modules
+try:
+    from src.data_quality.normalizer import normalize_name, find_fuzzy_matches, NormalizationError
+    from src.data_quality.deduplicator import deduplicate_entities, DeduplicationError
+    from src.data_quality.taxonomy import (
+        load_ncbi_taxonomy, filter_species_by_lineage, get_lineage_for_species, TaxonomyError
+    )
+except ImportError as e:
+    print(f"Error importing data quality modules: {e}")
+    sys.exit(1)
+
 # Initialize Typer app and Rich console
 app = typer.Typer(
     name="aim2-odie",
@@ -151,6 +170,53 @@ extract_app = typer.Typer(
     Use 'extract [command] --help' for detailed information about each command."""
 )
 app.add_typer(extract_app, name="extract")
+
+# Create ontology mapping subcommand group
+map_app = typer.Typer(
+    name="map",
+    help="""Ontology mapping tools for entities and relationships.
+
+    Commands for mapping extracted entities and relationships to ontology terms using
+    text2term library with various similarity algorithms and filtering options.
+    
+    Available commands:
+    • entities - Map entity names to ontology classes using text similarity
+    • relations - Map relationship triples to ontology properties
+    
+    Use 'map [command] --help' for detailed information about each command."""
+)
+app.add_typer(map_app, name="map")
+
+# Create data cleaning subcommand group
+clean_app = typer.Typer(
+    name="clean",
+    help="""Data quality and cleaning tools for preprocessing.
+
+    Commands for normalizing entity names, deduplicating records, and improving
+    data quality before ontology mapping and information extraction tasks.
+    
+    Available commands:
+    • normalize - Normalize entity names for consistency and standardization
+    • deduplicate - Remove duplicate entity records using fuzzy matching
+    
+    Use 'clean [command] --help' for detailed information about each command."""
+)
+app.add_typer(clean_app, name="clean")
+
+# Create taxonomy filtering subcommand group
+taxonomy_app = typer.Typer(
+    name="taxonomy",
+    help="""NCBI taxonomy integration and filtering tools.
+
+    Commands for working with NCBI taxonomy data to filter species by lineage,
+    retrieve taxonomic information, and integrate taxonomic constraints.
+    
+    Available commands:
+    • filter - Filter species by taxonomic lineage or rank
+    
+    Use 'taxonomy [command] --help' for detailed information about each command."""
+)
+app.add_typer(taxonomy_app, name="taxonomy")
 
 
 @ontology_app.command("load")
@@ -3104,6 +3170,614 @@ def version():
     console.print("Python package for automated ontology development and information extraction")
 
 
+# Map command implementations
+@map_app.command("entities")
+def map_entities_command(
+    entities_file: str = typer.Argument(..., help="Path to file containing entities to map (one per line or JSON)"),
+    target_ontology: str = typer.Argument(..., help="Path to target ontology file or ontology IRI"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file for mapping results (JSON format)"),
+    mapping_method: str = typer.Option("tfidf", "--method", "-m", help="Mapping method: tfidf, levenshtein, jaro, jaccard, fuzzy"),
+    min_score: float = typer.Option(0.5, "--min-score", "-s", help="Minimum similarity score for mappings"),
+    term_type: str = typer.Option("class", "--term-type", "-t", help="Target term type: class, property, individual"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Map entity names to ontology terms using text similarity.
+    
+    Maps a list of entity names to ontology terms using the text2term library
+    with configurable similarity algorithms and filtering options.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading entities from: {entities_file}[/blue]")
+        
+        # Load entities from file
+        if not os.path.exists(entities_file):
+            console.print(f"[red]Error: Entities file not found: {entities_file}[/red]")
+            raise typer.Exit(1)
+        
+        entities = []
+        with open(entities_file, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            try:
+                # Try parsing as JSON first
+                data = json.loads(content)
+                if isinstance(data, list):
+                    entities = [str(item) for item in data]
+                else:
+                    entities = [str(data)]
+            except json.JSONDecodeError:
+                # Fall back to line-by-line parsing
+                entities = [line.strip() for line in content.splitlines() if line.strip()]
+        
+        if not entities:
+            console.print("[red]Error: No entities found in input file[/red]")
+            raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[blue]Loaded {len(entities)} entities[/blue]")
+            console.print(f"[blue]Target ontology: {target_ontology}[/blue]")
+            console.print(f"[blue]Mapping method: {mapping_method}[/blue]")
+            console.print(f"[blue]Minimum score: {min_score}[/blue]")
+        
+        # Perform entity mapping
+        results = map_entities_to_ontology(
+            entities=entities,
+            target_ontology=target_ontology,
+            mapping_method=mapping_method,
+            min_score=min_score,
+            term_type=term_type
+        )
+        
+        # Display results
+        if not results.empty:
+            console.print(f"[green]Successfully mapped {len(results)} entity matches[/green]")
+            
+            # Create summary table
+            table = Table(title="Entity Mapping Results")
+            table.add_column("Entity", style="cyan")
+            table.add_column("Mapped Term", style="green")
+            table.add_column("Score", style="yellow")
+            table.add_column("IRI", style="blue")
+            
+            for _, row in results.head(10).iterrows():
+                table.add_row(
+                    str(row.get('Source Term', '')),
+                    str(row.get('Mapped Term Label', '')),
+                    f"{float(row.get('Mapping Score', 0)):.3f}",
+                    str(row.get('Mapped Term IRI', ''))
+                )
+            
+            console.print(table)
+            
+            if len(results) > 10:
+                console.print(f"[dim]... and {len(results) - 10} more results[/dim]")
+        else:
+            console.print("[yellow]No entity mappings found above the minimum score threshold[/yellow]")
+        
+        # Save results if output file specified
+        if output_file:
+            results.to_json(output_file, orient='records', indent=2)
+            console.print(f"[green]Results saved to: {output_file}[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error mapping entities: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
+@map_app.command("relations")
+def map_relations_command(
+    relations_file: str = typer.Argument(..., help="Path to file containing relationship triples (JSON format)"),
+    target_ontology: str = typer.Argument(..., help="Path to target ontology file or ontology IRI"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file for mapping results (JSON format)"),
+    mapping_method: str = typer.Option("tfidf", "--method", "-m", help="Mapping method: tfidf, levenshtein, jaro, jaccard, fuzzy"),
+    min_score: float = typer.Option(0.5, "--min-score", "-s", help="Minimum similarity score for mappings"),
+    term_type: str = typer.Option("property", "--term-type", "-t", help="Target term type: property, objectProperty, dataProperty"),
+    validate_semantics: bool = typer.Option(False, "--validate", help="Validate semantic consistency of mappings"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Map relationship triples to ontology properties.
+    
+    Maps relationship triples (subject, predicate, object) to ontology properties
+    using text similarity with optional semantic validation.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading relationships from: {relations_file}[/blue]")
+        
+        # Load relationships from file
+        if not os.path.exists(relations_file):
+            console.print(f"[red]Error: Relations file not found: {relations_file}[/red]")
+            raise typer.Exit(1)
+        
+        with open(relations_file, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError as e:
+                console.print(f"[red]Error parsing JSON file: {str(e)}[/red]")
+                raise typer.Exit(1)
+        
+        # Convert to list of tuples
+        relationships = []
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict) and 'subject' in item and 'predicate' in item and 'object' in item:
+                    relationships.append((item['subject'], item['predicate'], item['object']))
+                elif isinstance(item, list) and len(item) == 3:
+                    relationships.append(tuple(item))
+                else:
+                    console.print(f"[yellow]Warning: Skipping invalid relationship format: {item}[/yellow]")
+        else:
+            console.print("[red]Error: Expected JSON array of relationship objects[/red]")
+            raise typer.Exit(1)
+        
+        if not relationships:
+            console.print("[red]Error: No valid relationships found in input file[/red]")
+            raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[blue]Loaded {len(relationships)} relationships[/blue]")
+            console.print(f"[blue]Target ontology: {target_ontology}[/blue]")
+            console.print(f"[blue]Mapping method: {mapping_method}[/blue]")
+            console.print(f"[blue]Minimum score: {min_score}[/blue]")
+        
+        # Load ontology object for mapping
+        try:
+            import owlready2
+            onto = owlready2.get_ontology(target_ontology).load()
+        except Exception as e:
+            console.print(f"[red]Error loading ontology: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+        # Perform relationship mapping
+        results = map_relationships_to_ontology(
+            relationships=relationships,
+            ontology_obj=onto,
+            mapping_method=mapping_method,
+            min_score=min_score,
+            term_type=term_type,
+            validate_semantics=validate_semantics
+        )
+        
+        # Display results
+        if not results.empty:
+            console.print(f"[green]Successfully mapped {len(results)} relationship matches[/green]")
+            
+            # Create summary table
+            table = Table(title="Relationship Mapping Results")
+            table.add_column("Subject", style="cyan")
+            table.add_column("Predicate", style="magenta")
+            table.add_column("Object", style="cyan")
+            table.add_column("Mapped Property", style="green")
+            table.add_column("Score", style="yellow")
+            
+            for _, row in results.head(10).iterrows():
+                table.add_row(
+                    str(row.get('Subject', '')),
+                    str(row.get('Original Predicate', '')),
+                    str(row.get('Object', '')),
+                    str(row.get('Mapped Term Label', '')),
+                    f"{float(row.get('Mapping Score', 0)):.3f}"
+                )
+            
+            console.print(table)
+            
+            if len(results) > 10:
+                console.print(f"[dim]... and {len(results) - 10} more results[/dim]")
+        else:
+            console.print("[yellow]No relationship mappings found above the minimum score threshold[/yellow]")
+        
+        # Save results if output file specified
+        if output_file:
+            results.to_json(output_file, orient='records', indent=2)
+            console.print(f"[green]Results saved to: {output_file}[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error mapping relationships: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
+# Clean command implementations
+@clean_app.command("normalize")
+def normalize_entities_command(
+    input_file: str = typer.Argument(..., help="Path to file containing entity names to normalize (one per line or JSON)"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file for normalized entities (JSON format)"),
+    threshold: int = typer.Option(80, "--threshold", "-t", help="Fuzzy matching threshold for finding similar entities"),
+    find_matches: bool = typer.Option(False, "--find-matches", help="Find fuzzy matches between normalized entities"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Normalize entity names for consistency and standardization.
+    
+    Normalizes entity names by applying consistent formatting rules including
+    case conversion, whitespace handling, and scientific notation processing.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading entities from: {input_file}[/blue]")
+        
+        # Load entities from file
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        entities = []
+        with open(input_file, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            try:
+                # Try parsing as JSON first
+                data = json.loads(content)
+                if isinstance(data, list):
+                    entities = [str(item) for item in data]
+                else:
+                    entities = [str(data)]
+            except json.JSONDecodeError:
+                # Fall back to line-by-line parsing
+                entities = [line.strip() for line in content.splitlines() if line.strip()]
+        
+        if not entities:
+            console.print("[red]Error: No entities found in input file[/red]")
+            raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[blue]Loaded {len(entities)} entities[/blue]")
+        
+        # Normalize entities
+        normalized_entities = []
+        normalization_pairs = []
+        
+        for entity in entities:
+            try:
+                normalized = normalize_name(entity)
+                normalized_entities.append(normalized)
+                normalization_pairs.append({"original": entity, "normalized": normalized})
+                
+                if verbose and entity != normalized:
+                    console.print(f"[dim]'{entity}' -> '{normalized}'[/dim]")
+            except NormalizationError as e:
+                console.print(f"[yellow]Warning: Could not normalize '{entity}': {str(e)}[/yellow]")
+                normalized_entities.append(entity)
+                normalization_pairs.append({"original": entity, "normalized": entity})
+        
+        console.print(f"[green]Successfully normalized {len(normalized_entities)} entities[/green]")
+        
+        # Find fuzzy matches if requested
+        if find_matches:
+            if verbose:
+                console.print(f"[blue]Finding fuzzy matches with threshold {threshold}[/blue]")
+            
+            matches_found = []
+            for i, entity in enumerate(normalized_entities):
+                try:
+                    matches = find_fuzzy_matches(entity, normalized_entities, threshold)
+                    # Filter out self-matches
+                    matches = [(match, score) for match, score in matches if match != entity]
+                    if matches:
+                        matches_found.append({
+                            "entity": entity,
+                            "matches": matches
+                        })
+                except NormalizationError as e:
+                    if verbose:
+                        console.print(f"[yellow]Warning: Could not find matches for '{entity}': {str(e)}[/yellow]")
+            
+            if matches_found:
+                console.print(f"[green]Found fuzzy matches for {len(matches_found)} entities[/green]")
+                
+                # Display sample matches
+                table = Table(title="Fuzzy Matches Sample")
+                table.add_column("Entity", style="cyan")
+                table.add_column("Similar Entities", style="green")
+                table.add_column("Scores", style="yellow")
+                
+                for match_group in matches_found[:10]:
+                    entity = match_group["entity"]
+                    matches = match_group["matches"][:3]  # Show top 3 matches
+                    match_names = [match[0] for match in matches]
+                    match_scores = [str(match[1]) for match in matches]
+                    
+                    table.add_row(
+                        entity,
+                        ", ".join(match_names),
+                        ", ".join(match_scores)
+                    )
+                
+                console.print(table)
+                
+                if len(matches_found) > 10:
+                    console.print(f"[dim]... and {len(matches_found) - 10} more entities with matches[/dim]")
+        
+        # Prepare output data
+        output_data = {
+            "normalized_entities": normalized_entities,
+            "normalization_pairs": normalization_pairs
+        }
+        
+        if find_matches:
+            output_data["fuzzy_matches"] = matches_found
+        
+        # Save results if output file specified
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, indent=2, ensure_ascii=False)
+            console.print(f"[green]Results saved to: {output_file}[/green]")
+        else:
+            # Display results
+            console.print("\n[bold]Normalized Entities:[/bold]")
+            for entity in normalized_entities[:20]:
+                console.print(f"  {entity}")
+            if len(normalized_entities) > 20:
+                console.print(f"  [dim]... and {len(normalized_entities) - 20} more[/dim]")
+        
+    except Exception as e:
+        console.print(f"[red]Error normalizing entities: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
+@clean_app.command("deduplicate")
+def deduplicate_entities_command(
+    input_file: str = typer.Argument(..., help="Path to JSON file containing entity records to deduplicate"),
+    fields: List[str] = typer.Option(..., "--field", "-f", help="Fields to use for deduplication (can specify multiple)"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file for deduplicated entities (JSON format)"),
+    settings_file: str = typer.Option(None, "--settings", help="Path to deduplication settings file"),
+    training_file: str = typer.Option(None, "--training", help="Path to training data file for supervised deduplication"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Remove duplicate entity records using fuzzy matching.
+    
+    Identifies and consolidates duplicate entity records using both exact matching
+    and fuzzy matching algorithms with support for external libraries.
+    """
+    try:
+        if verbose:
+            console.print(f"[blue]Loading entity records from: {input_file}[/blue]")
+        
+        # Load entity records from file
+        if not os.path.exists(input_file):
+            console.print(f"[red]Error: Input file not found: {input_file}[/red]")
+            raise typer.Exit(1)
+        
+        with open(input_file, 'r', encoding='utf-8') as f:
+            try:
+                records = json.load(f)
+            except json.JSONDecodeError as e:
+                console.print(f"[red]Error parsing JSON file: {str(e)}[/red]")
+                raise typer.Exit(1)
+        
+        if not isinstance(records, list):
+            console.print("[red]Error: Expected JSON array of entity records[/red]")
+            raise typer.Exit(1)
+        
+        if not records:
+            console.print("[red]Error: No records found in input file[/red]")
+            raise typer.Exit(1)
+        
+        # Validate that specified fields exist in records
+        if records:
+            sample_record = records[0]
+            missing_fields = [field for field in fields if field not in sample_record]
+            if missing_fields:
+                console.print(f"[red]Error: Fields not found in records: {missing_fields}[/red]")
+                console.print(f"[blue]Available fields: {list(sample_record.keys())}[/blue]")
+                raise typer.Exit(1)
+        
+        if verbose:
+            console.print(f"[blue]Loaded {len(records)} entity records[/blue]")
+            console.print(f"[blue]Deduplication fields: {fields}[/blue]")
+        
+        # Perform deduplication
+        try:
+            deduplicated_records = deduplicate_entities(
+                records=records,
+                fields=fields,
+                settings_file=settings_file,
+                training_file=training_file
+            )
+        except DeduplicationError as e:
+            console.print(f"[red]Deduplication error: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+        # Display results
+        original_count = len(records)
+        deduplicated_count = len(deduplicated_records)
+        duplicates_removed = original_count - deduplicated_count
+        
+        console.print(f"[green]Deduplication completed successfully[/green]")
+        console.print(f"[blue]Original records: {original_count}[/blue]")
+        console.print(f"[blue]Unique records: {deduplicated_count}[/blue]")
+        console.print(f"[red]Duplicates removed: {duplicates_removed}[/red]")
+        
+        if duplicates_removed > 0:
+            reduction_percentage = (duplicates_removed / original_count) * 100
+            console.print(f"[yellow]Reduction: {reduction_percentage:.1f}%[/yellow]")
+        
+        # Display sample of deduplicated records
+        if deduplicated_records:
+            table = Table(title="Sample Deduplicated Records")
+            for field in fields:
+                table.add_column(field.title(), style="cyan")
+            
+            for record in deduplicated_records[:10]:
+                values = [str(record.get(field, '')) for field in fields]
+                table.add_row(*values)
+            
+            console.print(table)
+            
+            if len(deduplicated_records) > 10:
+                console.print(f"[dim]... and {len(deduplicated_records) - 10} more records[/dim]")
+        
+        # Save results if output file specified
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(deduplicated_records, f, indent=2, ensure_ascii=False)
+            console.print(f"[green]Results saved to: {output_file}[/green]")
+        
+    except Exception as e:
+        console.print(f"[red]Error deduplicating entities: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
+# Taxonomy command implementations
+@taxonomy_app.command("filter")
+def filter_taxonomy_command(
+    target_lineage: str = typer.Argument(..., help="Target taxonomic lineage to filter by (e.g., 'Viridiplantae', 'Bacteria')"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file for filtered species (JSON format)"),
+    rank: str = typer.Option(None, "--rank", "-r", help="Taxonomic rank to filter by (e.g., 'kingdom', 'family', 'species')"),
+    db_path: str = typer.Option(None, "--db-path", help="Path to local NCBI taxonomy database"),
+    download: bool = typer.Option(False, "--download", help="Download NCBI taxonomy database if not available"),
+    get_lineage: str = typer.Option(None, "--get-lineage", help="Get full lineage for a specific species name or taxonomic ID"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+):
+    """
+    Filter species by taxonomic lineage or retrieve lineage information.
+    
+    Uses NCBI taxonomy data to filter species by taxonomic lineage, rank,
+    or retrieve detailed lineage information for specific species.
+    """
+    try:
+        # If get_lineage is specified, handle lineage retrieval
+        if get_lineage:
+            if verbose:
+                console.print(f"[blue]Retrieving lineage for: {get_lineage}[/blue]")
+            
+            # Load taxonomy database
+            try:
+                taxonomy_obj = load_ncbi_taxonomy(db_path=db_path, download=download)
+                if verbose:
+                    console.print("[blue]NCBI taxonomy database loaded successfully[/blue]")
+            except TaxonomyError as e:
+                console.print(f"[red]Error loading taxonomy database: {str(e)}[/red]")
+                raise typer.Exit(1)
+            
+            # Get lineage information
+            try:
+                lineage_info = get_lineage_for_species(taxonomy_obj, get_lineage)
+                
+                if lineage_info:
+                    console.print(f"[green]Lineage information for '{get_lineage}':[/green]")
+                    
+                    # Create lineage table
+                    table = Table(title=f"Taxonomic Lineage: {get_lineage}")
+                    table.add_column("Rank", style="cyan")
+                    table.add_column("Name", style="green")
+                    table.add_column("Taxonomic ID", style="yellow")
+                    
+                    # Display lineage hierarchy
+                    if 'lineage' in lineage_info:
+                        for rank_info in lineage_info['lineage']:
+                            table.add_row(
+                                str(rank_info.get('rank', '')),
+                                str(rank_info.get('name', '')),
+                                str(rank_info.get('taxid', ''))
+                            )
+                    
+                    console.print(table)
+                    
+                    # Save results if output file specified
+                    if output_file:
+                        with open(output_file, 'w', encoding='utf-8') as f:
+                            json.dump(lineage_info, f, indent=2, ensure_ascii=False)
+                        console.print(f"[green]Lineage information saved to: {output_file}[/green]")
+                else:
+                    console.print(f"[yellow]No lineage information found for '{get_lineage}'[/yellow]")
+                
+            except TaxonomyError as e:
+                console.print(f"[red]Error retrieving lineage: {str(e)}[/red]")
+                raise typer.Exit(1)
+            
+            return
+        
+        # Handle species filtering by lineage
+        if verbose:
+            console.print(f"[blue]Filtering species by lineage: {target_lineage}[/blue]")
+            if rank:
+                console.print(f"[blue]Filtering by rank: {rank}[/blue]")
+        
+        # Load taxonomy database
+        try:
+            taxonomy_obj = load_ncbi_taxonomy(db_path=db_path, download=download)
+            if verbose:
+                console.print("[blue]NCBI taxonomy database loaded successfully[/blue]")
+        except TaxonomyError as e:
+            console.print(f"[red]Error loading taxonomy database: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+        # Filter species by lineage
+        try:
+            filtered_species = filter_species_by_lineage(
+                taxonomy_obj=taxonomy_obj,
+                target_lineage=target_lineage,
+                rank=rank
+            )
+            
+            if filtered_species:
+                console.print(f"[green]Found {len(filtered_species)} species matching lineage '{target_lineage}'[/green]")
+                
+                # Create results table
+                table = Table(title=f"Species in Lineage: {target_lineage}")
+                table.add_column("Species Name", style="cyan")
+                table.add_column("Taxonomic ID", style="yellow")
+                table.add_column("Rank", style="green")
+                table.add_column("Parent", style="blue")
+                
+                # Display sample results
+                for species in filtered_species[:20]:
+                    table.add_row(
+                        str(species.get('name', '')),
+                        str(species.get('taxid', '')),
+                        str(species.get('rank', '')),
+                        str(species.get('parent_name', ''))
+                    )
+                
+                console.print(table)
+                
+                if len(filtered_species) > 20:
+                    console.print(f"[dim]... and {len(filtered_species) - 20} more species[/dim]")
+                
+                # Save results if output file specified
+                if output_file:
+                    output_data = {
+                        "target_lineage": target_lineage,
+                        "rank_filter": rank,
+                        "total_species": len(filtered_species),
+                        "species": filtered_species
+                    }
+                    
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump(output_data, f, indent=2, ensure_ascii=False)
+                    console.print(f"[green]Results saved to: {output_file}[/green]")
+                
+            else:
+                console.print(f"[yellow]No species found for lineage '{target_lineage}'[/yellow]")
+                if rank:
+                    console.print(f"[yellow]with rank '{rank}'[/yellow]")
+                
+        except TaxonomyError as e:
+            console.print(f"[red]Error filtering species: {str(e)}[/red]")
+            raise typer.Exit(1)
+        
+    except Exception as e:
+        console.print(f"[red]Error in taxonomy filtering: {str(e)}[/red]")
+        if verbose:
+            import traceback
+            console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(1)
+
+
 @app.callback()
 def main(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
@@ -3120,6 +3794,9 @@ def main(
     • corpus - Download papers, extract PDF content, scrape journals
     • process - Clean and chunk text data for analysis
     • extract - Extract entities and relationships using LLMs
+    • map - Map entities and relationships to ontology terms
+    • clean - Normalize and deduplicate entity data for quality
+    • taxonomy - Filter species by taxonomic lineage and retrieve lineage information
     """
     if debug:
         import logging
