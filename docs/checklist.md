@@ -532,11 +532,11 @@ Description: CLI for Evaluation & Curation: Create a command-line interface for 
 Dependencies: AIM2-ODIE-031, AIM2-ODIE-032  
 Independent: No
 
-- [ ] **AIM2-ODIE-033-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_evaluation\_cli.py) for the CLI:  
+- [x] **AIM2-ODIE-033-T1:** **Develop Integration Tests:** Write integration tests (tests/cli/test\_evaluation\_cli.py) for the CLI:  
   * Test eval benchmark \--gold \<file\> \--predicted \<file\> command.  
   * Test eval curate \--input \<file\> \--output \<file\> command.  
   * Test invalid arguments and ensure proper error messages.  
-- [ ] **AIM2-ODIE-033-T2:** Extend src/cli.py with an eval subcommand.  
+- [x] **AIM2-ODIE-033-T2:** Extend src/cli.py with an eval subcommand.  
 - [ ] **AIM2-ODIE-033-T3:** Implement eval benchmark subcommand, calling functions from src/evaluation/benchmarker.py.  
 - [ ] **AIM2-ODIE-033-T4:** Implement eval curate subcommand, calling functions from src/evaluation/curation\_tool.py.  
 - [ ] **AIM2-ODIE-033-T5:** Add comprehensive help messages for all eval commands and their arguments.  

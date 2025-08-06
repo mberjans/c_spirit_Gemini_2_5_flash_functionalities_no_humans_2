@@ -218,6 +218,22 @@ taxonomy_app = typer.Typer(
 )
 app.add_typer(taxonomy_app, name="taxonomy")
 
+# Create evaluation subcommand group
+eval_app = typer.Typer(
+    name="eval", 
+    help="""Evaluation and benchmarking tools for model assessment.
+
+    Commands for benchmarking language models, curating evaluation datasets,
+    and assessing the quality of information extraction and ontology mapping results.
+    
+    Available commands:
+    • benchmark - Run benchmarking experiments on language models
+    • curate - Curate and manage evaluation datasets
+    
+    Use 'eval [command] --help' for detailed information about each command."""
+)
+app.add_typer(eval_app, name="eval")
+
 
 @ontology_app.command("load")
 def load_ontology_command(
