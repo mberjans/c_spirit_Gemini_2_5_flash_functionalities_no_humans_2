@@ -451,7 +451,7 @@ Independent: Yes
 - [x] **AIM2-ODIE-028-T3:** Implement load\_ncbi\_taxonomy() function using multitax.NcbiTx() to load the NCBI taxonomy.  
 - [x] **AIM2-ODIE-028-T4:** Implement filter\_species\_by\_lineage(taxonomy\_obj, target\_lineage: str) function using multitax.filter() or ncbi-taxonomist's subtree command.  
 - [x] **AIM2-ODIE-028-T5:** Implement get\_lineage\_for\_species(taxonomy\_obj, species\_name\_or\_id: str) function using multitax or ncbi-taxonomist's resolve command.  
-- [ ] **AIM2-ODIE-028-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-028-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-029  
 Description: CLI for Ontology Mapping & Post-processing: Create a command-line interface for the ontology mapping, normalization, deduplication, and taxonomy integration modules.  
