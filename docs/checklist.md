@@ -467,7 +467,7 @@ Independent: No
   * Test invalid arguments and ensure proper error messages.  
 - [x] **AIM2-ODIE-029-T2:** Extend src/cli.py with map and clean (subcommands for normalize, deduplicate), and taxonomy subcommands.  
 - [x] **AIM2-ODIE-029-T3:** Implement map entities subcommand, calling functions from src/ontology\_mapping/entity\_mapper.py.  
-- [ ] **AIM2-ODIE-029-T4:** Implement map relations subcommand, calling functions from src/ontology\_mapping/relation\_mapper.py.  
+- [x] **AIM2-ODIE-029-T4:** Implement map relations subcommand, calling functions from src/ontology\_mapping/relation\_mapper.py.  
 - [ ] **AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\_quality/normalizer.py.  
 - [ ] **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\_quality/deduplicator.py.  
 - [ ] **AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\_quality/taxonomy.py.  
