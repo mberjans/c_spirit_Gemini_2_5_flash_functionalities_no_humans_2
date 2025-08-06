@@ -522,10 +522,10 @@ Independent: Yes
   * Test save\_curated\_output to a file and verify its structure.  
 - [x] **AIM2-ODIE-032-T2:** Create src/evaluation/curation\_tool.py.  
 - [x] **AIM2-ODIE-032-T3:** Implement load\_llm\_output(file\_path: str) function to load LLM-generated extractions.  
-- [ ] **AIM2-ODIE-032-T4:** Implement display\_for\_review(text: str, entities: list\[dict\], relations: list\[tuple\]) function (CLI-based display).  
-- [ ] **AIM2-ODIE-032-T5:** Implement apply\_correction(extracted\_data: dict, correction\_type: str, old\_value: Any, new\_value: Any) function to modify entities/relations.  
-- [ ] **AIM2-ODIE-032-T6:** Implement save\_curated\_output(curated\_data: dict, output\_file: str) function.  
-- [ ] **AIM2-ODIE-032-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
+- [x] **AIM2-ODIE-032-T4:** Implement display\_for\_review(text: str, entities: list\[dict\], relations: list\[tuple\]) function (CLI-based display).  
+- [x] **AIM2-ODIE-032-T5:** Implement apply\_correction(extracted\_data: dict, correction\_type: str, old\_value: Any, new\_value: Any) function to modify entities/relations.  
+- [x] **AIM2-ODIE-032-T6:** Implement save\_curated\_output(curated\_data: dict, output\_file: str) function.  
+- [x] **AIM2-ODIE-032-T7:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-033  
 Description: CLI for Evaluation & Curation: Create a command-line interface for the benchmarking and manual curation tools.  
