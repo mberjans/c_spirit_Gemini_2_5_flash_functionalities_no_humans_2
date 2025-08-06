@@ -447,10 +447,10 @@ Independent: Yes
   * Test filter\_species\_by\_lineage to filter species based on a given taxonomic lineage (e.g., "Viridiplantae").  
   * Test get\_lineage\_for\_species to retrieve the full taxonomic lineage for a given species name or ID.  
   * Test handling of non-existent species or invalid IDs.  
-- [ ] **AIM2-ODIE-028-T2:** Create src/data\_quality/taxonomy.py.  
-- [ ] **AIM2-ODIE-028-T3:** Implement load\_ncbi\_taxonomy() function using multitax.NcbiTx() to load the NCBI taxonomy.  
-- [ ] **AIM2-ODIE-028-T4:** Implement filter\_species\_by\_lineage(taxonomy\_obj, target\_lineage: str) function using multitax.filter() or ncbi-taxonomist's subtree command.  
-- [ ] **AIM2-ODIE-028-T5:** Implement get\_lineage\_for\_species(taxonomy\_obj, species\_name\_or\_id: str) function using multitax or ncbi-taxonomist's resolve command.  
+- [x] **AIM2-ODIE-028-T2:** Create src/data\_quality/taxonomy.py.  
+- [x] **AIM2-ODIE-028-T3:** Implement load\_ncbi\_taxonomy() function using multitax.NcbiTx() to load the NCBI taxonomy.  
+- [x] **AIM2-ODIE-028-T4:** Implement filter\_species\_by\_lineage(taxonomy\_obj, target\_lineage: str) function using multitax.filter() or ncbi-taxonomist's subtree command.  
+- [x] **AIM2-ODIE-028-T5:** Implement get\_lineage\_for\_species(taxonomy\_obj, species\_name\_or\_id: str) function using multitax or ncbi-taxonomist's resolve command.  
 - [ ] **AIM2-ODIE-028-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
 
 Ticket ID: AIM2-ODIE-029  
