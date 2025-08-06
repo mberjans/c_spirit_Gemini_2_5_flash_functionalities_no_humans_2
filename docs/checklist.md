@@ -505,7 +505,7 @@ Independent: No
   * Test run\_benchmark with a small dummy gold standard dataset and mock LLM extraction calls.  
   * Test handling of empty inputs or no matches.  
 - [x] **AIM2-ODIE-031-T2:** Create src/evaluation/benchmarker.py.  
-- [ ] **AIM2-ODIE-031-T3:** Implement calculate\_ner\_metrics(gold\_entities: list\[dict\], predicted\_entities: list\[dict\]) function.  
+- [x] **AIM2-ODIE-031-T3:** Implement calculate\_ner\_metrics(gold\_entities: list\[dict\], predicted\_entities: list\[dict\]) function.  
 - [ ] **AIM2-ODIE-031-T4:** Implement calculate\_relation\_metrics(gold\_relations: list\[tuple\], predicted\_relations: list\[tuple\]) function.  
 - [ ] **AIM2-ODIE-031-T5:** Implement run\_benchmark(gold\_standard\_data: list\[dict\], llm\_ner\_function, llm\_relation\_function) function that iterates through gold data, calls LLM extraction functions (AIM2-ODIE-020, \-021), and aggregates metrics.  
 - [ ] **AIM2-ODIE-031-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
