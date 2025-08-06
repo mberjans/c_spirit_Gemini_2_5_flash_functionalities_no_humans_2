@@ -7,4 +7,6 @@ performance in biological literature processing.
 
 Components:
 - gold_standard_tool: Manual annotation tool for creating gold standard test sets
+- benchmarker: Evaluation metrics calculation and benchmarking functionality
+- curation_tool: Manual curation and feedback loop tool for LLM-generated extractions
 """
