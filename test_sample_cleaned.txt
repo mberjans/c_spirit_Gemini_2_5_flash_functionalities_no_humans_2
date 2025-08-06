@@ -1,0 +1,1 @@
+this is a test document with html tags and some uppercase text. the document contains multiple sentences for testing. some words are repeated repeated. this is the second paragraph with various special characters: café, résumé, naïve. for testing stopwords: the, and, or, but these should be filtered out during processing.

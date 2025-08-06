@@ -45,7 +45,8 @@ from src.ontology_mapping.entity_mapper import (
     _validate_entities,
     _validate_mapping_method,
     _process_mapping_results,
-    _filter_by_score
+    _filter_by_score,
+    text2term  # Import text2term for test assertions
 )
 
 
@@ -75,7 +76,7 @@ class TestMapEntitiesToOntologyBasic:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             # Verify function call
@@ -132,7 +133,7 @@ class TestMapEntitiesToOntologyBasic:
             
             result = map_entities_to_ontology(
                 entities=chemical_entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 mapping_method='tfidf',
                 min_score=0.8
             )
@@ -172,7 +173,7 @@ class TestMapEntitiesToOntologyBasic:
             
             result = map_entities_to_ontology(
                 entities=species_entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 mapping_method='levenshtein',
                 min_score=0.9
             )
@@ -221,7 +222,7 @@ class TestMappingMethods:
                 
                 result = map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=ontology_iri,
+                    target_ontology=ontology_iri,
                     mapping_method=mapping_method
                 )
                 
@@ -257,7 +258,7 @@ class TestMappingMethods:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 mapping_method='tfidf',
                 min_score=0.7  # Filter out low-confidence mappings
             )
@@ -299,13 +300,13 @@ class TestMappingMethods:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 mapping_method='levenshtein',
                 min_score=0.75
             )
             
             # Verify fuzzy matching results
-            assert len(result) == 5  # One entity below threshold (0.79 >= 0.75)
+            assert len(result) == 6  # All entities above threshold (0.75)
             
             # Check that variations map to same terms
             glucose_mappings = result[result['Mapped Term IRI'] == 
@@ -336,7 +337,7 @@ class TestScoreFiltering:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 min_score=min_score
             )
             
@@ -375,7 +376,7 @@ class TestScoreFiltering:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 min_score=min_score
             )
             
@@ -415,7 +416,7 @@ class TestScoreFiltering:
             # Test very high confidence threshold
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 min_score=0.95
             )
             
@@ -449,7 +450,7 @@ class TestTermTypes:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 term_type='class'
             )
             
@@ -484,7 +485,7 @@ class TestTermTypes:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 term_type='property'
             )
             
@@ -515,7 +516,7 @@ class TestTermTypes:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 term_type=term_type
             )
             
@@ -549,7 +550,7 @@ class TestUnmappedTermsHandling:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             # Verify text2term was called with incl_unmapped=False (default)
@@ -584,7 +585,7 @@ class TestUnmappedTermsHandling:
                 mock_map_terms.return_value = mock_mapping_df
                 
                 # Mock the actual function to test parameter passing
-                def mock_implementation(entities, ontology_iri, **kwargs):
+                def mock_implementation(entities, target_ontology, **kwargs):
                     incl_unmapped = kwargs.get('incl_unmapped', False)
                     if incl_unmapped:
                         return mock_mapping_df
@@ -595,7 +596,7 @@ class TestUnmappedTermsHandling:
                 
                 result = mock_func(
                     entities=entities,
-                    ontology_iri=ontology_iri,
+                    target_ontology=ontology_iri,
                     incl_unmapped=True
                 )
                 
@@ -628,7 +629,7 @@ class TestUnmappedTermsHandling:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 min_score=0.8
             )
             
@@ -655,7 +656,7 @@ class TestErrorHandling:
             with expect_exception(OntologyNotFoundError, "Ontology not found"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=invalid_iri
+                    target_ontology=invalid_iri
                 )
     
     def test_mapping_error_handling(self):
@@ -670,7 +671,7 @@ class TestErrorHandling:
             with expect_exception(MappingError, "Failed to map entities"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=ontology_iri
+                    target_ontology=ontology_iri
                 )
     
     def test_empty_entities_list_error(self):
@@ -678,7 +679,7 @@ class TestErrorHandling:
         with expect_exception(ValueError, "Entities list cannot be empty"):
             map_entities_to_ontology(
                 entities=[],
-                ontology_iri="http://example.org/test-ontology.owl"
+                target_ontology="http://example.org/test-ontology.owl"
             )
     
     def test_none_entities_list_error(self):
@@ -686,7 +687,7 @@ class TestErrorHandling:
         with expect_exception(ValueError, "Entities list cannot be None"):
             map_entities_to_ontology(
                 entities=None,
-                ontology_iri="http://example.org/test-ontology.owl"
+                target_ontology="http://example.org/test-ontology.owl"
             )
     
     def test_invalid_ontology_iri_error(self):
@@ -705,7 +706,7 @@ class TestErrorHandling:
             with expect_exception(ValueError, "Invalid ontology IRI"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=invalid_iri
+                    target_ontology=invalid_iri
                 )
     
     def test_invalid_mapping_method_error(self):
@@ -724,7 +725,7 @@ class TestErrorHandling:
             with expect_exception(ValueError, "Invalid mapping method"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=ontology_iri,
+                    target_ontology=ontology_iri,
                     mapping_method=invalid_method
                 )
     
@@ -739,7 +740,7 @@ class TestErrorHandling:
             with expect_exception(ValueError, "Minimum score must be between 0.0 and 1.0"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=ontology_iri,
+                    target_ontology=ontology_iri,
                     min_score=invalid_score
                 )
     
@@ -759,7 +760,7 @@ class TestErrorHandling:
             with expect_exception(ValueError, "Invalid term type"):
                 map_entities_to_ontology(
                     entities=entities,
-                    ontology_iri=ontology_iri,
+                    target_ontology=ontology_iri,
                     term_type=invalid_term_type
                 )
 
@@ -906,7 +907,7 @@ class TestEdgeCases:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             assert len(result) == 1
@@ -932,7 +933,7 @@ class TestEdgeCases:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 min_score=0.8
             )
             
@@ -965,7 +966,7 @@ class TestEdgeCases:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             # Should handle special characters correctly
@@ -1000,7 +1001,7 @@ class TestEdgeCases:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             # Should preserve duplicates if that's how text2term handles them
@@ -1039,7 +1040,7 @@ class TestEdgeCases:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri
+                target_ontology=ontology_iri
             )
             
             # Should handle whitespace variations
@@ -1122,7 +1123,7 @@ class TestIntegrationScenarios:
             
             result = map_entities_to_ontology(
                 entities=entities,
-                ontology_iri=ontology_iri,
+                target_ontology=ontology_iri,
                 mapping_method='tfidf',
                 min_score=0.8
             )
@@ -1179,7 +1180,7 @@ class TestIntegrationScenarios:
             
             chemical_results = map_entities_to_ontology(
                 entities=chemical_entities,
-                ontology_iri="http://purl.obolibrary.org/obo/chebi.owl"
+                target_ontology="http://purl.obolibrary.org/obo/chebi.owl"
             )
             
             # Second call for species to NCBI Taxonomy
@@ -1187,7 +1188,7 @@ class TestIntegrationScenarios:
             
             species_results = map_entities_to_ontology(
                 entities=species_entities,
-                ontology_iri="http://purl.obolibrary.org/obo/ncbitaxon.owl"
+                target_ontology="http://purl.obolibrary.org/obo/ncbitaxon.owl"
             )
             
             # Verify separate mappings

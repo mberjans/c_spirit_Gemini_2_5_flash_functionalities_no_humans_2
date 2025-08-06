@@ -1,0 +1,1 @@
+The flavonoid quercetin is a major metabolite found in Arabidopsis thaliana leaves. This compound exhibits antioxidant properties and accumulates in plant tissues under stress conditions. The gene CHS1 encodes chalcone synthase, which is involved in flavonoid biosynthesis pathways.

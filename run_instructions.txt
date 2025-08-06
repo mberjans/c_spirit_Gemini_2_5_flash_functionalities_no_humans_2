@@ -5,7 +5,7 @@ IMPORTANT: Before creating any new code, always check the existing codebase thor
 For unchecked tasks on the checklists, write the program one task of one ticket at a time. Once task is finshed, check it on the docs/checklist.md, add all changed files to the git using a separate git add command, commit changes with commit message that you generate yourself using individual git commit command, push changes to the git repository with indvidual git push command, and switch to the next task. Once you complete tasks on one ticket, add all changed files to the git using a separate git add command, commit changes with commit message that you generate yourself using individual git commit command, push changes to the git repository with indvidual git push command, switch to the next ticket. After the push, update the momety bank if it exists. Never chain multiple shell command together with & sign. Never use list comprehension in python. Avoid using regular expression for pattern matching. Instead create special pattern matching function to pattern matching. Work until all bugs are fixed. Please do not ask me for conformation whether I want you to proceedto the next ticket. Just keep working until completing the last ticket.
 
 CURRENT TASK TO COMPLETE:
-**AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.
+**AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\_quality/normalizer.py.
 
 CONTEXT:
 - Project directory: /Users/Mark/Research/C-Spirit/c_spirit_Gemini_2_5_flash_functionalities_no_humans_2
@@ -13,22 +13,22 @@ CONTEXT:
 - Focus on completing the current task above
 - IMPORTANT: After completing the task, update docs/checklist.md to mark the task as complete by changing [ ] to [x]
 
-REMAINING UNCHECKED TASKS (91 total):
-→ CURRENT **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.
-  2. **AIM2-ODIE-019-T5:** Implement chunk\_recursive\_char(text: str, chunk\_size: int, chunk\_overlap: int, separators: list\[str\] \= None) function using LangChain's RecursiveCharacterTextSplitter.
-  3. **AIM2-ODIE-019-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
-  4. **AIM2-ODIE-020-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_ner.py) for src/llm\_extraction/ner.py (mocking LLM API calls using unittest.mock or pytest-mock):
-  5. **AIM2-ODIE-020-T2:** Create src/llm\_extraction/ner.py.
-  6. **AIM2-ODIE-020-T3:** Implement extract\_entities(text: str, entity\_schema: dict, llm\_model\_name: str, prompt\_template: str, few\_shot\_examples: list \= None) function using LLM-IE or OntoGPT.
-  7. **AIM2-ODIE-020-T4:** Define initial entity schemas for plant metabolites, species, plant anatomical structures, experimental conditions, molecular traits, and plant traits.
-  8. **AIM2-ODIE-020-T5:** Develop initial prompt templates for zero-shot and few-shot NER, focusing on clear instructions and output format.
-  9. **AIM2-ODIE-020-T6:** **Conduct Unit Tests:** Run unit tests developed in T1.
-  10. **AIM2-ODIE-021-T1:** **Develop Unit Tests:** Write unit tests (tests/llm\_extraction/test\_relations.py) for src/llm\_extraction/relations.py (mocking LLM API calls):
-  ... and 81 more tasks
+REMAINING UNCHECKED TASKS (31 total):
+→ CURRENT **AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\_quality/normalizer.py.
+  2. **AIM2-ODIE-029-T6:** Implement clean deduplicate subcommand, calling functions from src/data\_quality/deduplicator.py.
+  3. **AIM2-ODIE-029-T7:** Implement taxonomy filter subcommand, calling functions from src/data\_quality/taxonomy.py.
+  4. **AIM2-ODIE-029-T8:** Add comprehensive help messages for all new commands and arguments.
+  5. **AIM2-ODIE-029-T9:** **Conduct Integration Tests:** Run integration tests developed in T1.
+  6. **AIM2-ODIE-030-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\_gold\_standard\_tool.py) for src/evaluation/gold\_standard\_tool.py:
+  7. **AIM2-ODIE-030-T2:** Create src/evaluation/gold\_standard\_tool.py.
+  8. **AIM2-ODIE-030-T3:** Implement load\_document\_for\_annotation(file\_path: str) function.
+  9. **AIM2-ODIE-030-T4:** Implement add\_entity\_annotation(doc\_id: str, entity\_type: str, text: str, start\_char: int, end\_char: int) function to store annotations in memory.
+  10. **AIM2-ODIE-030-T5:** Implement add\_relationship\_annotation(doc\_id: str, subject\_id: str, relation\_type: str, object\_id: str) function.
+  ... and 21 more tasks
 
 CRITICAL INSTRUCTIONS:
 1. Read docs/checklist.md, docs/plan.md, and docs/tickets.md for context
-2. Focus ONLY on completing the current task: **AIM2-ODIE-019-T4:** Implement chunk\_by\_sentences(text: str) function using NLTK or spaCy sentence tokenizers.
+2. Focus ONLY on completing the current task: **AIM2-ODIE-029-T5:** Implement clean normalize subcommand, calling functions from src/data\_quality/normalizer.py.
 3. Think 
 4. Create to-do list of smaller subtasks
 5. Assign task to software-engeneer subagent. Give subagent only information it needs for the task. You can also give subagent ticket-specific information extracted from docs/tickets.md as well as task specific information extracted from docs/checklist.md 

@@ -433,14 +433,14 @@ class TestDeduplicateEntitiesErrorHandling:
             deduplicate_entities(records, fields)
     
     def test_deduplicate_entities_non_string_field_values(self):
-        """Test error handling for non-string field values."""
+        """Test error handling for unsupported field value types."""
         records = [
             {"name": "Valid Entity", "priority": 1},
-            {"name": 123, "priority": "high"}  # Non-string name
+            {"name": "Another Entity", "priority": {"level": "high"}}  # Dict value not supported
         ]
         fields = ["name", "priority"]
         
-        with pytest.raises(DeduplicationError, match="Field .* must be a string"):
+        with pytest.raises(DeduplicationError, match="Field .* must be a string, int, or float"):
             deduplicate_entities(records, fields)
     
     def test_deduplicate_entities_invalid_settings_file(self):

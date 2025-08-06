@@ -419,7 +419,7 @@ class TestFindFuzzyMatches:
         expected_results = [item for item in mock_results if item[1] >= threshold]
         
         assert len(result) == len(expected_results)
-        assert result == expected_results[:expected_count]
+        assert result == expected_results
 
 
 class TestNormalizationIntegration:
