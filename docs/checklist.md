@@ -540,4 +540,4 @@ Independent: No
 - [x] **AIM2-ODIE-033-T3:** Implement eval benchmark subcommand, calling functions from src/evaluation/benchmarker.py.  
 - [x] **AIM2-ODIE-033-T4:** Implement eval curate subcommand, calling functions from src/evaluation/curation\_tool.py.  
 - [x] **AIM2-ODIE-033-T5:** Add comprehensive help messages for all eval commands and their arguments.  
-- [ ] **AIM2-ODIE-033-T6:** **Conduct Integration Tests:** Run integration tests developed in T1.
+- [x] **AIM2-ODIE-033-T6:** **Conduct Integration Tests:** Run integration tests developed in T1.
