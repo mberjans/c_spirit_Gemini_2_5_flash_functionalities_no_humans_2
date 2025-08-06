@@ -233,77 +233,189 @@ app.add_typer(taxonomy_app, name="taxonomy")
 # Create evaluation subcommand group
 eval_app = typer.Typer(
     name="eval", 
-    help="""Evaluation and benchmarking tools for model assessment.
+    help="""Comprehensive evaluation and benchmarking suite for plant metabolomics ontology development.
 
-    Commands for benchmarking language models, curating evaluation datasets,
-    and assessing the quality of information extraction and ontology mapping results.
+    This suite provides essential tools for evaluating and improving the quality of information
+    extraction systems, language model performance, and ontology mapping accuracy in the context
+    of plant metabolomics research. These tools help ensure high-quality data curation and
+    systematic assessment of automated text mining workflows.
+
+    EVALUATION WORKFLOW:
+    1. Extract entities and relations from literature using language models
+    2. Curate extracted data using domain expert review (eval curate)
+    3. Create gold standard datasets from curated extractions
+    4. Benchmark model performance against gold standards (eval benchmark)
+    5. Iterate on prompts and models based on evaluation results
+
+    AVAILABLE COMMANDS:
+    • benchmark - Evaluate model performance against gold standard datasets
+      - Calculate precision, recall, and F1 scores for NER and relation extraction
+      - Support multiple output formats (table, JSON, CSV)
+      - Essential for quantifying system improvements and model comparison
+      
+    • curate - Interactive manual review and correction of extracted data
+      - Domain expert-guided correction of entities and relationships
+      - Systematic quality improvement through human-in-the-loop validation
+      - Creates high-quality training and evaluation datasets
+
+    WHEN TO USE EACH COMMAND:
+    - Use 'benchmark' when you have gold standard data and want to evaluate model performance
+    - Use 'curate' when you need to manually review and correct model extractions
+    - Typically, curate first to create gold standards, then benchmark to measure performance
     
-    Available commands:
-    • benchmark - Run benchmarking experiments on language models
-    • curate - Curate and manage evaluation datasets
-    
-    Use 'eval [command] --help' for detailed information about each command."""
+    Use 'eval [command] --help' for detailed information about each command and their parameters."""
 )
 app.add_typer(eval_app, name="eval")
 
 
 @eval_app.command("benchmark")
 def eval_benchmark_command(
-    gold: str = typer.Argument(..., help="Path to gold standard data file (JSON format)"),
-    predicted: str = typer.Argument(..., help="Path to predicted results file (JSON format)"),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Path to output results file (default: stdout)"),
-    format: str = typer.Option("table", "--format", "-f", help="Output format: json, csv, table (default: table)"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+    gold: str = typer.Argument(
+        ..., 
+        help="Path to gold standard data file in JSON format. Must contain list of documents with 'entities' and 'relations' fields. Example: /path/to/gold_standard.json"
+    ),
+    predicted: str = typer.Argument(
+        ..., 
+        help="Path to predicted results file in JSON format. Must have same structure as gold standard with matching document order. Example: /path/to/model_predictions.json"
+    ),
+    output: Optional[str] = typer.Option(
+        None, 
+        "--output", 
+        "-o", 
+        help="Path to save detailed evaluation results. If not specified, results are displayed to stdout. Supports .json, .csv extensions. Example: --output results.json"
+    ),
+    format: str = typer.Option(
+        "table", 
+        "--format", 
+        "-f", 
+        help="Output format for results display. Options: 'table' (human-readable), 'json' (structured data), 'csv' (spreadsheet). Default: table"
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", 
+        "-v", 
+        help="Enable detailed progress reporting and debugging information during evaluation process"
+    )
 ):
     """
-    Run benchmark evaluation comparing predicted results against gold standard data.
+    Comprehensive benchmark evaluation for information extraction system performance assessment.
     
-    This command evaluates the performance of information extraction systems by comparing
-    predicted entities and relations against gold standard annotations. It calculates
-    precision, recall, and F1 scores for both Named Entity Recognition (NER) and
-    Relationship Extraction (RE) tasks.
+    This command performs rigorous evaluation of information extraction systems by comparing
+    model predictions against manually curated gold standard datasets. It calculates standard
+    evaluation metrics (precision, recall, F1) for both Named Entity Recognition (NER) and
+    Relationship Extraction (RE) tasks, providing detailed insights into system performance.
+
+    EVALUATION METHODOLOGY:
+    • Exact match evaluation for entities (text span and label)
+    • Tuple-based evaluation for relations (head, relation, tail)
+    • Micro-averaged metrics across all documents
+    • Document-level statistics and processing summaries
     
-    INPUT FILE FORMATS:
+    REQUIRED INPUT FILE FORMATS:
     
-    Gold standard file should contain a list of documents with entities and relations:
+    Both gold standard and predicted files must be JSON arrays containing document objects:
+    
+    GOLD STANDARD FORMAT:
     [
         {
-            "text": "Document text content",
+            "text": "Quercetin accumulates in Arabidopsis thaliana leaves under stress.",
             "entities": [
                 {
-                    "entity_type": "COMPOUND",
-                    "text": "quercetin",
-                    "start_char": 0,
-                    "end_char": 9
+                    "entity_type": "COMPOUND",        // Required: entity classification
+                    "text": "quercetin",              // Required: exact entity mention
+                    "start_char": 0,                  // Required: character start position
+                    "end_char": 9                     // Required: character end position
+                },
+                {
+                    "entity_type": "PLANT_PART",
+                    "text": "leaves",
+                    "start_char": 45,
+                    "end_char": 51
                 }
             ],
             "relations": [
-                ("quercetin", "found_in", "Arabidopsis thaliana")
+                ("quercetin", "accumulates_in", "leaves"),  // Tuple format supported
+                ["quercetin", "found_in", "Arabidopsis thaliana"]  // List format also supported
             ]
         }
     ]
     
-    Predicted file should contain entities and relations in the same format.
+    PREDICTED FILE FORMAT:
+    Must match gold standard structure exactly. Document order must correspond to gold standard.
+    Missing fields will be treated as empty lists, affecting recall calculations.
+
+    VALIDATION REQUIREMENTS:
+    ✓ Both files must be valid JSON arrays
+    ✓ Each document must contain 'text', 'entities', and 'relations' fields
+    ✓ Entity objects must have 'entity_type', 'text', 'start_char', 'end_char'
+    ✓ Relations can be tuples or lists with exactly 3 elements
+    ✓ Document count should match between files (warnings issued if different)
     
     METRICS CALCULATED:
-    • NER metrics: Precision, recall, F1 for entity recognition
-    • Relation metrics: Precision, recall, F1 for relationship extraction
-    • Document counts and entity/relation statistics
+    • NER METRICS:
+      - Precision: Correct predictions / Total predictions
+      - Recall: Correct predictions / Total gold entities
+      - F1 Score: Harmonic mean of precision and recall
+      
+    • RELATION METRICS:
+      - Precision: Correct relations / Total predicted relations
+      - Recall: Correct relations / Total gold relations  
+      - F1 Score: Harmonic mean of precision and recall
+      
+    • SUMMARY STATISTICS:
+      - Documents processed, entity counts, relation counts
+      - Processing timestamp for result tracking
+
+    OUTPUT FORMAT OPTIONS:
+    • table (default): Clean, human-readable format ideal for quick assessment
+    • json: Structured format perfect for automated analysis and result storage
+    • csv: Spreadsheet-compatible format for statistical analysis and visualization
     
-    OUTPUT FORMATS:
-    • table: Human-readable table format (default)
-    • json: Structured JSON format for programmatic use
-    • csv: Comma-separated values for spreadsheet analysis
+    COMPREHENSIVE USAGE EXAMPLES:
     
-    Examples:
-        # Basic benchmark with table output
-        aim2-odie eval benchmark gold_data.json predicted_data.json
+        # Basic evaluation with interactive table display
+        aim2-odie eval benchmark gold_standard.json model_output.json
         
-        # Save results to JSON file
-        aim2-odie eval benchmark gold_data.json predicted_data.json -o results.json -f json
+        # Detailed evaluation with verbose progress reporting
+        aim2-odie eval benchmark gold_data.json predictions.json --verbose
         
-        # CSV output for analysis
-        aim2-odie eval benchmark gold_data.json predicted_data.json -o results.csv -f csv
+        # Save comprehensive results for analysis
+        aim2-odie eval benchmark gold.json pred.json --output evaluation_report.json --format json
+        
+        # Generate CSV for statistical analysis in R/Python
+        aim2-odie eval benchmark gold.json pred.json --output metrics.csv --format csv
+        
+        # Compare multiple models (run separately, save with descriptive names)
+        aim2-odie eval benchmark gold.json gpt4_predictions.json -o gpt4_results.json -f json
+        aim2-odie eval benchmark gold.json claude_predictions.json -o claude_results.json -f json
+        
+        # Evaluation workflow for model development
+        aim2-odie eval benchmark gold.json v1_predictions.json --verbose -o v1_eval.json -f json
+        # ... analyze results, improve model ...
+        aim2-odie eval benchmark gold.json v2_predictions.json --verbose -o v2_eval.json -f json
+
+    TROUBLESHOOTING COMMON ISSUES:
+    
+    FILE FORMAT ERRORS:
+    • "Invalid JSON": Check file syntax with a JSON validator
+    • "Not a list": Ensure root element is an array, not an object
+    • "Missing fields": Verify all required fields are present in each document
+    
+    DATA MISMATCH ISSUES:
+    • Document count mismatch: Check if files correspond to same dataset
+    • Empty results: Verify entity/relation fields contain expected data
+    • Character position errors: Ensure start_char/end_char match actual text spans
+    
+    PERFORMANCE CONSIDERATIONS:
+    • Large datasets: Use --verbose to monitor progress
+    • Memory usage: For very large files, consider splitting into smaller batches
+    • Processing time: Evaluation is linear with total entities and relations
+    
+    INTERPRETING RESULTS:
+    • High precision, low recall: System is conservative but accurate
+    • Low precision, high recall: System is aggressive but produces false positives  
+    • Balanced F1: Good overall performance indicator
+    • Compare across entity types and relation types for detailed analysis
     """
     try:
         if verbose:
@@ -493,68 +605,209 @@ def eval_benchmark_command(
 
 @eval_app.command("curate")
 def eval_curate_command(
-    input_file: str = typer.Argument(..., help="Path to LLM extraction results file (JSON format)"),
-    output_file: str = typer.Argument(..., help="Path to save curated results (JSON format)"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output")
+    input_file: str = typer.Argument(
+        ..., 
+        help="Path to LLM extraction results file in JSON format. Must contain 'text', 'entities', and 'relations' fields. Example: /path/to/llm_extractions.json"
+    ),
+    output_file: str = typer.Argument(
+        ..., 
+        help="Path to save manually curated and corrected results in JSON format. Will be created or overwritten. Example: /path/to/curated_gold_standard.json"
+    ),
+    verbose: bool = typer.Option(
+        False, 
+        "--verbose", 
+        "-v", 
+        help="Enable detailed progress reporting, entity/relation counts, and step-by-step workflow guidance during curation process"
+    )
 ):
     """
-    Curate and manually review LLM extraction results for quality improvement.
+    Interactive manual curation tool for systematic quality improvement of LLM extractions.
     
-    This command provides an interactive interface for domain experts to review,
-    correct, and curate entities and relationships extracted by language models
-    from biological literature. The tool enables systematic feedback collection
-    to improve prompt engineering and model performance.
+    This command provides a comprehensive, domain expert-guided interface for reviewing,
+    correcting, and validating entities and relationships extracted by language models
+    from plant metabolomics literature. The tool implements best practices for systematic
+    annotation and quality control, enabling creation of high-quality gold standard datasets
+    essential for evaluation and model improvement.
+
+    PURPOSE AND BENEFITS:
+    • Transform noisy LLM outputs into reliable gold standard datasets
+    • Enable systematic domain expert feedback for prompt engineering
+    • Create high-quality training data for fine-tuning extraction models
+    • Implement consistent annotation standards across research teams
+    • Track correction patterns to identify common model errors
+
+    REQUIRED INPUT FILE FORMAT:
     
-    INPUT FILE FORMAT:
+    Input file must be a JSON object (single document) or array (multiple documents):
     
-    The input file should contain LLM extraction results in JSON format:
+    SINGLE DOCUMENT FORMAT:
     {
-        "text": "Original document text",
+        "text": "Quercetin accumulates in Arabidopsis thaliana leaves under osmotic stress conditions.",
         "entities": [
             {
-                "text": "entity mention",
-                "label": "entity type",
-                "start": start_position,
-                "end": end_position
+                "text": "quercetin",                    // Required: exact entity mention
+                "label": "COMPOUND",               // or "entity_type": entity classification
+                "start": 0,                        // or "start_char": character start position  
+                "end": 9                           // or "end_char": character end position
+            },
+            {
+                "text": "Arabidopsis thaliana",
+                "label": "PLANT_SPECIES", 
+                "start": 25,
+                "end": 45
             }
         ],
         "relations": [
             {
-                "head": "entity1",
-                "tail": "entity2", 
-                "relation": "relationship_type"
+                "head": "quercetin",               // First entity in relationship
+                "tail": "Arabidopsis thaliana",    // Second entity in relationship
+                "relation": "found_in"             // Relationship type
             }
         ]
     }
     
-    CURATION WORKFLOW:
+    MULTIPLE DOCUMENTS FORMAT:
+    [
+        { /* document 1 */ },
+        { /* document 2 */ },
+        ...
+    ]
+
+    STEP-BY-STEP CURATION WORKFLOW:
     
-    1. Load extraction results from input file
-    2. Display text and extracted items for review
-    3. Interactive correction loop:
-       - View entities and relations in context
-       - Apply corrections (modify, add, remove)
-       - Navigate through documents
-    4. Save curated results to output file
+    1. INITIALIZATION PHASE:
+       ✓ Load and validate input file structure
+       ✓ Display document text with highlighted entities
+       ✓ Show initial entity and relation counts
+       ✓ Begin interactive correction session
     
-    CORRECTION TYPES:
+    2. REVIEW AND ASSESSMENT PHASE:
+       ✓ Carefully read the document text in scientific context
+       ✓ Evaluate each extracted entity for accuracy and completeness
+       ✓ Assess relationship correctness and missing connections
+       ✓ Identify systematic extraction errors or patterns
     
-    Entity corrections:
-    - modify: Change entity text, label, or boundaries
-    - add: Add missing entities
-    - remove: Remove incorrect entities
+    3. INTERACTIVE CORRECTION PHASE:
+       ✓ Use structured commands to apply corrections
+       ✓ Modify incorrect entities (text, boundaries, classifications)
+       ✓ Add missed entities following annotation guidelines
+       ✓ Remove false positive extractions
+       ✓ Correct relationship types and participants
+       ✓ Add missing semantic relationships
     
-    Relation corrections:
-    - modify: Change relation type or participants
-    - add: Add missing relationships
-    - remove: Remove incorrect relationships
+    4. VALIDATION AND COMPLETION PHASE:
+       ✓ Review all corrections for consistency
+       ✓ Verify entity-relation alignment
+       ✓ Confirm adherence to annotation standards
+       ✓ Save curated results with validation metadata
+
+    COMPREHENSIVE CORRECTION COMMANDS:
     
-    Examples:
-        # Curate extractions with verbose output
-        aim2-odie eval curate extractions.json curated_results.json --verbose
+    ENTITY CORRECTIONS:
+    • modify entity <old_text> <new_text> <new_label>
+      - Example: modify entity "plant" "Arabidopsis thaliana" "PLANT_SPECIES"
+      - Updates entity text and classification
+      
+    • add entity <text> <label> <start_pos> <end_pos>
+      - Example: add entity "leaves" "PLANT_PART" 45 51
+      - Adds missing entity with precise boundaries
+      
+    • remove entity <text>
+      - Example: remove entity "stress"
+      - Removes incorrectly identified entity
+    
+    RELATION CORRECTIONS:
+    • modify relation <head> <tail> <old_relation> <new_relation>
+      - Example: modify relation "quercetin" "leaves" "found_in" "accumulates_in"
+      - Updates relationship type between entities
+      
+    • add relation <head> <tail> <relation_type>
+      - Example: add relation "quercetin" "osmotic stress" "induced_by"
+      - Adds missing semantic relationship
+      
+    • remove relation <head> <tail> <relation_type>
+      - Example: remove relation "quercetin" "conditions" "found_in"
+      - Removes incorrect or spurious relationship
+
+    NAVIGATION AND UTILITY COMMANDS:
+    • show - Redisplay current entities and relations with text
+    • help - Display detailed command reference and examples
+    • done - Complete curation and save results
+    • quit - Exit without saving (confirmation required)
+
+    BEST PRACTICES FOR MANUAL CURATION:
+    
+    ENTITY ANNOTATION GUIDELINES:
+    ✓ Use consistent terminology from established ontologies
+    ✓ Prefer specific over general entity types (e.g., "PLANT_SPECIES" vs "ORGANISM")
+    ✓ Ensure entity boundaries capture complete mentions
+    ✓ Annotate nested entities when scientifically meaningful
+    ✓ Follow systematic naming conventions for compound classes
+    
+    RELATIONSHIP ANNOTATION GUIDELINES:
+    ✓ Focus on scientifically meaningful biological relationships
+    ✓ Use standardized relation types from metabolomics ontologies
+    ✓ Prioritize direct over inferred relationships
+    ✓ Ensure relationship directionality follows biological logic
+    ✓ Document complex multi-entity relationships systematically
+    
+    QUALITY CONTROL PRACTICES:
+    ✓ Maintain annotation consistency across similar documents
+    ✓ Regular breaks to prevent annotation fatigue and errors
+    ✓ Cross-reference with domain knowledge and literature
+    ✓ Document ambiguous cases for team discussion
+    ✓ Validate final results against annotation guidelines
+
+    COMPREHENSIVE USAGE EXAMPLES:
+    
+        # Basic curation with step-by-step guidance
+        aim2-odie eval curate raw_extractions.json gold_standard.json
         
-        # Basic curation workflow
-        aim2-odie eval curate llm_output.json corrected_output.json
+        # Detailed curation with progress tracking
+        aim2-odie eval curate llm_output.json curated_data.json --verbose
+        
+        # Batch curation workflow for multiple documents
+        aim2-odie eval curate batch_extractions.json batch_curated.json --verbose
+        
+        # Quality control curation for evaluation dataset
+        aim2-odie eval curate model_predictions.json evaluation_gold.json
+        
+        # Annotation refinement for training data
+        aim2-odie eval curate training_extractions.json refined_training.json --verbose
+
+    TYPICAL CURATION SESSION WORKFLOW:
+    
+        1. Start: aim2-odie eval curate input.json output.json --verbose
+        2. Review displayed entities and relations
+        3. Apply corrections systematically:
+           - Fix obvious entity classification errors
+           - Add missing important entities
+           - Correct relationship types and missing relations
+           - Remove clearly incorrect extractions
+        4. Use 'show' command to review changes
+        5. Complete with 'done' command
+        6. Result: High-quality curated dataset ready for evaluation
+
+    TROUBLESHOOTING AND TIPS:
+    
+    COMMON ISSUES:
+    • Input format errors: Verify JSON structure matches expected format
+    • Missing entities: Use 'add entity' with precise character positions
+    • Relationship confusion: Focus on direct biological relationships
+    • Annotation fatigue: Take regular breaks, maintain consistency standards
+    
+    EFFICIENCY TIPS:
+    • Start with obvious errors (wrong entity types, clear false positives)
+    • Use 'show' frequently to track progress and maintain context
+    • Focus on high-impact corrections (frequent entity types, key relationships)
+    • Document systematic errors for prompt engineering feedback
+    
+    OUTPUT QUALITY INDICATORS:
+    • Consistent entity type usage
+    • Scientifically valid relationships
+    • Complete coverage of important domain concepts
+    • Minimal false positives and negatives
+    • Adherence to established annotation guidelines
     """
     try:
         if verbose:
