@@ -481,7 +481,7 @@ Description: Gold Standard Test Set Creation Tool: Develop a simple CLI tool (or
 Dependencies: AIM2-ODIE-001  
 Independent: Yes
 
-- [ ] **AIM2-ODIE-030-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\_gold\_standard\_tool.py) for src/evaluation/gold\_standard\_tool.py:  
+- [x] **AIM2-ODIE-030-T1:** **Develop Unit Tests:** Write unit tests (tests/evaluation/test\_gold\_standard\_tool.py) for src/evaluation/gold\_standard\_tool.py:  
   * Test load\_document\_for\_annotation to load a text file.  
   * Test add\_entity\_annotation to add an entity with type, text, and span.  
   * Test add\_relationship\_annotation to add a relationship between two entity IDs.  
